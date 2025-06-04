@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Jar-Id: 
+Project-Name: lag1-prj01-cloud01
+Build-Tool: Gradle 7.6.3
+Build-Date: 2025-06-04 20:07:55
+Built-By: Kingdee Cosmic Developer Tools
+Build-Num: 20250604200755024
+App-Name: 
+Git-Branch: 
+Cloud-Name: 
+Group-Name: lag1.cosmic
+Bundle-Version: 1.0.0
+Git-Commit-Hash: 
+Build-Image: 
+Build-Jdk: 1.8.0_212
+
