@@ -1,0 +1,9 @@
+{
+    "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-1.8",
+      "path": "E:/Learn_zone/Environment/Java/Java/jdk/jdk",
+      "default": true
+    }
+  ]
+}

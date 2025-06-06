@@ -82,10 +82,10 @@ public class TimerMainPlugin extends AbstractFormPlugin implements Plugin {
             }
         }, 0, 1000);
 
-        // // 更新UI状态
-        // this.getView().getControl("lag1_start_btn").setEnabled(false);
-        // this.getView().getControl("lag1_pause_btn").setEnabled(true);
-        // this.getView().getControl("lag1_stop_btn").setEnabled(true);
+         // 更新UI状态
+//         this.getView().getControl("lag1_start_btn").setEnabled(false);
+//         this.getView().getControl("lag1_pause_btn").setEnabled(true);
+//         this.getView().getControl("lag1_stop_btn").setEnabled(true);
     }
 
     private void pauseTimer() {
