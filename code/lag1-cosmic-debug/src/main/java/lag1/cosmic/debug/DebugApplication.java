@@ -13,8 +13,8 @@ import kd.cosmic.debug.tools.CosmicLauncher;
  * 启动本地应用程序(微服务节点)
  */
 public class DebugApplication {
-	
-	
+
+//entrence    http://127.0.0.1:8881/ierp/login.html
 
     public static void main(String[] args) {
     	
