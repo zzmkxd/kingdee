@@ -49,4 +49,5 @@ public class PostAutoNumberPlugin extends AbstractBasePlugIn implements Plugin {
             this.getView().close(); //关闭窗口
         }
     }
+
 }
