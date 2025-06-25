@@ -94,5 +94,4 @@ public class CommentAutoNumberPlugin extends AbstractBasePlugIn implements Plugi
             System.out.println("帖子编号不能为空");
         }
     }
-
 }

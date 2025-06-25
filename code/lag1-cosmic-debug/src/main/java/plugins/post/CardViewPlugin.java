@@ -110,7 +110,6 @@ public class CardViewPlugin extends AbstractBasePlugIn implements ItemClickListe
             }else{
                 this.getView().showMessage("错误");
             }
-
         }else if("cardthumb".equals(afterDoOperationEventArgs.getOperateKey())){
             IListView listview = (IListView) this.getView();
             Long rowPkId = (Long)listview.getFocusRowPkId();

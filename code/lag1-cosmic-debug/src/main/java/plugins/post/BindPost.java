@@ -218,5 +218,4 @@ public class BindPost extends AbstractFormPlugin implements Plugin {
             this.getView().setEnable(false,fieldName);
         }
     }
-
 }

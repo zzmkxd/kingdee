@@ -13,6 +13,7 @@ import java.util.EventObject;
 
 /**
  * 基础资料插件
+ *
  * 这个插件没在用
  */
 public class BaseDataCardClickPlugin extends AbstractBasePlugIn implements Plugin {
