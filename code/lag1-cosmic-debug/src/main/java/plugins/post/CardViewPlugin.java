@@ -80,6 +80,7 @@ public class CardViewPlugin extends AbstractBasePlugIn implements ItemClickListe
                 String postNumber = postSingle.getString("number");
                 if(StringUtils.isNotBlank(postNumber)){
                     //创建参数对象
+//                    这里如果要打开的页面类型不同构造的是不一样的 typora里面有片可以抄
                     FormShowParameter formShowParameter = new FormShowParameter();
                     formShowParameter.setFormId(targetForm);
 //                    formShowParameter.setCloseCallBack(new CloseCallBack(this,CALLBACK_ID));
@@ -87,14 +88,14 @@ public class CardViewPlugin extends AbstractBasePlugIn implements ItemClickListe
                     formShowParameter.getOpenStyle().setShowType(ShowType.Modal);
 
                     //传递帖子编码作为自定义参数
-                    formShowParameter.setCustomParam("postNumber", postNumber);
+                    formShowParameter.setCustomParam("postNumber", postNumber); //这里是发送端在设置要传的参数    可以替换成原lag_md的字符串？
                     formShowParameter.setCustomParam("pkId",rowPkId);
 
                     //设置宽高
                     StyleCss styleCss = new StyleCss();
-                    styleCss.setHeight("600");
+                    styleCss.setHeight("600");      //如果设置了宽高就有点像弹窗
                     styleCss.setWidth("1200");
-                    formShowParameter.getOpenStyle().setInlineStyleCss(styleCss);
+                    formShowParameter.getOpenStyle().setInlineStyleCss(styleCss);       //这几行是css样式
 
                     //添加浏览量
                     int view = postSingle.getInt("lag1_view");
@@ -103,7 +104,7 @@ public class CardViewPlugin extends AbstractBasePlugIn implements ItemClickListe
                     SaveServiceHelper.update(postSingle); // 这一步至关重要！ 更新数据
 
                     //打开下一个表单并传递参数
-                    this.getView().showForm(formShowParameter);
+                    this.getView().showForm(formShowParameter);     //这里是最后一步
                 }
 //                String code = postSingle.getString("number");
 //                this.getView().showMessage("帖子编码"+code);

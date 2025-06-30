@@ -111,8 +111,9 @@ public class BindPost extends AbstractFormPlugin implements Plugin {
     @Override
     public void beforeBindData(EventObject e) {
         super.beforeBindData(e);
-        postNumber = this.getView().getFormShowParameter().getCustomParam("postNumber");
-        pkId = this.getView().getFormShowParameter().getCustomParam("pkId");
+//        这里是接收参数端在beforeBIndData里面开始先接受传过来的参数
+        postNumber = this.getView().getFormShowParameter().getCustomParam("postNumber");        //这里的getCustomParam里面的标识就是在上个页面传参的时候设置的
+        pkId = this.getView().getFormShowParameter().getCustomParam("pkId");        //这样就可以获取到传过来的参数
         if(StringUtils.isNotBlank(postNumber)){
             this.getModel().setValue("lag1_postnumber",postNumber);
             //查询基础资料
@@ -132,6 +133,8 @@ public class BindPost extends AbstractFormPlugin implements Plugin {
                     //发帖时间
                     String createTime = postData.getString("createtime");
                     this.getModel().setValue("lag1_date",createTime);
+//                    然后像这里一样，定位到这个控件，就可以直接绑定数据了
+//                    你懂了吗okok 原来你实现的这个功能要两个插件 好像是吧，因为绑定在不同的页面，我不知道一个可不可以
 
                     //发帖人
                     DynamicObject creator = (DynamicObject) postData.get("creator");

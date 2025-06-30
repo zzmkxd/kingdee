@@ -73,8 +73,7 @@ public class evaluate_aaa extends AbstractFormPlugin implements Plugin {
     //获取提示词的Fid
     public long getPromptFid(String billNo) {
         DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_prompt",
-                "number," +
-                        "id",
+                "number," + "id",
                 (new QFilter("number", QCP.equals, billNo)).toArray());
         return dynamicObject.getLong("id");
     }
