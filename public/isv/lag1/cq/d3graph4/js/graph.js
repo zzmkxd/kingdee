@@ -1,5 +1,6 @@
 // 图形组件封装
-(function(data) {
+window.initGraph = function(domElement, data) {
+    console.error(data);
     // 设置SVG容器
     const svg = d3.select("#d3js-svg");
     const width = svg.node().parentElement.clientWidth;
@@ -647,4 +648,4 @@
         simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
         simulation.alpha(0.3).restart();
     });
-})();
+}
