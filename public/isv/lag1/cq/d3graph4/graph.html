@@ -1,0 +1,53 @@
+
+    <div class="container">
+        <div class="header">
+            <h1>
+                <%= title %>
+            </h1>
+        </div>
+
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="search" placeholder="搜索节点...">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <button id="resetZoom">重置视图</button>
+            <button id="expandAll">展开所有</button>
+            <button id="collapseAll">折叠所有</button>
+            <select id="layoutType">
+                <option value="force">力导向布局</option>
+                <option value="radial">放射状布局</option>
+                <option value="tree">树形布局</option>
+            </select>
+        </div>
+
+        <div class="graph-container">
+            <svg id="d3js-svg"width="100%" height="100%"></svg>
+            <div class="tooltip" id="tooltip"></div>
+            <div class="legend">
+                <h4 style="margin-top: 0;">节点类型</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #1f77b4;"></div>
+                    <span>根节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ff7f0e;"></div>
+                    <span>一级节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #2ca02c;"></div>
+                    <span>二级节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #d62728;"></div>
+                    <span>三级节点</span>
+                </div>
+            </div>
+            <div class="node-info" id="nodeInfo">
+                <span class="node-info-close" id="nodeInfoClose">×</span>
+                <h3 id="nodeInfoTitle">节点详情</h3>
+                <div id="nodeInfoContent"></div>
+            </div>
+        </div>
+    </div>
+
