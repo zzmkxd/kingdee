@@ -48,6 +48,7 @@ public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
             JSONObject jsonResultObject = new JSONObject();
             for (int i = 1; i <= 3; i++) {
                 jsonResultObject.put("lag1_chapter" + i , this.getModel().getValue("lag1_chapter" + i).toString());
+
             }//目前没有对小标题分析
             //----下面是正常提取教材代码----
             // 调用GPT开发平台微服务
@@ -79,11 +80,7 @@ public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
         if (e.getItemKey().equalsIgnoreCase("lag1_pointbindcourse")) {
             // 获取日任务信息，并且以JSON字符串的形式展现
             JSONObject jsonResultObject = new JSONObject();
-//            if(globalLlmValue == null){
-//                this.getView().showMessage("坏了");
-//            }else {
-                jsonResultObject.put("knowpointinfo", globalLlmValue);
-//            }
+            jsonResultObject.put("knowpointinfo", globalLlmValue);
             // 调用GPT开发平台微服务
             Map<String, String> variableMap = new HashMap<>();
             variableMap.put("knowpointinfos", jsonResultObject.toJSONString());
@@ -157,9 +154,6 @@ public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
 
                 // 更新单据
                 SaveServiceHelper.update(new DynamicObject[]{existingBill});
-            }
-            else {
-                this.getView().showMessage("坏了");
             }
         }
     }

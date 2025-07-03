@@ -5,6 +5,7 @@ import kd.bos.base.BaseShowParameter;
 import kd.bos.bill.BillShowParameter;
 import kd.bos.bill.OperationStatus;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.entity.datamodel.IDataModel;
 import kd.bos.form.CloseCallBack;
 import kd.bos.form.FormShowParameter;
@@ -51,7 +52,8 @@ public class Booktoknowpoint extends AbstractBasePlugIn implements ItemClickList
                 IDataModel formDataModel = this.getModel();
                 DynamicObject formDataEntity = formDataModel.getDataEntity();
                 Long formPkId = (Long) formDataEntity.getPkValue();
-               DynamicObject postSingle = BusinessDataServiceHelper.loadSingle("lag1_book", new QFilter[]{new QFilter("id", QCP.equals,formPkId)});
+
+                DynamicObject postSingle = BusinessDataServiceHelper.loadSingle("lag1_book", new QFilter[]{new QFilter("id", QCP.equals,formPkId)});
                 if(postSingle!=null){
                     String targetForm = "lag1_knowpoint";//知识点-基础资料表单
                     String postNumber = postSingle.getString("number");//教材编码

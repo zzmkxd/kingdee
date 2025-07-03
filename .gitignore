@@ -1,4 +1,18 @@
 .gradle
+.idea
+.vscode
+
+datamodel
+docs
+gradle
+logs
+script_modules
+temp
+webapp
+
+
+
+
 **/build/
 !**/src/**/build/
 
@@ -22,4 +36,6 @@ gradle-app.setting
 
 .bin
 
-script_modules
+
+
+

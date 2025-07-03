@@ -1,0 +1,1050 @@
+2025-06-29 23:11:59.898  INFO   --- [pool-26-thread-1//time:1751209919870] DB                                       : {traceId:840e0e1e3929042e} ----sql@basedata->basedata#con8244----
+#cost:11ms,time is:2025-06-29 23:11:59.898, include(getconnection:0ms, result_handle:0ms, statement.execute:11ms ...)
+ select distinct fbusinesstype,fentitynumber,fstatus from t_dts_datasyncconfig where fenable='1' and fstatus != 'stopped' 
+
+2025-06-29 23:11:59.931  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:00.649  INFO   --- [CommitTask-Thread//time:1751209920642] DB                                       :  ----sql@basedata->basedata#con8245----
+#cost:7ms,time is:2025-06-29 23:12:00.649, include(getconnection:0ms, result_handle:0ms, statement.execute:7ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:12:00.658  INFO   --- [RollbackTask-Thread//time:1751209920642] DB                                       :  ----sql@basedata->basedata#con8246----
+#cost:16ms,time is:2025-06-29 23:12:00.658, include(getconnection:2ms, result_handle:0ms, statement.execute:14ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:12:00.658  INFO   --- [CommitTask-Thread//time:1751209920642] DB                                       :  ----sql@basedata->basedata#con8247----
+#cost:9ms,time is:2025-06-29 23:12:00.658, include(getconnection:0ms, result_handle:0ms, statement.execute:9ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus in (2, 7) and (DATEADD(now(), -600) > trs.fupdate_time or rs.fcommit_retry_count > 0) and (rs.fcommit_retry_count is null or rs.fcommit_retry_count < 5) and not exists (select 1 from t_cbs_dtx_retry_stat rs2 where  rs2.fxid=trs.fxid and rs2.ftrigger_type=2) ORDER BY trs.fcreate_time
+
+2025-06-29 23:12:00.664  INFO   --- [RollbackTask-Thread//time:1751209920642] DB                                       :  ----sql@basedata->basedata#con8249----
+#cost:6ms,time is:2025-06-29 23:12:00.664, include(getconnection:0ms, result_handle:0ms, statement.execute:6ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus in (3, 6) and (DATEADD(now(), -600) > trs.fupdate_time or rs.frollback_retry_count > 0) and (rs.frollback_retry_count is null or rs.frollback_retry_count < 5) and not exists (select 1 from t_cbs_dtx_retry_stat rs2 where  rs2.fxid=trs.fxid and rs2.ftrigger_type=2)
+
+2025-06-29 23:12:00.664  INFO   --- [PrepareTask-Thread//time:1751209920658] DB                                       :  ----sql@basedata->basedata#con8248----
+#cost:6ms,time is:2025-06-29 23:12:00.664, include(getconnection:0ms, result_handle:5ms, statement.execute:1ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:12:00.664 ERROR   --- [CommitTask-Thread//time:1751209920642] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:12:00.664  WARN   --- [CommitTask-Thread//time:1751209920642] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:12:00.671 ERROR   --- [RollbackTask-Thread//time:1751209920642] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:12:00.671  WARN   --- [RollbackTask-Thread//time:1751209920642] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:12:00.677  INFO   --- [PrepareTask-Thread//time:1751209920658] DB                                       :  ----sql@basedata->basedata#con8250----
+#cost:13ms,time is:2025-06-29 23:12:00.677, include(getconnection:0ms, result_handle:0ms, statement.execute:13ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus = 1 and (DATEADD(now(), -7200) > trs.fupdate_time)
+
+2025-06-29 23:12:00.685 ERROR   --- [PrepareTask-Thread//time:1751209920658] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:12:00.685  WARN   --- [PrepareTask-Thread//time:1751209920658] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:12:00.739 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:00.812  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:01.046  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:02.749 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:02.865  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:03.113  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:03.973  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:04.231  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:04.418 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:04.418 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:05.529 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:05.529 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:06.010  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:06.272  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:06.536 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:07.126  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:07.394  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:07.545 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:09.157  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:09.420  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:10.269  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:10.526  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:12.308  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:12.564  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:13.425  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:13.676  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:14.430 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:15.462  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:15.524 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:15.710  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:16.580  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:16.640 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:16.640 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:16.830  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:17.643 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:17.643 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:18.593  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:18.647 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:18.870  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:19.660 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:19.707  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:19.974  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:21.754  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:22.002  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:22.871  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:23.115  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:24.442 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:24.924  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:25.137  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:25.548 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:26.048  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:26.247  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:26.558 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:27.569 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:28.069  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:28.290  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:29.190  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:29.408  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:30.770 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:31.236  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:31.441  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:31.773 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:32.343  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:32.567  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:32.788 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:34.391  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:34.445 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:34.445 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:34.621  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:35.503  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:35.659 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:35.743  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:36.664 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:37.533  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:37.675 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:37.763  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:38.648  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:38.874  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:40.685  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:40.918  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:41.804  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:42.029  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:43.815  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:44.060  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:44.933  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:45.179  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:45.505 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Connection refused: no further information
+2025-06-29 23:12:46.627 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:46.627 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:46.986  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:47.207  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:47.634 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:47.634 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:48.105  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:48.317  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:48.644 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:48.644 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:49.658 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:50.140  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:50.331  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:51.244  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:51.445  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:52.481  INFO   --- [CommitTask-Thread//time:1751209972259] DB                                       :  ----sql@basedata->basedata#con8256----
+#cost:222ms,time is:2025-06-29 23:12:52.481, include(getconnection:0ms, result_handle:0ms, statement.execute:222ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:12:52.579  INFO   --- [CommitTask-Thread//time:1751209972259] DB                                       :  ----sql@basedata->basedata#con8258----
+#cost:98ms,time is:2025-06-29 23:12:52.579, include(dogetconnection:0ms, getconnection:0ms, result_handle:0ms, loadFromDataCenter:0ms, statement.execute:98ms ...)
+SELECT 1 FROM KSQL_USERTABLES WHERE KSQL_TABNAME='t_cbs_dtx_retry_schedule'
+
+2025-06-29 23:12:52.595  INFO   --- [CommitTask-Thread//time:1751209972259] DB                                       :  ----sql@basedata->basedata#con8259----
+#cost:5ms,time is:2025-06-29 23:12:52.595, include(getconnection:0ms, result_handle:0ms, statement.execute:5ms ...)
+select distinct sc.fxid,rs.fseq from t_cbs_dtx_retry_schedule sc left join t_cbs_dtx_retry_stat rs on sc.fxid=rs.fxid where sc.fschedule_time <= now()
+
+2025-06-29 23:12:52.601 ERROR   --- [CommitTask-Thread//time:1751209972259] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:12:52.601  WARN   --- [CommitTask-Thread//time:1751209972259] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:12:53.273  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:53.473  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:54.389  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:54.479 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:54.586  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:55.588 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:56.418  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:56.601 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:56.613  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:57.522  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:57.615 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:12:57.718  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:12:59.560  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:12:59.742  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:00.679  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:00.689  INFO   --- [PrepareTask-Thread//time:1751209980683] DB                                       :  ----sql@basedata->basedata#con8261----
+#cost:6ms,time is:2025-06-29 23:13:00.689, include(getconnection:0ms, result_handle:0ms, statement.execute:6ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:13:00.689  INFO   --- [AutoCompensateTask-Thread//time:1751209980683] DB                                       :  ----sql@basedata->basedata#con8262----
+#cost:6ms,time is:2025-06-29 23:13:00.689, include(getconnection:0ms, result_handle:0ms, statement.execute:6ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:13:00.699  INFO   --- [CommitTask-Thread//time:1751209980694] DB                                       :  ----sql@basedata->basedata#con8265----
+#cost:5ms,time is:2025-06-29 23:13:00.699, include(getconnection:0ms, result_handle:0ms, statement.execute:5ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:13:00.704  INFO   --- [PrepareTask-Thread//time:1751209980683] DB                                       :  ----sql@basedata->basedata#con8264----
+#cost:10ms,time is:2025-06-29 23:13:00.704, include(getconnection:0ms, result_handle:5ms, statement.execute:5ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus in (2, 7) and (DATEADD(now(), -600) > trs.fupdate_time or rs.fcommit_retry_count > 0) and (rs.fcommit_retry_count is null or rs.fcommit_retry_count < 5) and not exists (select 1 from t_cbs_dtx_retry_stat rs2 where  rs2.fxid=trs.fxid and rs2.ftrigger_type=2) ORDER BY trs.fcreate_time
+
+2025-06-29 23:13:00.704  INFO   --- [AutoCompensateTask-Thread//time:1751209980683] DB                                       :  ----sql@basedata->basedata#con8263----
+#cost:10ms,time is:2025-06-29 23:13:00.704, include(getconnection:0ms, result_handle:5ms, statement.execute:5ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus in (3, 6) and (DATEADD(now(), -600) > trs.fupdate_time or rs.frollback_retry_count > 0) and (rs.frollback_retry_count is null or rs.frollback_retry_count < 5) and not exists (select 1 from t_cbs_dtx_retry_stat rs2 where  rs2.fxid=trs.fxid and rs2.ftrigger_type=2)
+
+2025-06-29 23:13:00.715  INFO   --- [CommitTask-Thread//time:1751209980694] DB                                       :  ----sql@basedata->basedata#con8266----
+#cost:16ms,time is:2025-06-29 23:13:00.715, include(getconnection:0ms, result_handle:0ms, statement.execute:16ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus = 1 and (DATEADD(now(), -7200) > trs.fupdate_time)
+
+2025-06-29 23:13:00.715 ERROR   --- [PrepareTask-Thread//time:1751209980683] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:00.715  WARN   --- [PrepareTask-Thread//time:1751209980683] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:13:00.715 ERROR   --- [AutoCompensateTask-Thread//time:1751209980683] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:00.715  WARN   --- [AutoCompensateTask-Thread//time:1751209980683] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:13:00.726 ERROR   --- [CommitTask-Thread//time:1751209980694] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:00.726  WARN   --- [CommitTask-Thread//time:1751209980694] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:13:00.857  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:00.857 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:01.868 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:02.711  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:02.880 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:02.896  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:03.819  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:04.008  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:04.497 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:04.497 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:05.874  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:05.904 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:06.030  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:06.914 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:06.993  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:07.137  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:07.922 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:09.020  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:09.162  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:10.145  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:10.278  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:12.164  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:12.303  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:13.286  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:13.419  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:14.496 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:15.333  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:15.439  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:15.943 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:15.943 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:16.450  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:16.552  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:16.958 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:16.958 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:17.970 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:17.970 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:18.482  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:18.589  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:18.979 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:19.601  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:19.694  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:21.646  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:21.747  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:22.752  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:22.862  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:24.519 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:24.797  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:24.890  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:25.625 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:25.910  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:26.000  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:26.629 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:27.641 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:27.974  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:28.021  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:29.086  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:29.143  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:30.111 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:31.113  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:31.122 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:31.181  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:32.132 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:32.241  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:32.297  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:33.142 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:34.286  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:34.309  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:34.531 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:35.398  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:35.434  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:35.622 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:36.630 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:37.434  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:37.478  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:37.641 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:38.550  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:38.595  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:40.571  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:40.618  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:41.694  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:41.739  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:43.721  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:43.780  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:44.535 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:44.535 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:44.840  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:44.900  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:45.633 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:45.633 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:46.640 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:46.640 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:46.860  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:46.918  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:47.650 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:47.650 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:47.969  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:48.040  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:50.008  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:50.061  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:51.130  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:51.172  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:52.273  INFO   --- [RollbackTask-Thread//time:1751210032268] DB                                       :  ----sql@basedata->basedata#con8272----
+#cost:5ms,time is:2025-06-29 23:13:52.273, include(getconnection:0ms, result_handle:0ms, statement.execute:5ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:13:52.288  INFO   --- [RollbackTask-Thread//time:1751210032268] DB                                       :  ----sql@basedata->basedata#con8274----
+#cost:15ms,time is:2025-06-29 23:13:52.288, include(dogetconnection:0ms, getconnection:0ms, result_handle:0ms, loadFromDataCenter:0ms, statement.execute:15ms ...)
+SELECT 1 FROM KSQL_USERTABLES WHERE KSQL_TABNAME='t_cbs_dtx_retry_schedule'
+
+2025-06-29 23:13:52.470  INFO   --- [OpLogTaskService-thread-1] kd.bos.dlock.curator.CuratorLockManager  :  acquire lock AlarmRecordTask-check_...
+2025-06-29 23:13:52.533  INFO   --- [RollbackTask-Thread//time:1751210032268] DB                                       :  ----sql@basedata->basedata#con8275----
+#cost:5ms,time is:2025-06-29 23:13:52.533, include(getconnection:0ms, result_handle:0ms, statement.execute:5ms ...)
+select distinct sc.fxid,rs.fseq from t_cbs_dtx_retry_schedule sc left join t_cbs_dtx_retry_stat rs on sc.fxid=rs.fxid where sc.fschedule_time <= now()
+
+2025-06-29 23:13:52.538 ERROR   --- [RollbackTask-Thread//time:1751210032268] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:52.538  WARN   --- [RollbackTask-Thread//time:1751210032268] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:13:52.736  INFO   --- [OpLogTaskService-thread-1] kd.bos.dlock.curator.CuratorLockManager  :  acquired lock AlarmRecordTask-check_
+2025-06-29 23:13:52.750  INFO   --- [OpLogTaskService-thread-1] kd.bos.government.metadata.db.DBHelper   :  zk为空，再次去MC中查询存储库配置！
+2025-06-29 23:13:52.813 ERROR   --- [OpLogTaskService-thread-1] kd.bos.government.metadata.db.DBHelper   :  
+kd.bos.exception.KDException: 
+	at kd.bos.dc.utils.MCApiUtil.getMCAPIInfo(MCApiUtil.java:145)
+	at kd.bos.dc.utils.MCApiUtil.getMCAPIInfo(MCApiUtil.java:93)
+	at kd.bos.government.metadata.db.DBHelper.getDbConfig(DBHelper.java:91)
+	at kd.bos.government.metadata.db.DBStatement.executeQuery(DBStatement.java:61)
+	at kd.bos.eye.api.alarm.db.AlarmRecordDbHelper.findRecordInfosByState(AlarmRecordDbHelper.java:397)
+	at kd.bos.eye.api.alarm.record.task.AlarmRecordTask.checkAlarmRecords(AlarmRecordTask.java:45)
+	at kd.bos.eye.api.alarm.record.task.AlarmRecordTask.run(AlarmRecordTask.java:36)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:52.813 ERROR   --- [OpLogTaskService-thread-1] k.b.government.metadata.db.DBStatement   :  DBStatement executeQuery error:
+java.lang.NullPointerException: null
+	at kd.bos.government.metadata.db.DBHelper.getDbUrl(DBHelper.java:226)
+	at kd.bos.government.metadata.db.DBStatement.executeQuery(DBStatement.java:62)
+	at kd.bos.eye.api.alarm.db.AlarmRecordDbHelper.findRecordInfosByState(AlarmRecordDbHelper.java:397)
+	at kd.bos.eye.api.alarm.record.task.AlarmRecordTask.checkAlarmRecords(AlarmRecordTask.java:45)
+	at kd.bos.eye.api.alarm.record.task.AlarmRecordTask.run(AlarmRecordTask.java:36)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:52.813 ERROR   --- [OpLogTaskService-thread-1] k.b.e.a.a.record.task.AlarmRecordTask    :  AlarmRecordWork-check error:
+kd.bos.exception.KDException: java.lang.NullPointerException
+	at kd.bos.government.metadata.db.DBStatement.executeQuery(DBStatement.java:95)
+	at kd.bos.eye.api.alarm.db.AlarmRecordDbHelper.findRecordInfosByState(AlarmRecordDbHelper.java:397)
+	at kd.bos.eye.api.alarm.record.task.AlarmRecordTask.checkAlarmRecords(AlarmRecordTask.java:45)
+	at kd.bos.eye.api.alarm.record.task.AlarmRecordTask.run(AlarmRecordTask.java:36)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:13:52.813  INFO   --- [OpLogTaskService-thread-1] kd.bos.dlock.curator.CuratorLockManager  :  release lock AlarmRecordTask-check_...
+2025-06-29 23:13:53.148  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:53.195  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:54.255  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:54.318  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:54.537 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:55.594 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:56.284  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:56.338  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:56.608 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:57.407  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:57.454  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:13:57.610 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:58.792 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:13:59.432  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:59.518  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:13:59.809 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:00.084  INFO   --- [pool-26-thread-1//time:1751210039869] DB                                       : {traceId:b66205ec1f08598e} ----sql@basedata->basedata#con8277----
+#cost:215ms,time is:2025-06-29 23:14:00.084, include(getconnection:2ms, result_handle:0ms, statement.execute:213ms ...)
+select fid,fentitynumber,fbusinesstype from t_dts_datasyncconfig where fenable='1' and fstatus in ('prepare','working','suspend') 
+
+2025-06-29 23:14:00.115  INFO   --- [pool-26-thread-1//time:1751210039869] DB                                       : {traceId:b66205ec1f08598e} ----sql@basedata->basedata#con8278----
+#cost:16ms,time is:2025-06-29 23:14:00.115, include(getconnection:0ms, result_handle:3ms, statement.execute:13ms ...)
+ select distinct fbusinesstype,fentitynumber,fstatus from t_dts_datasyncconfig where fenable='1' and fstatus != 'stopped' 
+
+2025-06-29 23:14:00.538  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:00.630  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:00.743  INFO   --- [PrepareTask-Thread//time:1751210040730] DB                                       :  ----sql@basedata->basedata#con8279----
+#cost:13ms,time is:2025-06-29 23:14:00.743, include(getconnection:0ms, result_handle:0ms, statement.execute:13ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:14:00.752  INFO   --- [AutoCompensateTask-Thread//time:1751210040745] DB                                       :  ----sql@basedata->basedata#con8282----
+#cost:7ms,time is:2025-06-29 23:14:00.752, include(getconnection:0ms, result_handle:0ms, statement.execute:7ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:14:00.752  INFO   --- [CommitTask-Thread//time:1751210040730] DB                                       :  ----sql@basedata->basedata#con8280----
+#cost:22ms,time is:2025-06-29 23:14:00.752, include(getconnection:13ms, result_handle:0ms, statement.execute:9ms ...)
+SELECT TOP 1 fid FROM t_cbs_dtx_transaction
+
+2025-06-29 23:14:00.762  INFO   --- [PrepareTask-Thread//time:1751210040730] DB                                       :  ----sql@basedata->basedata#con8281----
+#cost:19ms,time is:2025-06-29 23:14:00.762, include(getconnection:0ms, result_handle:10ms, statement.execute:9ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus in (2, 7) and (DATEADD(now(), -600) > trs.fupdate_time or rs.fcommit_retry_count > 0) and (rs.fcommit_retry_count is null or rs.fcommit_retry_count < 5) and not exists (select 1 from t_cbs_dtx_retry_stat rs2 where  rs2.fxid=trs.fxid and rs2.ftrigger_type=2) ORDER BY trs.fcreate_time
+
+2025-06-29 23:14:00.762  INFO   --- [CommitTask-Thread//time:1751210040730] DB                                       :  ----sql@basedata->basedata#con8284----
+#cost:10ms,time is:2025-06-29 23:14:00.762, include(getconnection:5ms, result_handle:0ms, statement.execute:5ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus in (3, 6) and (DATEADD(now(), -600) > trs.fupdate_time or rs.frollback_retry_count > 0) and (rs.frollback_retry_count is null or rs.frollback_retry_count < 5) and not exists (select 1 from t_cbs_dtx_retry_stat rs2 where  rs2.fxid=trs.fxid and rs2.ftrigger_type=2)
+
+2025-06-29 23:14:00.762  INFO   --- [AutoCompensateTask-Thread//time:1751210040745] DB                                       :  ----sql@basedata->basedata#con8283----
+#cost:10ms,time is:2025-06-29 23:14:00.762, include(getconnection:0ms, result_handle:0ms, statement.execute:10ms ...)
+SELECT trs.fid as trs_fid, trs.fxid as fxid, trs.ftx_type as ftx_type, trs.ftenant_id as ftenant_id, trs.faccount_id as faccount_id, trs.fcreate_time as fcreate_time, trs.fupdate_time as fupdate_time, trs.froutekey as froutekey, trs.fserializer as fserializer, trs.fcontext as fcontext, rs.fid as rs_fid, ISNULL(rs.fcommit_retry_count, 0) as commit_retry_count, ISNULL(rs.frollback_retry_count, 0) as rollback_retry_count FROM t_cbs_dtx_transaction trs LEFT JOIN t_cbs_dtx_retry_stat rs on rs.fxid = trs.fxid and rs.ftrigger_type = 3 WHERE trs.fstatus = 1 and (DATEADD(now(), -7200) > trs.fupdate_time)
+
+2025-06-29 23:14:00.768 ERROR   --- [CommitTask-Thread//time:1751210040730] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:14:00.768  WARN   --- [CommitTask-Thread//time:1751210040730] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:14:00.768 ERROR   --- [AutoCompensateTask-Thread//time:1751210040745] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:14:00.768  WARN   --- [AutoCompensateTask-Thread//time:1751210040745] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:14:00.768 ERROR   --- [PrepareTask-Thread//time:1751210040730] k.b.k.s.tasks.template.LockTemplate      :  redis execute eval: unLock error. 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.eval(JedisClientFake.java:2542)
+	at sun.reflect.GeneratedMethodAccessor821.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.eval(Unknown Source)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.unLock(LockTemplate.java:169)
+	at kd.bos.kdtx.server.tasks.template.LockTemplate.run(LockTemplate.java:123)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:14:00.773  WARN   --- [PrepareTask-Thread//time:1751210040730] k.b.k.s.tasks.template.LockTemplate      :  unlock failed.
+2025-06-29 23:14:00.826 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:01.837 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:02.563  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:02.664  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:03.664  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:03.774  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:04.534 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:05.645 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:05.680  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:05.808  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:06.657 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:06.793  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:06.916  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:07.666 ERROR   --- [metrics-report] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
+2025-06-29 23:14:08.330 ERROR   --- [SessionIdRecyleManager//time:1751210048330] k.bos.cache.redis.RedisSessionableCache  :  hscan error 
+kd.bos.exception.KDException: redis fake 方法未实现
+	at kd.bos.fake.redis.JedisClientFake.hscan(JedisClientFake.java:2133)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at kd.bos.redis.JedisClientProxy.invoke(JedisClientProxy.java:37)
+	at com.sun.proxy.$Proxy15.hscan(Unknown Source)
+	at kd.bos.cache.redis.JedisClientWrapper.hscan(JedisClientWrapper.java:738)
+	at kd.bos.cache.redis.RedisSessionableCache.scanBucket(RedisSessionableCache.java:262)
+	at kd.bos.cache.redis.RedisSessionableCache.getPartSessionIdsWithAccountId(RedisSessionableCache.java:229)
+	at kd.bos.framework.lifecycle.services.SessionManagerService.lambda$start$1(SessionManagerService.java:79)
+	at java.lang.Thread.run(Thread.java:748)
+2025-06-29 23:14:08.818  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:08.942  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:09.924  INFO   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:10.065  INFO   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Opening socket connection to server /127.0.0.1:2181.
+2025-06-29 23:14:11.950  WARN   --- [Lifecycle-start-service-1-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:12.088  WARN   --- [main-SendThread(127.0.0.1:2181)] org.apache.zookeeper.ClientCnxn          :  Session 0x0 for server /127.0.0.1:2181, Closing socket connection. Attempting reconnect except it is a SessionExpiredException.
+java.net.ConnectException: Connection refused: no further information
+	at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method)
+	at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717)
+	at org.apache.zookeeper.ClientCnxnSocketNIO.doTransport(ClientCnxnSocketNIO.java:344)
+	at org.apache.zookeeper.ClientCnxn$SendThread.run(ClientCnxn.java:1309)
+2025-06-29 23:14:12.953 ERROR   --- [metrics-measurement-reporter-2-thread-1] kd.bos.eye.api.dashboard.es.EsClient     :  monitor dashboard query metrics error,msg=Timeout connecting to [/127.0.0.1:9200]
