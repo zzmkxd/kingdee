@@ -110,7 +110,7 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
                         this.getModel().setValue("lag1_coursename", postTitle);
 
                         //课程id
-                        String courseid = postData.getString("lag1_textfield");
+                        String courseid = postData.getString("lag1_courseid");
                         this.getModel().setValue("lag1_courseid",courseid);
 
                         //教材id
