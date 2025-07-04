@@ -1,43 +1,38 @@
 package plugins.AI;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import kd.bos.bill.AbstractBillPlugIn;
-import kd.bos.context.RequestContext;
-import kd.bos.dataentity.OperateOption;
-import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.entity.datamodel.IDataModel;
-import kd.bos.entity.operate.result.OperationResult;
-import kd.bos.form.control.Control;
-import kd.bos.servicehelper.operation.SaveServiceHelper;
-import kd.sdk.plugin.Plugin;
 import com.alibaba.fastjson.JSONObject;
+import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.ext.form.control.Markdown;
+import kd.bos.form.control.Control;
 import kd.bos.form.control.events.ItemClickEvent;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
-import kd.bos.dataentity.entity.DynamicObject;
+import kd.sdk.plugin.Plugin;
 
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
+
 /**
- * 单据界面插件
+ * 基础资料插件
  */
-public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
-    @Override
-    public void registerListener(EventObject e) {
-        // 注册点击事件
-        super.registerListener(e);
-        this.addItemClickListeners("tbmain");
-    }
+public class Learning_Task_calendar extends AbstractBasePlugIn implements Plugin {
+//输入有：学生对知识点方案的平均正确率+该知识点的做题数量+想提升的模式（基础/中等+困难）+ 想要掌握的知识点列表
+@Override
+public void registerListener(EventObject e) {
+    // 注册点击事件
+    super.registerListener(e);
+    this.addItemClickListeners("tbmain");
+}
 
     public void itemClick(ItemClickEvent e) {
 //        this.getView().setEnable(false, "lag1_pointbindcourse");
         super.itemClick(e);
         Control source = (Control) e.getSource();
+        //改
         if (e.getItemKey().equalsIgnoreCase("lag1_button_knowpoint")) {
 //            else {
 //                 设置第二个微服务按钮不可见和禁用
@@ -56,8 +51,8 @@ public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
 
             Object[] params = new Object[]{
                     //GPT提示编码
-                    getPromptFid("prompt-2505280F653A39"),
-                    "开始分析这本教材",
+                    getPromptFid("prompt-2505280F653A39"),//改
+                    "开始输出学习计划方案",
                     variableMap
             };
             Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
@@ -65,6 +60,8 @@ public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
             JSONObject jsonObjectResult = new JSONObject(result);
             JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
             // 设置值
+
+            //改
             this.getModel().setValue("lag1_knowpoint1", jsonObjectData.getString("llmValue"));//返回数据中的 llmValue 字段
             Markdown mk = this.getView().getControl("lag1_md");
             mk.setText(jsonObjectData.getString("llmValue"));
@@ -88,6 +85,7 @@ public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
 
     @Override
     public void afterBindData(EventObject eventObject) {
+        //改
         Markdown mk = this.getView().getControl("lag1_md");
         mk.setText(this.getModel().getValue("lag1_knowpoint1").toString());
     }
