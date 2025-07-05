@@ -1,15 +1,7 @@
 package plugins.AI;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import kd.bos.bill.AbstractBillPlugIn;
-import kd.bos.context.RequestContext;
-import kd.bos.dataentity.OperateOption;
-import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.entity.datamodel.IDataModel;
-import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.form.control.Control;
-import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.sdk.plugin.Plugin;
 import com.alibaba.fastjson.JSONObject;
 import kd.bos.ext.form.control.Markdown;
@@ -26,7 +18,7 @@ import java.util.Map;
 /**
  * 单据界面插件
  */
-public class buttom_Gpt_evaluate extends AbstractBillPlugIn implements Plugin {
+public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
     @Override
     public void registerListener(EventObject e) {
         // 注册点击事件

@@ -23,8 +23,8 @@ import java.util.Map;
 /**
  * 基础资料插件
  */
-public class KnowpointForm_input extends AbstractBasePlugIn implements Plugin {
-
+public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements Plugin {
+    private String damn;
     @Override
     public void registerListener(EventObject e) {
         // 注册点击事件
@@ -35,12 +35,58 @@ public class KnowpointForm_input extends AbstractBasePlugIn implements Plugin {
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         Control source = (Control) e.getSource();
-        if (e.getItemKey().equalsIgnoreCase("lag1_pointbindcourse")) {
-            String str=this.getModel().getValue("lag1_knowpoint1").toString().replaceAll("\\s*|\r|\n|\t","");
-            JSONObject jsonResultObject = JSON.parseObject(str); // 直接解析字符串
+        if (e.getItemKey().equalsIgnoreCase("lag1_d3jsplan_creat")) {
+
+//            String llmValue2 = this.getModel().getValue("lag1_knowpoint1").toString();
+            String llmValue2 = damn;
+            Map<String, String> params1 = new HashMap<>();
+            params1.put("jsonResult", llmValue2);
+            String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
+            JSONObject resultJsonObject = null;
+            try {
+                //若全部生成JSON字符串，则不会进入catch
+                resultJsonObject = JSON.parseObject(jsonResult);
+            } catch (Exception ee) {
+                //将"knowpoint_plan"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
+                jsonResult = jsonResult.substring(jsonResult.indexOf("\"knowpoint_plan\"")-1 , jsonResult.indexOf("}]}")+3);
+                resultJsonObject = JSON.parseObject(jsonResult);
+            }
+
+            //new一个DynamicObject表单对象
+            DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_d3js_knowpoints");
+            StringBuilder sb1 = new StringBuilder();
+            for (int i = 1; i <= 10; i++) {
+                int ascii = 48 + (int) (Math.random() * 9);
+                char c = (char) ascii;
+                sb1.append(c);
+            }
+            //设置对应属性
+            dynamicObject.set("number", sb1.toString());
+            dynamicObject.set("name", resultJsonObject.getString("knowpoint_plan"));
+            dynamicObject.set("status", "C");
+            dynamicObject.set("enable", 1);
+            dynamicObject.set("creator", RequestContext.get().getCurrUserId());
+            //操作单据体
+            DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_knp");
+            for (Object object : resultJsonObject.getJSONArray("knowpoint_plan")) {
+                JSONObject jsonObjectSingle = (JSONObject) object;
+                DynamicObject dynamicObjectEntry = dynamicObjectCollection.addNew();
+                dynamicObjectEntry.set("lag1_knpid", jsonObjectSingle.getString("knpId"));
+                dynamicObjectEntry.set("lag1_knowpname", jsonObjectSingle.getString("knowpName"));
+                dynamicObjectEntry.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));
+                dynamicObjectEntry.set("lag1_knowp_expand", jsonObjectSingle.getString("knowpExpand"));
+                dynamicObjectEntry.set("lag1_chap", jsonObjectSingle.getString("chap"));
+                dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("description"));
+            }
+            SaveServiceHelper.saveOperate("lag1_d3js_knowpoints", new DynamicObject[] {dynamicObject}, null);
+        }
+//-------------------------------------------------------------------------------------------------------------------------------------
+
+        if (e.getItemKey().equalsIgnoreCase("lag1_kpoint_new")) {
+            String str=this.getModel().getValue("lag1_knowpoint1").toString();
             // 调用GPT开发平台微服务
             Map<String, String> variableMap = new HashMap<>();
-            variableMap.put("knowpointinfos", jsonResultObject.toJSONString());
+            variableMap.put("knowpointinfos", str);
             Object[] params = new Object[]{
                     //GPT提示编码
                     getPromptFid("prompt-250630BAA79177"),
@@ -51,10 +97,10 @@ public class KnowpointForm_input extends AbstractBasePlugIn implements Plugin {
 
             JSONObject jsonObjectResult2 = new JSONObject(result);
             JSONObject jsonObjectData2 = jsonObjectResult2.getJSONObject("data");//微服务的输出，即代填入单据体的知识点JSON及正常微服务输出的各个键值对
-
             this.getView().showMessage(jsonObjectData2.getString("llmValue"));
             String llmValue2 = jsonObjectData2.getString("llmValue");//代填入单据体的知识点JSON
-            this.getModel().setValue("lag1_knowpoint1", llmValue2);//返回数据中的 llmValue 字段
+            damn=llmValue2;
+//            this.getModel().setValue("lag1_knowpoint1", llmValue2);//返回数据中的 llmValue 字段
             Map<String, String> params1 = new HashMap<>();
             params1.put("jsonResult", llmValue2);
             String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
@@ -94,11 +140,12 @@ public class KnowpointForm_input extends AbstractBasePlugIn implements Plugin {
                     dynamicObject.set("status", "C");
                     dynamicObject.set("enable", 1);
                     dynamicObject.set("name", jsonObjectSingle.getString("knowpName"));
-                    dynamicObject.set("lag1_knowpointplan", jsonObjectSingle.getString("knowpoint_plan"));
+                    dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_courseid"));
+                    dynamicObject.set("lag1_coursename", this.getModel().getValue("lag1_coursename"));
+
+                    dynamicObject.set("lag1_knowpointplan", this.getModel().getValue("name"));
                     dynamicObject.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));
                     dynamicObject.set("lag1_knowp_expand", jsonObjectSingle.getString("knowpExpand"));
-    //                 创建新的基础资料记录
-    //                DynamicObject newBase = BusinessDataServiceHelper.newDynamicObject("lag1_knowpoints");
                     dynamicObject.set("lag1_description", jsonObjectSingle.getString("description"));
                     dynamicObject.set("lag1_chap", jsonObjectSingle.getString("chap"));
                     // 保存新的基础资料记录
