@@ -19,12 +19,14 @@ import kd.sdk.plugin.Plugin;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 基础资料插件
  */
 public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements Plugin {
-    private String damn;
+    private String damn=" { \"knowpoint_plan\": \"什么情况\", \"knowledgePoints\": [ { \"knpId\": \"1\", \"knowpName\": \"数学基础\", \"knowpointParent\": \"0\", \"knowpExpand\": \"1\", \"chap\": \"第一章\", \"description\": \"数学基础概念介绍\" }, { \"knpId\": \"2\", \"knowpName\": \"代数\", \"knowpointParent\": \"1\", \"knowpExpand\": \"2\", \"chap\": \"第一章\", \"description\": \"代数基本概念和运算\" }, { \"knpId\": \"3\", \"knowpName\": \"几何\", \"knowpointParent\": \"1\", \"knowpExpand\": \"2\", \"chap\": \"第一章\", \"description\": \"几何基本概念和图形\" }, { \"knpId\": \"4\", \"knowpName\": \"线性代数\", \"knowpointParent\": \"2\", \"knowpExpand\": \"3\", \"chap\": \"第一章\", \"description\": \"线性代数基本概念和矩阵运算\" }, { \"knpId\": \"5\", \"knowpName\": \"多项式\", \"knowpointParent\": \"2\", \"knowpExpand\": \"3\", \"chap\": \"第一章\", \"description\": \"多项式的基本概念和运算\" }, { \"knpId\": \"6\", \"knowpName\": \"平面几何\", \"knowpointParent\": \"3\", \"knowpExpand\": \"3\", \"chap\": \"第一章\", \"description\": \"平面几何的基本概念和定理\" }, { \"knpId\": \"7\", \"knowpName\": \"立体几何\", \"knowpointParent\": \"3\", \"knowpExpand\": \"3\", \"chap\": \"第一章\", \"description\": \"立体几何的基本概念和定理\" }, { \"knpId\": \"8\", \"knowpName\": \"矩阵运算\", \"knowpointParent\": \"4\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"矩阵的基本运算和性质\" }, { \"knpId\": \"9\", \"knowpName\": \"行列式\", \"knowpointParent\": \"4\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"行列式的基本概念和计算\" }, { \"knpId\": \"10\", \"knowpName\": \"多项式因式分解\", \"knowpointParent\": \"5\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"多项式因式分解的方法和技巧\" }, { \"knpId\": \"11\", \"knowpName\": \"多项式除法\", \"knowpointParent\": \"5\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"多项式除法的基本概念和运算\" }, { \"knpId\": \"12\", \"knowpName\": \"三角形\", \"knowpointParent\": \"6\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"三角形的基本性质和定理\" }, { \"knpId\": \"13\", \"knowpName\": \"圆\", \"knowpointParent\": \"6\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"圆的基本性质和定理\" }, { \"knpId\": \"14\", \"knowpName\": \"立体图形\", \"knowpointParent\": \"7\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"立体图形的基本性质和定理\" }, { \"knpId\": \"15\", \"knowpName\": \"空间几何\", \"knowpointParent\": \"7\", \"knowpExpand\": \"4\", \"chap\": \"第一章\", \"description\": \"空间几何的基本概念和定理\" }]}";
+
     @Override
     public void registerListener(EventObject e) {
         // 注册点击事件
@@ -36,12 +38,9 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
         super.itemClick(e);
         Control source = (Control) e.getSource();
         if (e.getItemKey().equalsIgnoreCase("lag1_d3jsplan_creat")) {
-
-//            String llmValue2 = this.getModel().getValue("lag1_knowpoint1").toString();
-            String llmValue2 = damn;
-            Map<String, String> params1 = new HashMap<>();
-            params1.put("jsonResult", llmValue2);
-            String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
+//            if(damn!=null)this.getView().showMessage(damn);
+//            String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
+            String jsonResult = damn.replaceAll("\\s*|\r|\n|\t", "");
             JSONObject resultJsonObject = null;
             try {
                 //若全部生成JSON字符串，则不会进入catch
@@ -51,6 +50,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"knowpoint_plan\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
+            this.getView().showMessage(jsonResult);
 
             //new一个DynamicObject表单对象
             DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_d3js_knowpoints");
@@ -68,7 +68,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             dynamicObject.set("creator", RequestContext.get().getCurrUserId());
             //操作单据体
             DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_knp");
-            for (Object object : resultJsonObject.getJSONArray("knowpoint_plan")) {
+            for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
                 JSONObject jsonObjectSingle = (JSONObject) object;
                 DynamicObject dynamicObjectEntry = dynamicObjectCollection.addNew();
                 dynamicObjectEntry.set("lag1_knpid", jsonObjectSingle.getString("knpId"));
@@ -79,6 +79,11 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("description"));
             }
             SaveServiceHelper.saveOperate("lag1_d3js_knowpoints", new DynamicObject[] {dynamicObject}, null);
+//            Long pkId = (Long) dynamicObject.getPkValue();
+//            //拼接URL字符串
+//            String targetForm = "bizAction://currentPage?gaiShow=1&selectedProcessNumber=processNumber&gaiAction=showBillForm&gaiParams={\"appId\":\"lag1_learning\",\"billFormId\":\"lag1_d3js_knowpoints\",\"billPkId\":\""+pkId+"\"}&title=damn了&iconType=bill&method=bizAction";
+//            System.out.println(targetForm);
+//            this.getView().showMessage(targetForm);
         }
 //-------------------------------------------------------------------------------------------------------------------------------------
 
@@ -97,7 +102,9 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
 
             JSONObject jsonObjectResult2 = new JSONObject(result);
             JSONObject jsonObjectData2 = jsonObjectResult2.getJSONObject("data");//微服务的输出，即代填入单据体的知识点JSON及正常微服务输出的各个键值对
+
             this.getView().showMessage(jsonObjectData2.getString("llmValue"));
+
             String llmValue2 = jsonObjectData2.getString("llmValue");//代填入单据体的知识点JSON
             damn=llmValue2;
 //            this.getModel().setValue("lag1_knowpoint1", llmValue2);//返回数据中的 llmValue 字段
@@ -150,6 +157,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                     dynamicObject.set("lag1_chap", jsonObjectSingle.getString("chap"));
                     // 保存新的基础资料记录
                     SaveServiceHelper.saveOperate("lag1_knowpoints", new DynamicObject[]{dynamicObject}, null);
+
 
                 }
             }else this.getView().showMessage("毁了");
