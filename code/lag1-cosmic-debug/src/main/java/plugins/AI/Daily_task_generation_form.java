@@ -21,7 +21,6 @@ public class Daily_task_generation_form implements IGPTAction {
         Map<String , String> result = new HashMap<>();
         if ("GET_JSON_STRING".equalsIgnoreCase(action)) {
             //将无效字符进行处理
-//            我想知道多种题型的题目（多选题，单选题，简答题），来用同一张表单存储（设置依据题型属性显示题目的信息输入框和有无选项栏），
             String jsonResult = params.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
             JSONObject resultJsonObject = null;
             try {
@@ -56,16 +55,13 @@ public class Daily_task_generation_form implements IGPTAction {
                 dynamicObjectEntry.set("lag1_diff", jsonObjectSingle.getString("diff"));
             }
             SaveServiceHelper.saveOperate("lag1_zzm", new DynamicObject[] {dynamicObject}, null);
+
             Long pkId = (Long) dynamicObject.getPkValue();
             //拼接URL字符串
             String targetForm = "bizAction://currentPage?gaiShow=1&selectedProcessNumber=processNumber&gaiAction=showBillForm&gaiParams={\"appId\":\"lag1_learn_helper\",\"billFormId\":\"lag1_zzm\",\"billPkId\":\""+pkId+"\"}&title=日任务生成表单&iconType=bill&method=bizAction";
             System.out.println(targetForm);
             result.put("formUrl", targetForm);
-
             result.put("resultJsonObject", resultJsonObject.toJSONString());
-
-
-
         }
         return result;
     }
