@@ -21,6 +21,7 @@ import kd.bos.form.control.events.ItemClickListener;
 import kd.bos.form.field.ComboEdit;
 import kd.bos.form.field.ComboItem;
 import kd.bos.list.BillList;
+import kd.bos.list.ListShowParameter;
 import kd.bos.list.events.ListRowClickEvent;
 import kd.bos.list.events.ListRowClickListener;
 import kd.bos.mservice.form.FormService;
@@ -61,6 +62,7 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
         super.click(evt);
         // 获取被点击的控件对象
         Control source = (Control) evt.getSource();
+        //不用了
         if (StringUtils.equals("lag1_uploadpro", source.getKey())) {
             // 相关逻辑操作...
             //分别收集课程编号、书籍编号、大章节编号、小章节编号
@@ -136,6 +138,43 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
             nxtList.getOpenStyle().setInlineStyleCss(styleCss);
 
             this.getView().showForm(nxtList);
+        }else if("lag1_addproblem".equalsIgnoreCase(itemKey)){
+            BillShowParameter billShowParameter = new BillShowParameter();
+            billShowParameter.setFormId("lag1_protest");
+            billShowParameter.getOpenStyle().setShowType(ShowType.Modal);
+
+            String courseId = this.getModel().getValue("number").toString();
+            if(StringUtils.isNotBlank(courseId)) billShowParameter.setCustomParam("courseId",courseId);
+            this.getView().showForm(billShowParameter);
+
+            //筛选出与当前教材id一一致的题目list
+        }else if("lag1_composetest".equalsIgnoreCase(itemKey)){
+            // 1. 创建基础资料页面参数
+            BillShowParameter parameter = new BillShowParameter();
+
+            // 2. 设置表单ID为目标基础资料表单lag1_problems
+            parameter.setFormId("lag1_problems");
+
+            // 3. 设置打开方式为模态窗口
+            parameter.getOpenStyle().setShowType(ShowType.Modal);
+
+            // 4. 可选：设置页面标题
+            parameter.setCaption("组卷页面");
+
+            // 5. 可选：传递当前课程ID
+            String courseId = this.getModel().getValue("number").toString();
+            if(StringUtils.isNotBlank(courseId)) {
+                parameter.setCustomParam("courseId", courseId);
+            }
+
+            // 6. 设置页面大小
+            StyleCss styleCss = new StyleCss();
+            styleCss.setWidth("1200");  // 宽度
+            styleCss.setHeight("800"); // 高度
+            parameter.getOpenStyle().setInlineStyleCss(styleCss);
+
+            // 7. 打开表单
+            this.getView().showForm(parameter);
         }
     }
     //   根据课程编号筛选教材列表
