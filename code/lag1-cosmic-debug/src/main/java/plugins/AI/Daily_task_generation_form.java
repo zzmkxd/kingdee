@@ -31,6 +31,7 @@ public class Daily_task_generation_form implements IGPTAction {
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"dayName\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
+
             //new一个DynamicObject表单对象
             DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_zzm");
             StringBuilder sb1 = new StringBuilder();
