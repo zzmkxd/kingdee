@@ -5,6 +5,7 @@ import kd.bos.bill.AbstractBillPlugIn;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.sdk.plugin.Plugin;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.EventObject;
 
@@ -12,6 +13,16 @@ import java.util.EventObject;
  * 基础资料插件
  */
 public class ProblemAutoNumberPlugin extends AbstractBillPlugIn implements Plugin {
+    @Override
+    public void beforeBindData(EventObject e) {
+        super.beforeBindData(e);
+        //绑定教材ID
+        String courseId = this.getView().getFormShowParameter().getCustomParam("courseId");
+        if(StringUtils.isNotBlank(courseId)){
+            this.getModel().setValue("lag1_classno",courseId);
+        }
+    }
+
     @Override
     public void afterCreateNewData(EventObject e) {
         super.afterCreateNewData(e);
