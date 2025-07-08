@@ -30,6 +30,7 @@ import static kd.bos.list.ListShowParameter.BILLLISTID;
  * 单据界面插件
  */
 public class ChoosePro extends AbstractBillPlugIn implements Plugin {
+    private boolean isRefresh=false;
     @Override
     public void registerListener(EventObject e) {
         super.registerListener(e);
@@ -47,6 +48,34 @@ public class ChoosePro extends AbstractBillPlugIn implements Plugin {
             // 确保回调方法名称与BindProList中设置的一致
             this.getView().returnDataToParent(billNos);
             this.getView().close();
+        }
+    }
+
+    /**
+     * 设置根据传递过来的courseId,过滤当前proList
+     * @param e
+     */
+    @Override
+    public void afterBindData(EventObject e) {
+        super.afterBindData(e);
+        if(isRefresh) return;   //防止递归调用
+        isRefresh = true;
+        String courseId = this.getView().getFormShowParameter().getCustomParam("courseId");
+//        this.getView().showMessage("courseId"+courseId);
+        if(courseId!=null && StringUtils.isNotBlank(courseId)){
+            setProFilter(courseId);
+            isRefresh = false;
+        }
+    }
+
+    private void setProFilter(String courseId) {
+        BillList proList = this.getView().getControl(BILLLISTID);
+        if(proList!=null){
+            QFilter filter = new QFilter("lag1_classno",QCP.equals,courseId);
+            proList.setFilter(filter);
+            proList.refresh();
+        }else{
+            System.out.println("setProFilter: 没有courseID传递");
         }
     }
 

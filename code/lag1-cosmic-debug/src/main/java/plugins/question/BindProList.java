@@ -9,17 +9,26 @@ import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
 import kd.bos.form.events.ClosedCallBackEvent;
+import kd.bos.form.events.PreOpenFormEventArgs;
+import kd.bos.list.BillList;
 import kd.bos.list.ListShowParameter;
+import kd.bos.orm.query.QCP;
+import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.sdk.plugin.Plugin;
 
-import java.util.EventObject;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 基础资料插件
  */
 public class BindProList extends AbstractBasePlugIn implements Plugin {
+    private static final String FIELD_PROBLEM_LIST = "lag1_prolist";
+    private static final String PROTEST_FORM_NAME = "lag1_protest";
+
+    private boolean isRefresh=false;
+
     @Override
     public void registerListener(EventObject e) {
         super.registerListener(e);
@@ -34,10 +43,13 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         super.click(evt);
         Control source = (Control) evt.getSource();
         if(StringUtils.equals("lag1_addpro",source.getKey())){
+            DynamicObject DO = this.getModel().getDataEntity();
+            String courseId = DO.getString("lag1_coursenumber");    //传递给题目list，作为filter过滤
             ListShowParameter nxtList = new ListShowParameter();
-            nxtList.setBillFormId("lag1_protest");
+            nxtList.setBillFormId(PROTEST_FORM_NAME);
             nxtList.setFormId("bos_list");
             nxtList.getOpenStyle().setShowType(ShowType.Modal);
+            nxtList.setCustomParam("courseId",courseId);
 
             CloseCallBack closeCallBack = new CloseCallBack(this,"returnSelectedProblems");
             nxtList.setCloseCallBack(closeCallBack);
@@ -56,6 +68,22 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         }
     }
 
+    /**
+     * //刷新此组卷下的题目单据列表，初始化filter
+     * @param e
+     */
+    @Override
+    public void afterBindData(EventObject e) {
+        super.afterBindData(e);
+        DynamicObject formData = this.getModel().getDataEntity();
+        //刷新此组卷下的题目单据列表，初始化filter
+        String billnos = formData.getString(FIELD_PROBLEM_LIST);
+        if(isRefresh) return;
+        isRefresh=true;
+        setProFilter(billnos);
+        isRefresh=false;
+    }
+
     //回调方法，赋值题目列表
     @Override
     public void closedCallBack(ClosedCallBackEvent closedCallBackEvent) {
@@ -63,7 +91,11 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         String callBackId = closedCallBackEvent.getActionId();
         if(callBackId.equalsIgnoreCase("returnSelectedProblems")){
             String billnos = (String) closedCallBackEvent.getReturnData();
-            this.getModel().setValue("lag1_prolist", billnos);
+            this.getModel().setValue(FIELD_PROBLEM_LIST, billnos);
+            if(isRefresh) return;
+            isRefresh=true;
+            setProFilter(billnos);
+            isRefresh=false;
         }
     }
 
@@ -89,5 +121,68 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
             // 设置到表单字段
             formData.set("number", newNumber);
         }
+
+        //刷新此组卷下的题目单据列表，初始化filter
+        String billnos = formData.getString(FIELD_PROBLEM_LIST);
+        if(isRefresh) return;
+        isRefresh=true;
+        setProFilter(billnos);
+        isRefresh=false;
     }
+
+    /**
+     * 题目单据列表filter,动态渲染在组卷下
+     * @param billnos
+     */
+    private void setProFilter(String billnos){
+//        this.getView().showMessage("setProFilter被调用");
+        BillList proList = this.getView().getControl("lag1_billlistap");
+        if(proList != null){
+//            if(billnos == null || billnos.isEmpty()){
+//                this.getView().showMessage("No billnos provided.");
+//                return;
+//            }
+
+            // 分割 billnos 字符串并去除空格
+            String[] billnoArray = billnos.split(",");
+            List<String> billnoList = new ArrayList<>();
+            for(String billno : billnoArray){
+                String trimmedBillno = billno.trim();
+                if(!trimmedBillno.isEmpty()){
+                    billnoList.add(trimmedBillno);
+                }
+            }
+
+//            if(billnoList.isEmpty()){
+//                this.getView().showMessage("No valid billnos to filter.");
+//                return;
+//            }
+
+            // 使用 QFilter.in 方法
+            QFilter inFilter = new QFilter("billno", QCP.in, billnoList);
+
+            // 应用过滤器
+            proList.setDataPermQFilters(Collections.singletonList(inFilter));
+
+            // 刷新列表
+            proList.refresh();
+        } else {
+            this.getView().showMessage("Bill list control not found.");
+        }
+    }
+//    private void setProFilter(String billnos){
+//        this.getView().showMessage("setProFilter被调用");
+//        BillList proList = this.getView().getControl("lag1_billlistap");
+//        if(proList!=null){
+//            String[] billno = billnos.split(",");
+//            QFilter[] filters = new QFilter[billno.length];
+//            for(int i=0;i<billno.length;i++){
+//                filters[i]=new QFilter("billno",QCP.equals,billno[i]);
+//            }
+//            QFilter combinedFilter = QFilter.or(filters);
+//            proList.setDataPermQFilters(Arrays.asList(filters));
+//        }
+//        proList.refresh();
+//    }
+
 }
