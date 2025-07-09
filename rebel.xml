@@ -9,9 +9,9 @@
 	<id>lag1-cosmic.main</id>
 
 	<classpath>
-		<dir name="E:/Learn_zone/Code_zone/Kingdee/build/resources/main">
+		<dir name="C:/Users/Tian_Yumi/workspace/kingdee/build/resources/main">
 		</dir>
-		<dir name="E:/Learn_zone/Code_zone/Kingdee/build/classes/java/main">
+		<dir name="C:/Users/Tian_Yumi/workspace/kingdee/build/classes/java/main">
 		</dir>
 	</classpath>
 
