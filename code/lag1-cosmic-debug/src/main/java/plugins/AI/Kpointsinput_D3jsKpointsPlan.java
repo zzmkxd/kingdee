@@ -65,7 +65,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             dynamicObject.set("status", "C");
             dynamicObject.set("enable", 1);
             dynamicObject.set("creator", RequestContext.get().getCurrUserId());
-            //操作单据体
+            //操作表单
             DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_knp");
             for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
                 JSONObject jsonObjectSingle = (JSONObject) object;
