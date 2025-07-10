@@ -25,7 +25,7 @@ public class DemoRadarPlugin extends AbstractFormPlugin {
 	@Override
 	public void afterBindData(EventObject e) {
 		super.afterBindData(e);
-		RadarChart chart = this.getControl("kdec_radarchartap");
+		RadarChart chart = this.getControl("lag1_radarchartap");
 		RadarAxis radarAxis = new RadarAxis();// 构建轴
 		List<RadarIndicator> indicators = new ArrayList<RadarIndicator>();
 		RadarIndicator indicator1 = new RadarIndicator("Sales",6500);
@@ -57,7 +57,7 @@ public class DemoRadarPlugin extends AbstractFormPlugin {
 		chart.addRadarSeries(radarSeries);
 		chart.refresh();
 		chart.setShowTooltip(true);//开启tips
-		this.getView().updateView("kdec_radarchartap");//刷新控件
+		this.getView().updateView("lag1_radarchartap");//刷新控件
 		
 		long org = UserServiceHelper.getUserDefaultOrgID(Long.valueOf(RequestContext.get().getUserId()));
 		UserServiceHelper.setUserDefaultOrg(Long.valueOf(RequestContext.get().getUserId()), 100000L);

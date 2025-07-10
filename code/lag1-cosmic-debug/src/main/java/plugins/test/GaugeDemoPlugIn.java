@@ -20,7 +20,7 @@ public class GaugeDemoPlugIn extends AbstractFormPlugin implements Plugin {
         // TODO Auto-generated method stub
         super.afterBindData(e);
         // 声明一个仪表盘对象
-        GaugeChart chart = this.getControl("kdec_gaugechartap");
+        GaugeChart chart = this.getControl("lag1_gaugechartap");
         GaugeSeries gaugeSeries = chart.createSeries("gauge");
         gaugeSeries.setType(ChartType.gauge);// 构造为扇形
         Map<String, Object> map = new HashMap<String, Object>();

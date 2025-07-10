@@ -16,7 +16,7 @@ public class DemoFormPlugin01 extends AbstractFormPlugin implements Plugin {
 
     public void afterCreateNewData(EventObject e) {
         super.afterCreateNewData(e);
-        PieChart pieChart = this.getControl("kdec_piechartap");
+        PieChart pieChart = this.getControl("lag1_piechartap");
         pieChart.setShowTitle(false);
         pieChart.setShowTooltip(true);
         pieChart.addTooltip("trigger","item");

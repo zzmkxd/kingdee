@@ -12,7 +12,14 @@ import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
 import kd.sdk.plugin.Plugin;
+import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.entity.datamodel.IDataModel;
+import kd.bos.form.plugin.AbstractFormPlugin;
+//import kd.bos.form.plugin.AbstractFormPluginEvents;
+//import kd.bos.form.plugin.FormShowParameter;
+import kd.bos.servicehelper.BusinessDataServiceHelper;
 
+import java.util.List;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +34,24 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         super.registerListener(e);
         this.addItemClickListeners("tbmain");
     }
+    // 在表单插件类中添加方法
+    private void updateEntryColumn(String entryKey, String fieldKey, Object value) {
+        // 获取单据体数据集合
+        DynamicObjectCollection entryRows = this.getModel().getEntryEntity(entryKey);
+        // 遍历修改每一行
+        for (DynamicObject row : entryRows) {
+            row.set(fieldKey, value); // 设置字段值
+        }
+        // 刷新界面显示
+        this.getView().updateView(entryKey);
+    }
 
+    // 调用示例（在afterLoadData等事件中调用）
+    @Override
+    public void afterLoadData(EventObject e) {
+        updateEntryColumn("entryentity", "your_field_key", "新值");
+        // entryentity是单据体标识，your_field_key是要修改的字段标识
+    }
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         if (e.getItemKey().equalsIgnoreCase("lag1_evaluate")) {
@@ -62,9 +86,11 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             JSONObject jsonObjectResult = new JSONObject(result);
             JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
             //设置值
-            this.getModel().setValue("lag1_evaluate_all", jsonObjectData.getString("llmValue"));
-            Markdown mk = this.getView().getControl("lag1_markdownap");
-            mk.setText(jsonObjectData.getString("llmValue"));
+            String str=jsonObjectData.getString("llmValue");//JSON结构的玩意
+//            this.getModel().setValue("lag1_evaluate_all",);
+//            Markdown mk = this.getView().getControl("lag1_markdownap");
+//            mk.setText(jsonObjectData.getString("llmValue"));
+
         }
 
     }
