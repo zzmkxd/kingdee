@@ -16,7 +16,7 @@ public class BindPicData extends AbstractFormPlugin implements Plugin {
     public void beforeBindData(EventObject e) {
         super.beforeBindData(e);
         String jsonString = this.getView().getFormShowParameter().getCustomParam("treeData");
-        this.getView().showMessage(jsonString);
+//        this.getView().showMessage(jsonString);
 //        this.getView().getModel().putContextVariable("treeData",jsonString);
         // BindPicData.java
 //        this.getView().getScriptEngine().executeScript("setExternalData(" + jsonString + ");");
