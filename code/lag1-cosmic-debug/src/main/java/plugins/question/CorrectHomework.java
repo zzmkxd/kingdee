@@ -53,7 +53,7 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
      * 绑定数据
      */
     private void bindQuestionData() {
-        this.getModel().getDataEntity().set("lag1_textfield2",prolist_id);
+        this.getModel().getDataEntity().set("number",prolist_id);
         DynamicObject DO = this.getModel().getDataEntity();
         //获取totproblems单据体集合
         DynamicObjectCollection totProblems = DO.getDynamicObjectCollection(TOTproblems);
