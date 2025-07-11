@@ -1,4 +1,4 @@
-package plugins.AI;
+package plugins.knowpoint;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -19,7 +19,6 @@ import kd.sdk.plugin.Plugin;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 基础资料插件

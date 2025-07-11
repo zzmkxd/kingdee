@@ -1,4 +1,4 @@
-package plugins.AI;
+package plugins.learncloud;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -39,9 +39,10 @@ public class TaskEvaluate extends AbstractFormPlugin implements Plugin {
             JSONArray jsonTaskArray = new JSONArray();
             for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
                 JSONObject jsonObjectSingle = new JSONObject();
-                jsonObjectSingle.put("taskContent", dynamicObjectSingle.getString("lag1_task_name"));
+                jsonObjectSingle.put("taskName", dynamicObjectSingle.getString("lag1_task_name"));
                 jsonObjectSingle.put("expectTime", dynamicObjectSingle.getString("lag1_expect_minutes"));
                 jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_diff"));
+                jsonObjectSingle.put("description", dynamicObjectSingle.getString("lag1_description"));
                 jsonObjectSingle.put("finishTime", dynamicObjectSingle.getString("lag1_finish_minute"));
                 jsonObjectSingle.put("finishSituation", dynamicObjectSingle.getString("lag1_finish"));
                 jsonTaskArray.add(jsonObjectSingle);

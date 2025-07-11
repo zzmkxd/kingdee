@@ -1,4 +1,4 @@
-package plugins.AI;
+package plugins.knowpoint;
 
 import kd.bos.bill.AbstractBillPlugIn;
 import kd.bos.form.control.Control;
