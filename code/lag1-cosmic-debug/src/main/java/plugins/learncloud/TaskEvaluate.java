@@ -1,18 +1,17 @@
-package plugins.AI;
+package plugins.learncloud;
 
 import com.alibaba.fastjson.JSONArray;
-import kd.bos.bill.AbstractBillPlugIn;
-import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.form.plugin.AbstractFormPlugin;
-import kd.sdk.plugin.Plugin;
 import com.alibaba.fastjson.JSONObject;
+import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.ext.form.control.Markdown;
 import kd.bos.form.control.events.ItemClickEvent;
+import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
-import kd.bos.dataentity.entity.DynamicObject;
+import kd.sdk.plugin.Plugin;
 
 import java.util.EventObject;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import java.util.Map;
 /**
  * 动态表单插件
  */
-public class evaluate_aaa extends AbstractFormPlugin implements Plugin {
+public class TaskEvaluate extends AbstractFormPlugin implements Plugin {
     @Override
     public void registerListener(EventObject e) {
         //注册点击事件
@@ -40,9 +39,10 @@ public class evaluate_aaa extends AbstractFormPlugin implements Plugin {
             JSONArray jsonTaskArray = new JSONArray();
             for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
                 JSONObject jsonObjectSingle = new JSONObject();
-                jsonObjectSingle.put("taskContent", dynamicObjectSingle.getString("lag1_task_name"));
+                jsonObjectSingle.put("taskName", dynamicObjectSingle.getString("lag1_task_name"));
                 jsonObjectSingle.put("expectTime", dynamicObjectSingle.getString("lag1_expect_minutes"));
                 jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_diff"));
+                jsonObjectSingle.put("description", dynamicObjectSingle.getString("lag1_description"));
                 jsonObjectSingle.put("finishTime", dynamicObjectSingle.getString("lag1_finish_minute"));
                 jsonObjectSingle.put("finishSituation", dynamicObjectSingle.getString("lag1_finish"));
                 jsonTaskArray.add(jsonObjectSingle);

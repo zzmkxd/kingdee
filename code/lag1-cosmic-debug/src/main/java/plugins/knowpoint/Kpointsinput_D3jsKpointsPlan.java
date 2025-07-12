@@ -1,4 +1,4 @@
-package plugins.AI;
+package plugins.knowpoint;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -19,7 +19,6 @@ import kd.sdk.plugin.Plugin;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 基础资料插件
@@ -65,7 +64,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             dynamicObject.set("status", "C");
             dynamicObject.set("enable", 1);
             dynamicObject.set("creator", RequestContext.get().getCurrUserId());
-            //操作单据体
+            //操作表单
             DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_knp");
             for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
                 JSONObject jsonObjectSingle = (JSONObject) object;

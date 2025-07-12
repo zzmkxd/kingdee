@@ -28,7 +28,9 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
     private static final String PROTEST_FORM_NAME = "lag1_protest";
 
     private boolean isRefresh=false;
-
+    private List<DynamicObject> questionObjects = new ArrayList<>(); // 添加为类成员变量
+    private List<String> pronoList = new ArrayList<>(); // 添加为类成员变量
+    
     @Override
     public void registerListener(EventObject e) {
         super.registerListener(e);
@@ -65,6 +67,24 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         String courseId = this.getView().getFormShowParameter().getCustomParam("courseId");
         if(StringUtils.isNotBlank(courseId)){
             this.getModel().setValue("lag1_coursenumber",courseId);
+        }
+        
+        // 初始化questionObjects和pronoList
+        DynamicObject formData = this.getModel().getDataEntity();
+        String billnos = formData.getString(FIELD_PROBLEM_LIST);
+        if(billnos != null) {
+            pronoList = Arrays.stream(billnos.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+                
+            questionObjects = pronoList.stream()
+                .map(prono -> {
+                    QFilter filter = new QFilter("billno", QCP.equals, prono);
+                    return BusinessDataServiceHelper.loadSingle("lag1_protest", "id,billno,content", new QFilter[]{filter});
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         }
     }
 

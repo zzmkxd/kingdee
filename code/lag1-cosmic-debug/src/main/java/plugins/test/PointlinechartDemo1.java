@@ -11,7 +11,7 @@ public class PointlinechartDemo1 extends AbstractFormPlugin implements Plugin {
     public void afterCreateNewData(EventObject e) {
         super.afterCreateNewData(e);
 
-        PointLineChart pointLineChart = this.getControl("kdec_pointlinechartap");
+        PointLineChart pointLineChart = this.getControl("lag1_pointlinechartap");
         PointLineChartHelper pointLineChartHelper = new PointLineChartHelper();
         pointLineChartHelper.drawChart(pointLineChart);
     }
