@@ -123,31 +123,31 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         PieChart pieChart = this.getControl("lag1_piechartap");
         RadarAxis radarAxis = new RadarAxis();// 构建轴
         List<RadarIndicator> indicators = new ArrayList<RadarIndicator>();
-        RadarIndicator indicator1 = new RadarIndicator("基础掌握",6500);
-        RadarIndicator indicator2 = new RadarIndicator("创新能力",16000);
+        RadarIndicator indicator1 = new RadarIndicator("基础题掌握度",6500);
+        RadarIndicator indicator2 = new RadarIndicator("高难创新能力",16000);
         RadarIndicator indicator3 = new RadarIndicator("全面程度",30000);
-//        RadarIndicator indicator4 = new RadarIndicator("Customer Support",38000);
-//        RadarIndicator indicator5 = new RadarIndicator("Development",52000);
+        RadarIndicator indicator4 = new RadarIndicator("选择题答题技巧",38000);
+        RadarIndicator indicator5 = new RadarIndicator("问答题答题技巧",52000);
 //        RadarIndicator indicator6 = new RadarIndicator("Marketing",25000);
         indicators.add(indicator1);
         indicators.add(indicator2);
         indicators.add(indicator3);
-//        indicators.add(indicator4);
-//        indicators.add(indicator5);
+        indicators.add(indicator4);
+        indicators.add(indicator5);
 //        indicators.add(indicator6);
         radarAxis.setIndicator(indicators);// 设置轴线
         chart.addRadarAxis(radarAxis);
         RadarSeries radarSeries = new RadarSeries();
         RadarData radarData = new RadarData();//构建数据
-        radarData.setName("Allocated Budget");//数据一
+        radarData.setName("张泽明(这里传学号)");//数据一
 //        radarData.setValue(new Number[] {4200, 3000, 20000, 35000, 50000, 18000});
-        radarData.setValue(new Number[] {4200, 3000, 20000});
+        radarData.setValue(new Number[] {4200, 3000, 20000, 35000, 50000});
         Map<String, Object>tooltip = new HashMap<String, Object>();
         tooltip.put("trigger", "item");
         RadarData radarData1 = new RadarData();
-        radarData1.setName("Actual Spending");//数据二
+//        radarData1.setName("Actual Spending");//数据二
 //        radarData1.setValue(new Number[] {5000, 14000, 28000, 26000, 42000, 21000});
-        radarData1.setValue(new Number[] {5000, 14000, 28000,});
+//        radarData1.setValue(new Number[] {5000, 14000});
         radarSeries.addData(radarData);
         radarSeries.addData(radarData1);
         radarSeries.setPropValue("tooltip", tooltip);//设置tips
@@ -205,13 +205,13 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     }
     private ItemValue[] getDefaultProfitData() {
         ItemValue[] items = new ItemValue[4];
-        ItemValue item1 = new ItemValue("困难题掌握度", new BigDecimal(1048));
+        ItemValue item1 = new ItemValue("困难题平均分", new BigDecimal(10));
         items[0] = item1;
-        ItemValue item2 = new ItemValue("进阶题掌握度", new BigDecimal(735));
+        ItemValue item2 = new ItemValue("进阶题平均分", new BigDecimal(7));
         items[1] = item2;
-        ItemValue item3 = new ItemValue("中等题掌握度", new BigDecimal(580));
+        ItemValue item3 = new ItemValue("中等题平均分", new BigDecimal(5));
         items[2] = item3;
-        ItemValue item4 = new ItemValue("基础题掌握度", new BigDecimal(484));
+        ItemValue item4 = new ItemValue("基础题平均分", new BigDecimal(4));
         items[3] = item4;
 //        ItemValue item5 = new ItemValue("Video Ads", new BigDecimal(300));
 //        items[4] = item5;

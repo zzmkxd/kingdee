@@ -25,13 +25,14 @@ public class LearningTaskCalendar implements IGPTAction {
         if ("GET_JSON_STRING".equalsIgnoreCase(action)) {
             //将无效字符进行处理
             String jsonResult = params.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
+
             JSONObject resultJsonObject = null;
             try {
                 //若全部生成JSON字符串，则不会进入catch
                 resultJsonObject = JSON.parseObject(jsonResult);
             } catch (Exception ee) {
                 //将"dayname"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
-                jsonResult = jsonResult.substring(jsonResult.indexOf("\"id\"")-2 , jsonResult.indexOf("}]")+3);
+                jsonResult = jsonResult.substring(jsonResult.indexOf("\"planName\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
 
@@ -45,7 +46,7 @@ public class LearningTaskCalendar implements IGPTAction {
             }
             //设置对应属性
             dynamicObject.set("number", sb1.toString());
-            dynamicObject.set("name", resultJsonObject.getString("id"));
+            dynamicObject.set("name", resultJsonObject.getString("planName"));
             dynamicObject.set("status", "C");
             dynamicObject.set("enable", 1);
             dynamicObject.set("creator", RequestContext.get().getCurrUserId());
@@ -54,10 +55,12 @@ public class LearningTaskCalendar implements IGPTAction {
             for (Object object : resultJsonObject.getJSONArray("dayTaskList")) {
                 JSONObject jsonObjectSingle = (JSONObject) object;
                 DynamicObject dynamicObjectEntry = dynamicObjectCollection.addNew();
-                dynamicObjectEntry.set("lag1_task_name", jsonObjectSingle.getString("taskName"));
-                dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("difficulty"));
+                dynamicObjectEntry.set("lag1_task_name", jsonObjectSingle.getString("name"));
+                dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("description"));
                 dynamicObjectEntry.set("lag1_expect_minutes", getDaysBetween(jsonObjectSingle.getString("start"),jsonObjectSingle.getString("end")));
-                dynamicObjectEntry.set("lag1_diff", jsonObjectSingle.getString("diff"));
+                dynamicObjectEntry.set("lag1_begindate", jsonObjectSingle.getString("start"));
+                dynamicObjectEntry.set("lag1_enddate", jsonObjectSingle.getString("end"));
+                dynamicObjectEntry.set("lag1_diff", jsonObjectSingle.getString("difficulty"));
             }
             SaveServiceHelper.saveOperate("lag1_calendar_plan", new DynamicObject[] {dynamicObject}, null);
 
@@ -70,6 +73,7 @@ public class LearningTaskCalendar implements IGPTAction {
         }
         return result;
     }
+
     public static int getDaysBetween(String startDateStr, String endDateStr) {
 
             LocalDate startDate = LocalDate.parse(startDateStr);
