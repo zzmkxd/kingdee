@@ -192,7 +192,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
             //提交按钮封装作答和题目传参
             getCurNo();
             saveAns(currentQuestionIndex);
-            loadQuestionData();
+//            loadQuestionData();
             loadAnswerData();
 //            this.getView().showMessage(userAnswers.toString());
             sendParameter();

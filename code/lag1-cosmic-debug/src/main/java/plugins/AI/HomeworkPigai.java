@@ -18,6 +18,7 @@ import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
+import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.bos.servicehelper.user.UserServiceHelper;
 import kd.sdk.plugin.Plugin;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -26,6 +27,7 @@ import kd.bos.form.plugin.AbstractFormPlugin;
 //import kd.bos.form.plugin.AbstractFormPluginEvents;
 //import kd.bos.form.plugin.FormShowParameter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
+import plugins.question.BindPbScore;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -34,6 +36,11 @@ import java.util.*;
  * 基础资料插件
  */
 public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
+    //题目分数表单据体名词
+    private static final String ENTRY_ENTITY_COLLECTION = "lag1_entryentity_problms";
+    //成绩关联表的表单标识
+    private static final String TKPROBLEM_SCORE= "lag1_problem_score";
+
     @Override
     public void registerListener(EventObject e) {
         //注册点击事件
@@ -105,6 +112,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
             // 刷新界面显示
             this.getView().updateView("lag1_entryentity_problms");
+            bindData(); //绑定至成绩关联表
         }
 
     }
@@ -216,5 +224,97 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 //        ItemValue item5 = new ItemValue("Video Ads", new BigDecimal(300));
 //        items[4] = item5;
         return items;
+    }
+
+    /**
+     * 成绩关联表方法
+     */
+    private void bindData(){
+        //            获取当前表单的数据实体
+        DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        if(dataEntities==null){
+            this.getView().showMessage("未找到数据实体");
+            return;
+        }
+//            this.getView().showMessage(dataEntities.toString());
+
+        String studentid = String.valueOf(RequestContext.get().getCurrUserId());
+        String studentname=RequestContext.get().getUserName();
+
+        //遍历单据体每一行,lag1_proid, lag1_protype,
+        for(DynamicObject entryEntity:dataEntities){
+            //new成绩关联表的表单对象
+            String proid = entryEntity.getString("lag1_proid"); //题目id
+            String protype = entryEntity.getString("lag1_protype");
+            String userscore = entryEntity.getString("lag1_userscore");
+            String courseid = entryEntity.getString("lag1_courseid");
+            String prodifficulty = entryEntity.getString("lag1_difficulty");
+            String knpoints = entryEntity.getString("lag1_link_kpoints");
+            String[] knpointArr = knpoints.split(",");
+            String knpoint1="";
+            String knpoint2 = "";
+            if(knpointArr.length>0){
+                knpoint1 = knpointArr[0].trim();
+            }
+            if(knpointArr.length>1){
+                knpoint2 = knpointArr[1].trim();
+            }
+
+            //插入之前能否先去TKPROBLEM_SCORE查找是否有数据的lag1_studentid与numer 和即将插入的studentid与proid一致，若一致，则只更新分数即lag1_score
+//                否则新建数据
+            DynamicObject existingRecord = findExistingRecord(studentid,proid);
+            this.getView().showMessage(existingRecord.toString());
+
+            if(existingRecord!=null){
+                existingRecord.set("lag1_score",Integer.parseInt(userscore));
+                SaveServiceHelper.update(existingRecord);
+            }else{
+                DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject(TKPROBLEM_SCORE);
+                dynamicObject.set("lag1_studentid",studentid);
+//                dynamicObject.set("creator",studentname);
+                dynamicObject.set("lag1_studentname",studentname);
+                dynamicObject.set("number",proid);
+                dynamicObject.set("lag1_questiontype",protype);
+                dynamicObject.set("lag1_score",Integer.parseInt(userscore));
+                dynamicObject.set("lag1_courseid",courseid);
+                dynamicObject.set("lag1_difficulty",Integer.parseInt(prodifficulty));
+                if(!knpoint1.isEmpty()){
+                    dynamicObject.set("lag1_knowpoint1",knpoint1);
+                }else{
+                    dynamicObject.set("lag1_knowpoint1","未绑定");
+                }
+                if(!knpoint1.isEmpty()){
+                    dynamicObject.set("lag1_knowpoint2",knpoint2);
+                }else{
+                    dynamicObject.set("lag1_knowpoint2","未绑定");
+                }
+//                this.getView().showMessage("dynamicObject:"+dynamicObject);
+                try {
+                    SaveServiceHelper.saveOperate(TKPROBLEM_SCORE,new DynamicObject[]{dynamicObject},null);
+//                    BusinessDataServiceHelper.save(,dynamicObject);
+                }catch (Exception e){
+                    this.getView().showMessage("exception: "+e);
+                }
+            }
+
+
+        }
+        this.getView().showMessage("更新数据成功");
+    }
+
+    private DynamicObject findExistingRecord(String studentid, String proid) {
+        // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
+        String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
+
+        // 构建 QFilter 条件
+        QFilter filter1 = new QFilter("lag1_studentid", QCP.equals, studentid);
+        QFilter filter2 = new QFilter("number", QCP.equals, proid);
+        QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
+
+        // 执行查询
+        DynamicObject[] records = BusinessDataServiceHelper.load(TKPROBLEM_SCORE, fields, new QFilter[]{combinedFilter});
+
+        // 返回第一条记录（如果没有则返回 null）
+        return records.length > 0 ? records[0] : null;
     }
 }
