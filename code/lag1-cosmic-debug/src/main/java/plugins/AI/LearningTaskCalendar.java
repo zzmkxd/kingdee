@@ -18,6 +18,7 @@ import java.util.Map;
  * 基础资料插件
  */
 public class LearningTaskCalendar implements IGPTAction {
+    private String str = null;
 //输入有：学生对知识点方案的平均正确率+该知识点的做题数量+想提升的模式（基础/中等+困难）+ 想要掌握的知识点列表
     @Override
     public Map<String, String> invokeAction(String action, Map<String, String> params) {
@@ -35,7 +36,7 @@ public class LearningTaskCalendar implements IGPTAction {
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"planName\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
-
+            str=jsonResult.substring(jsonResult.indexOf("\"dayTaskList\"")-1 , jsonResult.indexOf("}]")+2);
             //new一个DynamicObject表单对象
             DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_calendar_plan");
             StringBuilder sb1 = new StringBuilder();

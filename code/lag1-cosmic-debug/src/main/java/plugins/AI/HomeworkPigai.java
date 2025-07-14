@@ -27,7 +27,7 @@ import kd.bos.form.plugin.AbstractFormPlugin;
 //import kd.bos.form.plugin.AbstractFormPluginEvents;
 //import kd.bos.form.plugin.FormShowParameter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
-import plugins.question.BindPbScore;
+//import plugins.question.BindPbScore;
 
 import java.math.BigDecimal;
 import java.util.*;
