@@ -154,7 +154,7 @@ public class CourseDataProcessor extends AbstractBasePlugIn implements Plugin {
                 jsonResultObject.put("lag1_chapter" + i , tem1);
             }
 
-            if(i<9){
+            if(i<16){
                 for(int j=1;j<=5;j++){
                     String tem2=this.getModel().getValue("lag1_chapter" + i+"p"+j).toString();
                     if(tem2==null || !tem1.equals("")){
