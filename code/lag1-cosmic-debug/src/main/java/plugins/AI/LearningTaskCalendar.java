@@ -36,7 +36,7 @@ public class LearningTaskCalendar implements IGPTAction {
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"planName\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
-            str=jsonResult.substring(jsonResult.indexOf("\"dayTaskList\"")-1 , jsonResult.indexOf("}]")+2);
+            str=jsonResult.substring(jsonResult.indexOf("\"id\"")-2 , jsonResult.indexOf("}]")+2);
             //new一个DynamicObject表单对象
             DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_calendar_plan");
             StringBuilder sb1 = new StringBuilder();
@@ -51,6 +51,8 @@ public class LearningTaskCalendar implements IGPTAction {
             dynamicObject.set("status", "C");
             dynamicObject.set("enable", 1);
             dynamicObject.set("creator", RequestContext.get().getCurrUserId());
+//            lag1_textfield
+            dynamicObject.set("lag1_textfield", str);
             //操作单据体
             DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_entryentity_daytask");
             for (Object object : resultJsonObject.getJSONArray("dayTaskList")) {
