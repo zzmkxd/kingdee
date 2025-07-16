@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 public class BindProList extends AbstractBasePlugIn implements Plugin {
     private static final String FIELD_PROBLEM_LIST = "lag1_prolist";
     private static final String PROTEST_FORM_NAME = "lag1_protest";
+    private static final String TKCOURSE = "lag1_course";
+    private static final String TKPROBLEMS = "lag1_problems";
 
     private boolean isRefresh=false;
     private List<DynamicObject> questionObjects = new ArrayList<>(); // 添加为类成员变量
@@ -46,7 +48,7 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         Control source = (Control) evt.getSource();
         if(StringUtils.equals("lag1_addpro",source.getKey())){
             DynamicObject DO = this.getModel().getDataEntity();
-            String courseId = DO.getString("lag1_coursenumber");    //传递给题目list，作为filter过滤
+            String courseId = DO.getString("lag1_coursenumber.number");    //传递给题目list，作为filter过滤
             ListShowParameter nxtList = new ListShowParameter();
             nxtList.setBillFormId(PROTEST_FORM_NAME);
             nxtList.setFormId("bos_list");
@@ -65,8 +67,11 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         super.beforeBindData(e);
         //绑定课程id
         String courseId = this.getView().getFormShowParameter().getCustomParam("courseId");
-        if(StringUtils.isNotBlank(courseId)){
-            this.getModel().setValue("lag1_coursenumber",courseId);
+        String fields = "number";
+        QFilter qFilter = new QFilter("number",QCP.equals,courseId);
+        DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,fields,new QFilter[]{qFilter});
+        if(StringUtils.isNotBlank(courseId) && course!=null){
+            this.getModel().setValue("lag1_coursenumber",course);
         }
         
         // 初始化questionObjects和pronoList
@@ -80,8 +85,8 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
                 
             questionObjects = pronoList.stream()
                 .map(prono -> {
-                    QFilter filter = new QFilter("billno", QCP.equals, prono);
-                    return BusinessDataServiceHelper.loadSingle("lag1_protest", "id,billno,content", new QFilter[]{filter});
+                    QFilter filter = new QFilter("number", QCP.equals, prono);
+                    return BusinessDataServiceHelper.loadSingle(PROTEST_FORM_NAME, "id,number,content", new QFilter[]{filter});
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -127,7 +132,7 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
         if(formData.getString("number")==null || formData.getString("number").isEmpty()){
             // 查询所有ID但不加载具体数据
             DynamicObject[] posts = BusinessDataServiceHelper.load(
-                    "lag1_problems",  // 教材基础资料表名
+                    TKPROBLEMS,  // 教材基础资料表名
                     "id",         // 只查询ID字段
                     null          // 没有过滤条件
             );
@@ -179,7 +184,7 @@ public class BindProList extends AbstractBasePlugIn implements Plugin {
 //            }
 
             // 使用 QFilter.in 方法
-            QFilter inFilter = new QFilter("billno", QCP.in, billnoList);
+            QFilter inFilter = new QFilter("number", QCP.in, billnoList);
 
             // 应用过滤器
             proList.setDataPermQFilters(Collections.singletonList(inFilter));

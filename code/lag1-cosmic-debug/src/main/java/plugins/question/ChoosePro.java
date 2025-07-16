@@ -30,6 +30,7 @@ import static kd.bos.list.ListShowParameter.BILLLISTID;
  * 单据界面插件
  */
 public class ChoosePro extends AbstractBillPlugIn implements Plugin {
+    private final String TKPROBLEM = "lag1_protest";
     private boolean isRefresh=false;
     @Override
     public void registerListener(EventObject e) {
@@ -71,7 +72,7 @@ public class ChoosePro extends AbstractBillPlugIn implements Plugin {
     private void setProFilter(String courseId) {
         BillList proList = this.getView().getControl(BILLLISTID);
         if(proList!=null){
-            QFilter filter = new QFilter("lag1_classno",QCP.equals,courseId);
+            QFilter filter = new QFilter("lag1_courseid.number",QCP.equals,courseId);
             proList.setFilter(filter);
             proList.refresh();
         }else{
@@ -85,16 +86,16 @@ public class ChoosePro extends AbstractBillPlugIn implements Plugin {
      * @return 选中的 billno 列表
      */
     private String getSelectedBillNos() {
-        String fields = "id,billno";
+        String fields = "id,number";
         List<String> billNos = new ArrayList<>();
         BillList billList = this.getControl(BILLLISTID);
         ListSelectedRowCollection collection = billList.getSelectedRows();
         for(ListSelectedRow col : collection){
             Long selectId = (Long) col.getPrimaryKeyValue();
             QFilter qFilter = new QFilter("id", QCP.equals, selectId);
-            DynamicObject dys = BusinessDataServiceHelper.loadSingle("lag1_protest", "id,billno",
+            DynamicObject dys = BusinessDataServiceHelper.loadSingle(TKPROBLEM, "id,number",
                     new QFilter[]{qFilter});
-            String billNo = dys.getString("billno");
+            String billNo = dys.getString("number");
             billNos.add(billNo);
         }
         return String.join(",", billNos); // 改为返回逗号分隔的字符串

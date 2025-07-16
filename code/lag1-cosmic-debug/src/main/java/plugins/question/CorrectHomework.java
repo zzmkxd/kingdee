@@ -23,7 +23,7 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
    //作答列表
     private List<String> userAnswers = new ArrayList<>();
 
-    private final String TOTproblems = "lag1_entryentity_problms";           //单据体
+    private final String TOTproblems = "lag1_entryentity_pigai";           //单据体
     private final String USERans = "lag1_useranswer";           //作答记录
     private final String PROdes = "lag1_prodes";                //题干
     private final String PROdifficulty = "lag1_difficulty";     //题目难度
@@ -90,8 +90,8 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
             //题目遍历
             if(questionObjects.size()>i){
                 JSONObject proJsonObject = questionObjects.get(i);
-                String proid = proJsonObject.getString("billno");   //题目id
-                String courseid = proJsonObject.getString("lag1_classno");  //课程id
+                String proid = proJsonObject.getString("number");   //题目id
+                String courseid = proJsonObject.getString("lag1_courseidtxt");  //课程id
                 String protypeid = proJsonObject.getString("lag1_questiontype");
                 String protype = "";
                 if(protypeid.equals("1")) protype="单选题";
@@ -129,8 +129,8 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
                     if(entryEntityArray!=null && !entryEntityArray.isEmpty()){
                         for(int j=0;j<entryEntityArray.size();j++){
                             JSONObject entryEntity = entryEntityArray.getJSONObject(j);
-                            if(entryEntity.containsKey("lag1_basedatafield2")){
-                                JSONObject baseDataField2 = entryEntity.getJSONObject("lag1_basedatafield2");
+                            if(entryEntity.containsKey("lag1_knpoint1")){
+                                JSONObject baseDataField2 = entryEntity.getJSONObject("lag1_knpoint1");
                                 if(baseDataField2.containsKey("name")){
                                     JSONObject name = baseDataField2.getJSONObject("name");
                                     if(name.containsKey("zh_CN")){
@@ -141,8 +141,8 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
                                     }
                                 }
                             }
-                            if(entryEntity.containsKey("lag1_basedatafield1")){
-                                JSONObject baseDataField2 = entryEntity.getJSONObject("lag1_basedatafield1");
+                            if(entryEntity.containsKey("lag1_knpoint2")){
+                                JSONObject baseDataField2 = entryEntity.getJSONObject("lag1_knpoint2");
                                 if(baseDataField2.containsKey("name")){
                                     JSONObject name = baseDataField2.getJSONObject("name");
                                     if(name.containsKey("zh_CN")){
