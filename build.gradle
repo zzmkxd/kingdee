@@ -118,7 +118,7 @@ subprojects {
 	
 	// 添加lib目录下所有jar包作为依赖
 	// implementation fileTree(dir: "${rootDir}/code/lib", include: ["*.jar"])
-	
+
 	//生成本工程jar包并拷贝到outputdir目录
 	task buildJar(type: Copy, dependsOn: build){
 		group 'build'
@@ -134,7 +134,7 @@ subprojects {
 			}
 		}
 	}
-	
+
 	//生成本工程jar包并拷贝到拷贝到cus目录
 	task deployJar(type: Copy, dependsOn: buildJar){
 	 	group 'build'

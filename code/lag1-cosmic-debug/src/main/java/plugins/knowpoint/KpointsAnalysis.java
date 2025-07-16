@@ -27,21 +27,17 @@ public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
     }
 
     public void itemClick(ItemClickEvent e) {
-//        this.getView().setEnable(false, "lag1_pointbindcourse");
         super.itemClick(e);
         Control source = (Control) e.getSource();
         if (e.getItemKey().equalsIgnoreCase("lag1_button_knowpoint")) {
-//            else {
-//                 设置第二个微服务按钮不可见和禁用
-//                this.getView().setVisible(false, "lag1_pointbindcourse");
-//            }
             // 获取日任务信息，并且以JSON字符串的形式展现
             JSONObject jsonResultObject = new JSONObject();
-            for (int i = 1; i <= 3; i++) {
-                jsonResultObject.put("lag1_chapter" + i , this.getModel().getValue("lag1_chapter" + i).toString());
-
-            }//目前没有对小标题分析
-            //----下面是正常提取教材代码----
+            for (int i = 1; i <= 8; i++) {
+                jsonResultObject.put("第" + i +"章", this.getModel().getValue("lag1_chapter" + i).toString());
+                for(int j=1;j<=5;j++){
+                    jsonResultObject.put("第" + i+"p"+j +"章", this.getModel().getValue("lag1_chapter" + i+"p"+j).toString());
+                }
+            }
             // 调用GPT开发平台微服务
             Map<String, String> variableMap = new HashMap<>();
             variableMap.put("courseinfo", jsonResultObject.toJSONString());
@@ -61,11 +57,6 @@ public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
             Markdown mk = this.getView().getControl("lag1_md");
             mk.setText(jsonObjectData.getString("llmValue"));
 
-//            if (globalLlmValue != null && !globalLlmValue.isEmpty()) {
-//                // 设置第二个微服务按钮可见和启用
-////                this.getView().setVisible(true, "lag1_pointbindcourse");
-//                this.getView().setEnable(true, "lag1_pointbindcourse");
-//            }
         }
 
     }

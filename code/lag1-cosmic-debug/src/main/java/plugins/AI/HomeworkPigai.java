@@ -75,7 +75,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             //调用AI开发平台微服务
             Map<String , String> variableMap = new HashMap<>();
             variableMap.put("pigaiResult", jsonResultObject.toJSONString());
-
             Object[] params = new Object[] {
                     //提示词
                     getPromptFid("prompt-2507094056E37A"),
@@ -87,8 +86,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
             //设置值
             String str=jsonObjectData.getString("llmValue");//JSON结构的玩意
-//            this.getView().showMessage(str);
-
             String jsonResult = str.replaceAll("\\s*|\r|\n|\t", "");
             JSONObject resultJsonObject = null;
             try {
@@ -139,13 +136,11 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         RadarIndicator indicator3 = new RadarIndicator("全面程度",30000);
         RadarIndicator indicator4 = new RadarIndicator("选择题答题技巧",38000);
         RadarIndicator indicator5 = new RadarIndicator("问答题答题技巧",52000);
-//        RadarIndicator indicator6 = new RadarIndicator("Marketing",25000);
         indicators.add(indicator1);
         indicators.add(indicator2);
         indicators.add(indicator3);
         indicators.add(indicator4);
         indicators.add(indicator5);
-//        indicators.add(indicator6);
         radarAxis.setIndicator(indicators);// 设置轴线
         chart.addRadarAxis(radarAxis);
         RadarSeries radarSeries = new RadarSeries();
@@ -224,8 +219,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         items[2] = item3;
         ItemValue item4 = new ItemValue("基础题平均分", new BigDecimal(4));
         items[3] = item4;
-//        ItemValue item5 = new ItemValue("Video Ads", new BigDecimal(300));
-//        items[4] = item5;
         return items;
     }
 
@@ -239,11 +232,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             this.getView().showMessage("未找到数据实体");
             return;
         }
-//            this.getView().showMessage(dataEntities.toString());
-
         String studentid = String.valueOf(RequestContext.get().getCurrUserId());
         String studentname=RequestContext.get().getUserName();
-
         //遍历单据体每一行,lag1_proid, lag1_protype,
         for(DynamicObject entryEntity:dataEntities){
             //new成绩关联表的表单对象
@@ -266,7 +256,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             if(knpointArr.length>1){
                 knpoint2 = knpointArr[1].trim();
             }
-
             //插入之前能否先去TKPROBLEM_SCORE查找是否有数据的lag1_studentid与numer 和即将插入的studentid与proid一致，若一致，则只更新分数即lag1_score
 //                否则新建数据
             DynamicObject existingRecord = findExistingRecord(studentid,proid);
@@ -297,7 +286,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
                 DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject(TKPROBLEM_SCORE);
                 dynamicObject.set("lag1_studentid",studentid);
-//                dynamicObject.set("creator",studentname);
                 dynamicObject.set("lag1_studentname",studentname);
 
                 dynamicObject.set("lag1_proid",problem);
@@ -314,10 +302,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 }else{
 //                    dynamicObject.set("lag1_knowpoint2","未绑定");
                 }
-//                this.getView().showMessage("dynamicObject:"+dynamicObject);
                 try {
                     SaveServiceHelper.saveOperate(TKPROBLEM_SCORE,new DynamicObject[]{dynamicObject},null);
-//                    BusinessDataServiceHelper.save(,dynamicObject);
                 }catch (Exception e){
                     this.getView().showMessage("exception: "+e);
                 }
@@ -327,7 +313,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         }
         this.getView().showMessage("更新数据成功");
     }
-
     private DynamicObject findExistingRecord(String studentid, String proid) {
         // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
         String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段

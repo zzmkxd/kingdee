@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Jar-Id: 
 Project-Name: lag1-prj01-base-common
 Build-Tool: Gradle 7.6.3
-Build-Date: 2025-07-11 19:31:38
+Build-Date: 2025-07-17 00:47:41
 Built-By: Kingdee Cosmic Developer Tools
-Build-Num: 20250711193138138
+Build-Num: 20250717004741259
 App-Name: 
 Git-Branch: main
 Cloud-Name: 
 Group-Name: lag1.cosmic
 Bundle-Version: 1.0.0
-Git-Commit-Hash: 40c7e666f456c4baad221a8866f91aa9bb84abb5
+Git-Commit-Hash: c77f84057e5e89a9c2e4cfd1a46aa25c2992fd7a
 Build-Image: 
 Build-Jdk: 1.8.0_212
 

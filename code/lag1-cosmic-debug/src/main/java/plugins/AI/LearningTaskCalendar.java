@@ -26,7 +26,6 @@ public class LearningTaskCalendar implements IGPTAction {
         if ("GET_JSON_STRING".equalsIgnoreCase(action)) {
             //将无效字符进行处理
             String jsonResult = params.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
-
             JSONObject resultJsonObject = null;
             try {
                 //若全部生成JSON字符串，则不会进入catch
