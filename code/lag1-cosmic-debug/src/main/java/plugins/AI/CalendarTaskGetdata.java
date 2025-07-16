@@ -67,27 +67,6 @@ public class CalendarTaskGetdata implements IGPTAction {
                     //加入到JSONObject对象
                     getDayObject(1,dayDataObject, objectDate, sumExpect, sumFinish);
                     //若表单日期等于前一天
-                } else if (objectDate.equalsIgnoreCase(simpleDateFormat.format(calendarOne.getTime()))) {
-                    DynamicObjectCollection dynamicObjectCollection = single.getDynamicObjectCollection("ozwe_entryentity_daytask");
-                    //获取时间总数
-                    int sumExpect = 0;
-                    int sumFinish = 0;
-                    for (DynamicObject entryObject : dynamicObjectCollection) {
-                        sumExpect+=entryObject.getInt("ozwe_expect_minutes");
-                        sumFinish+=entryObject.getInt("ozwe_finish_minute");
-                    }
-                    //加入到JSONObject对象
-                    getDayObject(2,dayDataObject, objectDate, sumExpect, sumFinish);
-                    //若表单日期等于前两天
-                } else if (objectDate.equalsIgnoreCase(simpleDateFormat.format(calendarTwo.getTime()))) {
-                    DynamicObjectCollection dynamicObjectCollection = single.getDynamicObjectCollection("ozwe_entryentity_daytask");
-                    int sumExpect = 0;
-                    int sumFinish = 0;
-                    for (DynamicObject entryObject : dynamicObjectCollection) {
-                        sumExpect+=entryObject.getInt("ozwe_expect_minutes");
-                        sumFinish+=entryObject.getInt("ozwe_finish_minute");
-                    }
-                    getDayObject(3,dayDataObject, objectDate, sumExpect, sumFinish);
                 }
             }
             //将获取到的当日任务数据和近三日任务数据放入map

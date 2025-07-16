@@ -35,7 +35,8 @@ public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
             for (int i = 1; i <= 8; i++) {
                 jsonResultObject.put("第" + i +"章", this.getModel().getValue("lag1_chapter" + i).toString());
                 for(int j=1;j<=5;j++){
-                    jsonResultObject.put("第" + i+"p"+j +"章", this.getModel().getValue("lag1_chapter" + i+"p"+j).toString());
+                    if(this.getModel().getValue("lag1_chapter" + i+"p"+j)!=null)
+                        jsonResultObject.put("第" + i+"p"+j +"章", this.getModel().getValue("lag1_chapter" + i+"p"+j).toString());
                 }
             }
             // 调用GPT开发平台微服务

@@ -98,7 +98,7 @@ public class CalendarTaskReport implements IGPTAction {
                     //获取到文件路径
                     path= fs.upload(fi);
                     //拼接URL，将最终的URL输出
-                    result.put("endUrl", System.getProperty("domain.contextUrl")+"/attachment/download.do?path="+path+"&method=autoJump&title=日任务报告.docx&iconType=document");
+                    result.put("endUrl", System.getProperty("domain.contextUrl")+"/attachment/download.do?path="+path+"&method=autoJump&title=教案.docx&iconType=document");
 
                     targetFile.delete();
                     fos.close();
