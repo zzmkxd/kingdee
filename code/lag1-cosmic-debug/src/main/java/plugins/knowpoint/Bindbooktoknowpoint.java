@@ -32,6 +32,8 @@ import java.util.List;
  * 动态表单插件
  */
 public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
+    private final String TKCOURSE="lag1_course";
+    private final String TKBOOK="lag1_book";
 
         //全局变量
         String postNumber;
@@ -106,20 +108,34 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
 
 
                         //课程名
-                        String postTitle = postData.getString("lag1_coursename");
-                        this.getModel().setValue("lag1_coursename", postTitle);
+//                        String postTitle = postData.getString("lag1_coursename");
+//                        this.getModel().setValue("lag1_coursename", postTitle);
 
                         //课程id
-                        String courseid = postData.getString("lag1_courseid");
-                        this.getModel().setValue("lag1_courseid",courseid);
+                        String courseid = postData.getString("lag1_courseid.number");
+//                        this.getView().showMessage(courseid);
+                        String fields = "number,name";
+                        QFilter qFilter = new QFilter("number",QCP.equals,courseid);
+                        DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,fields,new QFilter[]{qFilter});
+                        if(course!=null){
+                            this.getModel().setValue("lag1_course",course);
+                        }
+//                        this.getModel().setValue("lag1_courseid",courseid);
 
                         //教材id
                         String bookid = postData.getString("number");
-                        this.getModel().setValue("lag1_bookid",bookid);
+                        String bookfields = "number";
+                        QFilter qFilter1 = new QFilter("number", QCP.equals,bookid);
+                        DynamicObject book = BusinessDataServiceHelper.loadSingle(TKBOOK,bookfields,new QFilter[]{qFilter1});
+                        if(book!=null){
+                            this.getModel().setValue("lag1_book",book);
+                        }
+
+//                        this.getModel().setValue("lag1_bookid",bookid);
 
                         //课程名
-                        String bookname = postData.getString("name");
-                        this.getModel().setValue("lag1_bookname",bookname);
+//                        String bookname = postData.getString("name");
+//                        this.getModel().setValue("lag1_bookname",bookname);//zheli
 
 
 
@@ -151,7 +167,7 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
          * @return 帖子数据对象
          */
         private DynamicObject queryPostData(String postNumber){
-            return BusinessDataServiceHelper.loadSingle("lag1_book",new QFilter[]{new QFilter("number", QCP.equals,postNumber)});
+            return BusinessDataServiceHelper.loadSingle(TKBOOK,new QFilter[]{new QFilter("number", QCP.equals,postNumber)});
         }
         @Override
         public void beforeClosed(BeforeClosedEvent e) {

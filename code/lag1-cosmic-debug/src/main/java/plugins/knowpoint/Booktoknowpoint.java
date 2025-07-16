@@ -32,6 +32,7 @@ import java.util.EventObject;
  * 动态表单插件
  */
 public class Booktoknowpoint extends AbstractBasePlugIn implements ItemClickListener {
+    private final String TKBOOK="lag1_book";
         //回调方法的标识符
 //    private static final String CALLBACK_ID = "parent_refresh1";
         //注册点击事件
@@ -53,7 +54,7 @@ public class Booktoknowpoint extends AbstractBasePlugIn implements ItemClickList
                 DynamicObject formDataEntity = formDataModel.getDataEntity();
                 Long formPkId = (Long) formDataEntity.getPkValue();
 
-                DynamicObject postSingle = BusinessDataServiceHelper.loadSingle("lag1_book", new QFilter[]{new QFilter("id", QCP.equals,formPkId)});
+                DynamicObject postSingle = BusinessDataServiceHelper.loadSingle(TKBOOK, new QFilter[]{new QFilter("id", QCP.equals,formPkId)});
                 if(postSingle!=null){
                     String targetForm = "lag1_knowpoint";//知识点-基础资料表单
                     String postNumber = postSingle.getString("number");//教材编码
@@ -116,7 +117,7 @@ public class Booktoknowpoint extends AbstractBasePlugIn implements ItemClickList
     public void afterCreateNewData(EventObject e) {
         FormShowParameter formShowParameter = this.getView().getFormShowParameter();
         Object text = formShowParameter.getCustomParam("paramName");
-        this.getModel().setValue("kdec_textfield", text);
+//        this.getModel().setValue("kdec_textfield", text);
     }
 
 //    //回调方法，在子表单关闭时调用

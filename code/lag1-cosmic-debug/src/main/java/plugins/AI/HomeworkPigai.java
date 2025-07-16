@@ -37,9 +37,12 @@ import java.util.*;
  */
 public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     //题目分数表单据体名词
-    private static final String ENTRY_ENTITY_COLLECTION = "lag1_entryentity_problms";
+    private static final String ENTRY_ENTITY_COLLECTION = "lag1_entryentity_pigai";
     //成绩关联表的表单标识
     private static final String TKPROBLEM_SCORE= "lag1_problem_score";
+    private static final String TKPROBLEM = "lag1_protest";
+    private static final String TKCOURSE = "lag1_course";
+    private static final String TKKNPOINT = "lag1_knowpoints";
 
     @Override
     public void registerListener(EventObject e) {
@@ -54,7 +57,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             JSONObject jsonResultObject = new JSONObject();
             jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
             jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
-            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entryentity_problms");
+            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
             JSONArray jsonTaskArray = new JSONArray();
             int i=1;
             for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
@@ -98,7 +101,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             }
             int sum=0;
             // entryentity是单据体标识，your_field_key是要修改的字段标识
-            DynamicObjectCollection entryRows = this.getModel().getEntryEntity("lag1_entryentity_problms");
+            DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
             this.getView().showMessage(Integer.toString(entryRows.size()));
             // 将JSONObject转换为金蝶可识别的DynamicObject数组
             for (int j = 0; j < entryRows.size(); j++) {
@@ -111,7 +114,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             }
             this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
             // 刷新界面显示
-            this.getView().updateView("lag1_entryentity_problms");
+            this.getView().updateView(ENTRY_ENTITY_COLLECTION);
             bindData(); //绑定至成绩关联表
         }
 
@@ -245,10 +248,14 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         for(DynamicObject entryEntity:dataEntities){
             //new成绩关联表的表单对象
             String proid = entryEntity.getString("lag1_proid"); //题目id
-            String protype = entryEntity.getString("lag1_protype");
+            this.getView().showMessage("proid"+proid);
+
+//            String protype = entryEntity.getString("lag1_protype");
             String userscore = entryEntity.getString("lag1_userscore");
+
             String courseid = entryEntity.getString("lag1_courseid");
-            String prodifficulty = entryEntity.getString("lag1_difficulty");
+
+//            String prodifficulty = entryEntity.getString("lag1_difficulty");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
             String[] knpointArr = knpoints.split(",");
             String knpoint1="";
@@ -263,30 +270,49 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             //插入之前能否先去TKPROBLEM_SCORE查找是否有数据的lag1_studentid与numer 和即将插入的studentid与proid一致，若一致，则只更新分数即lag1_score
 //                否则新建数据
             DynamicObject existingRecord = findExistingRecord(studentid,proid);
-            this.getView().showMessage(existingRecord.toString());
+
 
             if(existingRecord!=null){
+                this.getView().showMessage(existingRecord.toString());
                 existingRecord.set("lag1_score",Integer.parseInt(userscore));
                 SaveServiceHelper.update(existingRecord);
             }else{
+                this.getView().showMessage("不存在");
+                String field1 = "number";
+                QFilter qFilter1 = new QFilter("number", QCP.equals,proid);
+                DynamicObject problem = BusinessDataServiceHelper.loadSingle(TKPROBLEM,field1,new QFilter[]{qFilter1});
+
+                String field2 = "number";
+                QFilter qFilter2 = new QFilter("number", QCP.equals,courseid);
+                DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,field2,new QFilter[]{qFilter2});
+
+                String field3 = "name";
+                QFilter qFilter3 = new QFilter("name",QCP.equals,knpoint1);
+                DynamicObject knpointname1 = BusinessDataServiceHelper.loadSingle(TKKNPOINT,field3,new QFilter[]{qFilter3});
+
+                String field4 = "name";
+                QFilter qFilter4 = new QFilter("name",QCP.equals,knpoint2);
+                DynamicObject knpointname2 = BusinessDataServiceHelper.loadSingle(TKKNPOINT,field4,new QFilter[]{qFilter4});
+
+
                 DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject(TKPROBLEM_SCORE);
                 dynamicObject.set("lag1_studentid",studentid);
 //                dynamicObject.set("creator",studentname);
                 dynamicObject.set("lag1_studentname",studentname);
-                dynamicObject.set("number",proid);
-                dynamicObject.set("lag1_questiontype",protype);
+
+                dynamicObject.set("lag1_proid",problem);
                 dynamicObject.set("lag1_score",Integer.parseInt(userscore));
-                dynamicObject.set("lag1_courseid",courseid);
-                dynamicObject.set("lag1_difficulty",Integer.parseInt(prodifficulty));
+                dynamicObject.set("lag1_courseid",course);
+
                 if(!knpoint1.isEmpty()){
-                    dynamicObject.set("lag1_knowpoint1",knpoint1);
+                    dynamicObject.set("lag1_knowpoint1",knpointname1);
                 }else{
-                    dynamicObject.set("lag1_knowpoint1","未绑定");
+//                    dynamicObject.set("lag1_knowpoint1","未绑定");
                 }
                 if(!knpoint1.isEmpty()){
-                    dynamicObject.set("lag1_knowpoint2",knpoint2);
+                    dynamicObject.set("lag1_knowpoint2",knpointname2);
                 }else{
-                    dynamicObject.set("lag1_knowpoint2","未绑定");
+//                    dynamicObject.set("lag1_knowpoint2","未绑定");
                 }
 //                this.getView().showMessage("dynamicObject:"+dynamicObject);
                 try {
@@ -308,7 +334,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
         // 构建 QFilter 条件
         QFilter filter1 = new QFilter("lag1_studentid", QCP.equals, studentid);
-        QFilter filter2 = new QFilter("number", QCP.equals, proid);
+        QFilter filter2 = new QFilter("lag1_proid.number", QCP.equals, proid);
         QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
 
         // 执行查询
