@@ -27,7 +27,7 @@ public class DebugApplication {
         
 //        cosmic.setConfigUrl("127.0.0.1:2181?user=zk&password=zk123456");
         cosmic.setConfigUrl("127.0.0.1:2181?user=zookeeper&password=zk123456");
-        
+        //你的电脑上用这个本地回环地址不知道行不行
 //        cosmic.setMcServerUrl("http://127.0.0.1:8090");
         cosmic.setMcServerUrl("http://127.0.0.1:8071"); 
         
