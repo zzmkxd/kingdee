@@ -26,10 +26,10 @@ public class DebugApplication {
         cosmic.setTenantNumber("ierp");
         
 //        cosmic.setConfigUrl("127.0.0.1:2181?user=zk&password=zk123456");
-        cosmic.setConfigUrl("10.252.74.112:2181?user=zookeeper&password=zk123456");
+        cosmic.setConfigUrl("127.0.0.1:2181?user=zookeeper&password=zk123456");
         
 //        cosmic.setMcServerUrl("http://127.0.0.1:8090");
-        cosmic.setMcServerUrl("http://10.252.74.112:8071"); 
+        cosmic.setMcServerUrl("http://127.0.0.1:8071"); 
         
 //        cosmic.setFsServerUrl("127.0.0.1", 8100);
 //        cosmic.setImageServerUrl("127.0.0.1", 8100);
