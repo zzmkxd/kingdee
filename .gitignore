@@ -58,7 +58,7 @@ gradle-wrapper.properties
 
 
 
-
+*.jar
 *.bin
 *.log
 **/logs
