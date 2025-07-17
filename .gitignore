@@ -2,16 +2,22 @@
 .idea
 .vscode
 
-datamodel
-docs
-gradle
-logs
-script_modules
-temp
-webapp
+datamodel/*
+docs/*
+gradle/*
+logs/*
+script_modules/*
+temp/*
+webapp/*
 
 
 code/lag1-cosmic-debug/src/main/java/lag1/cosmic/debug
+# 忽略整个 code/ 目录下的所有内容
+code/*
+
+# 但排除 plugins/ 目录及其子目录内容（不忽略）
+!code/**/plugins/
+!code/**/plugins/*
 
 **/build/
 !**/src/**/build/
@@ -34,7 +40,7 @@ gradle-app.setting
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-.bin
+.bin/*
 
 
 

@@ -41,22 +41,6 @@ public class AiTeachPlan implements IGPTAction {
                     jsonResult = jsonResult.substring(jsonResult.indexOf("\"course_name\"")-1 , jsonResult.indexOf("}]}")+3);
                     resultJsonObject = JSON.parseObject(jsonResult);
                 }
-                //将jsonResult转为JSONArray
-//                JSONArray jsonArrayData = JSONArray.parseArray(jsonResult);
-//                StringBuilder stringBuilder = new StringBuilder();
-//                //将数据加入图表
-//                for (int i = 0 ;i<jsonArrayData.size(); i++) {
-//                    JSONArray jsonArraySingle = (JSONArray) jsonArrayData.get(i);
-//                    if (i==jsonArrayData.size()-1) {
-//                        stringBuilder.append("[&quot;").append(jsonArraySingle.getString(0)).append("&quot;").append(",").append(jsonArraySingle.getString(1)).append(",").append(jsonArraySingle.getString(2)).append("]");
-//
-//                    } else {
-//                        stringBuilder.append("[&quot;").append(jsonArraySingle.getString(0)).append("&quot;").append(",").append(jsonArraySingle.getString(1)).append(",").append(jsonArraySingle.getString(2)).append("],");
-//                    }
-//                }
-//                String statisticsResult = stringBuilder.toString();
-//                //替代最后的生成结果
-//                fileContent = fileContent.replace("{{teachplanData}}", statisticsResult);
                 //替代表格中的内容
                 int time = 1;
                 for(Object object : resultJsonObject.getJSONArray("teaching_plan")){
