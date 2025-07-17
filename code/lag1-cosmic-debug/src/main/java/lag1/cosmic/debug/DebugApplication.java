@@ -26,16 +26,14 @@ public class DebugApplication {
         cosmic.setTenantNumber("ierp");
         
 //        cosmic.setConfigUrl("127.0.0.1:2181?user=zk&password=zk123456");
-//        cosmic.setConfigUrl("10.0.0.8:2181?user=zookeeper&password=zk123456");
-        cosmic.setConfigUrl("10.26.0.2:2181?user=zookeeper&password=zk123456");
-        
+        cosmic.setConfigUrl("127.0.0.1:2181?user=zookeeper&password=zk123456");
+        //你的电脑上用这个本地回环地址不知道行不行
 //        cosmic.setMcServerUrl("http://127.0.0.1:8090");
-//        cosmic.setMcServerUrl("http://10.0.0.8:8071");
-        cosmic.setMcServerUrl("http://10.26.0.2:8071");
-//        10.26.0.2
+        cosmic.setMcServerUrl("http://127.0.0.1:8071"); 
+        
 //        cosmic.setFsServerUrl("127.0.0.1", 8100);
 //        cosmic.setImageServerUrl("127.0.0.1", 8100);
-//        cosmic.setMqConsumerRegister(true,"testcww");
+        cosmic.setMqConsumerRegister(true,"test1111");
         //自定义本地苍穹调试服务的端口
         cosmic.setCosmicWebPort(8881);
 //        cosmic.setDubboConfig(false, true, true);

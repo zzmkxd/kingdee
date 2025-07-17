@@ -3,6 +3,8 @@ package plugins.knowpoint;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
@@ -31,14 +33,14 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
         super.registerListener(e);
         this.addItemClickListeners("tbmain");
     }
+    DistributeSessionlessCache cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
 
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         Control source = (Control) e.getSource();
         if (e.getItemKey().equalsIgnoreCase("lag1_d3jsplan_creat")) {
-//            if(damn!=null)this.getView().showMessage(damn);
-//            String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
-            String jsonResult = damn.replaceAll("\\s*|\r|\n|\t", "");
+            String strdamn = cache.get("damn");
+            String jsonResult = strdamn.replaceAll("\\s*|\r|\n|\t", "");
             JSONObject resultJsonObject = null;
             try {
                 //若全部生成JSON字符串，则不会进入catch
@@ -72,28 +74,24 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 dynamicObjectEntry.set("lag1_knpid", jsonObjectSingle.getString("knpId"));
                 dynamicObjectEntry.set("lag1_knowpname", jsonObjectSingle.getString("knowpName"));
                 dynamicObjectEntry.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));
-                dynamicObjectEntry.set("lag1_knowp_expand", jsonObjectSingle.getString("knowpExpand"));
+                dynamicObjectEntry.set("lag1_expand", jsonObjectSingle.getString("knowpExpand"));
                 dynamicObjectEntry.set("lag1_chap", jsonObjectSingle.getString("chap"));
                 dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("description"));
             }
             SaveServiceHelper.saveOperate("lag1_d3js_knowpoints", new DynamicObject[] {dynamicObject}, null);
-//            Long pkId = (Long) dynamicObject.getPkValue();
-//            //拼接URL字符串
-//            String targetForm = "bizAction://currentPage?gaiShow=1&selectedProcessNumber=processNumber&gaiAction=showBillForm&gaiParams={\"appId\":\"lag1_learning\",\"billFormId\":\"lag1_d3js_knowpoints\",\"billPkId\":\""+pkId+"\"}&title=damn了&iconType=bill&method=bizAction";
-//            System.out.println(targetForm);
-//            this.getView().showMessage(targetForm);
         }
 //-------------------------------------------------------------------------------------------------------------------------------------
 
         if (e.getItemKey().equalsIgnoreCase("lag1_kpoint_new")) {
-            String str=this.getModel().getValue("lag1_knowpoint1").toString();
+//            String str=this.getModel().getValue("lag1_knowpoint1").toString();
+            String yourString = cache.get("yourValName");
             // 调用GPT开发平台微服务
             Map<String, String> variableMap = new HashMap<>();
-            variableMap.put("knowpointinfos", str);
+//            variableMap.put("knowpointinfos", yourString);
             Object[] params = new Object[]{
                     //GPT提示编码
                     getPromptFid("prompt-250630BAA79177"),
-                    "开始分析这些知识点",
+                    yourString,
                     variableMap
             };
             Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
@@ -104,8 +102,8 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             this.getView().showMessage(jsonObjectData2.getString("llmValue"));
 
             String llmValue2 = jsonObjectData2.getString("llmValue");//代填入单据体的知识点JSON
-            damn=llmValue2;
-//            this.getModel().setValue("lag1_knowpoint1", llmValue2);//返回数据中的 llmValue 字段
+//            damn=llmValue2;
+            cache.put("damn", llmValue2);
             Map<String, String> params1 = new HashMap<>();
             params1.put("jsonResult", llmValue2);
             String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
@@ -146,9 +144,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                     dynamicObject.set("enable", 1);
                     dynamicObject.set("name", jsonObjectSingle.getString("knowpName"));
                     //依据所属的基础资料获取
-//                    dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_courseid"));
-//                    dynamicObject.set("lag1_coursename", this.getModel().getValue("lag1_coursename"));
-                    dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_courseid"));
+                    dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_course"));
 
                     dynamicObject.set("lag1_knowpointplan", this.getModel().getValue("name"));
                     dynamicObject.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));

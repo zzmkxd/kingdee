@@ -12,7 +12,7 @@ import kd.bos.form.control.events.ItemClickEvent;
 import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.servicehelper.DispatchServiceHelper;
 import kd.sdk.plugin.Plugin;
-import plugins.learncloud.PointLineChartHelper;
+import plugins.test.PointLineChartHelper;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -58,7 +58,7 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
 //            jsonResultObject.put("taskIntroduction", jsonTaskArray);
 //        }
             PointLineChart pointLineChart = this.getControl("lag1_pointlinechartap");
-            plugins.learncloud.PointLineChartHelper pointLineChartHelper = new PointLineChartHelper();
+            PointLineChartHelper pointLineChartHelper = new PointLineChartHelper();
             drawChart(pointLineChart);
             this.getView().updateView("lag1_pointlinechartap");//刷新控件
          }

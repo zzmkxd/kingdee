@@ -1,6 +1,8 @@
 package plugins.knowpoint;
 
 import kd.bos.bill.AbstractBillPlugIn;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.form.control.Control;
 import kd.sdk.plugin.Plugin;
 import com.alibaba.fastjson.JSONObject;
@@ -25,7 +27,7 @@ public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
         super.registerListener(e);
         this.addItemClickListeners("tbmain");
     }
-
+    DistributeSessionlessCache cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         Control source = (Control) e.getSource();
@@ -35,7 +37,7 @@ public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
             for (int i = 1; i <= 8; i++) {
                 jsonResultObject.put("第" + i +"章", this.getModel().getValue("lag1_chapter" + i).toString());
                 for(int j=1;j<=5;j++){
-                    if(this.getModel().getValue("lag1_chapter" + i+"p"+j)!=null)
+                    if(this.getModel().getValue("lag1_chapter" + i+"p"+j) != null)
                         jsonResultObject.put("第" + i+"p"+j +"章", this.getModel().getValue("lag1_chapter" + i+"p"+j).toString());
                 }
             }
@@ -55,11 +57,10 @@ public class KpointsAnalysis extends AbstractBillPlugIn implements Plugin {
             JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
             // 设置值
             this.getModel().setValue("lag1_knowpoint1", jsonObjectData.getString("llmValue"));//返回数据中的 llmValue 字段
+            cache.put("yourValName", jsonObjectData.getString("llmValue"));
             Markdown mk = this.getView().getControl("lag1_md");
             mk.setText(jsonObjectData.getString("llmValue"));
-
         }
-
     }
 
     // 获取GPT提示的Fid

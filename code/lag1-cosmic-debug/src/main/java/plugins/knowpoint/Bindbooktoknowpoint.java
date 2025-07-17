@@ -34,24 +34,16 @@ import java.util.List;
 public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
     private final String TKCOURSE="lag1_course";
     private final String TKBOOK="lag1_book";
-
         //全局变量
         String postNumber;
         Long pkId;
         DynamicObject postData;
-
 
         @Override
         public void registerListener(EventObject e) {
             super.registerListener(e);
             // 注册点击事件
             this.addItemClickListeners("tbmain");
-
-//            // 先通过getControl来控制对应的控件
-//            Button thumb_btn = this.getView().getControl("lag1_pointbindcourse");
-//            // 再给这个控件加上监听功能
-//            thumb_btn.addClickListener(this);
-
         }
 
         @Override
@@ -99,29 +91,14 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
                     postData = queryPostData(postNumber);
                     if(postData!=null){
                         //绑定文本内容
-
-
-//                        //发帖人-->教师
-//                        DynamicObject creator = (DynamicObject) postData.get("creator");
-//                        String creatorName = creator.getString("name");
-//                        this.getModel().setValue("lag1_creator", creatorName);
-
-
-                        //课程名
-//                        String postTitle = postData.getString("lag1_coursename");
-//                        this.getModel().setValue("lag1_coursename", postTitle);
-
                         //课程id
                         String courseid = postData.getString("lag1_courseid.number");
-//                        this.getView().showMessage(courseid);
                         String fields = "number,name";
                         QFilter qFilter = new QFilter("number",QCP.equals,courseid);
                         DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,fields,new QFilter[]{qFilter});
                         if(course!=null){
                             this.getModel().setValue("lag1_course",course);
                         }
-//                        this.getModel().setValue("lag1_courseid",courseid);
-
                         //教材id
                         String bookid = postData.getString("number");
                         String bookfields = "number";
@@ -130,29 +107,23 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
                         if(book!=null){
                             this.getModel().setValue("lag1_book",book);
                         }
-
-//                        this.getModel().setValue("lag1_bookid",bookid);
-
-                        //课程名
-//                        String bookname = postData.getString("name");
-//                        this.getModel().setValue("lag1_bookname",bookname);//zheli
-
-
-
-                        for (int i = 1; i <= 14; i++) {
-                            String chapter = postData.getString("lag1_chapter" + i);
-                            this.getModel().setValue("lag1_chapter" + i, chapter);
-                        }
-                        for (int i = 1; i <= 5; i++) {
-                            String chapter1 = postData.getString("lag1_chapter1" +"p"+ i);
-                            String chapter2 = postData.getString("lag1_chapter2" +"p"+ i);
-                            this.getModel().setValue("lag1_chapter1" +"p"+ i, chapter1);
-                            this.getModel().setValue("lag1_chapter2" +"p"+ i, chapter2);
+                        //章节数据
+                        for (int i = 1; i <= 8; i++) {
+                            if(postData.getString("lag1_chapter" + i) != null){
+                                String chapter = postData.getString("lag1_chapter" + i);
+                                this.getModel().setValue("lag1_chapter" + i, chapter);
+                            }
+                            for(int j=1;j<=5;j++){
+                                if(postData.getString("lag1_chapter" + i+"p"+j) != null){
+                                    String chapter = postData.getString("lag1_chapter" + i+"p"+j);
+                                    this.getModel().setValue("lag1_chapter" + i+"p"+j, chapter);
+                                };
+                            }
                         }
 
 //                        knowpoint_zzm001
                     }else{
-                        this.getView().showMessage("没有找到帖子数据");
+                        this.getView().showMessage("没有找到章节数据");
                     }
             }else{
 //                this.getView().showMessage("绑定数据错误");
@@ -175,16 +146,5 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
             e.setCheckDataChange(false); // 取消修改确认弹框
         }
 
-        @Override
-        public void afterCreateNewData(EventObject e) {
-            super.afterCreateNewData(e);
-            IDataModel dataModel = this.getView().getModel();   //获取表单数据模型
-//            //遍历所有字段并设置为只读
-//            for(IDataEntityProperty property : dataModel.getDataEntityType().getProperties()){
-//                String fieldName = property.getName();
-////            this.getView().setVisible(false,fieldName);
-//                this.getView().setEnable(false,fieldName);
-//            }
-        }
 
 }
