@@ -31,6 +31,7 @@ public class AiTeachPlan implements IGPTAction {
                 String fileContent = getFileContent();
                 //获取传入参数
                 String jsonResult = params.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
+
                 JSONObject resultJsonObject = null;
                 try {
                     //若全部生成JSON字符串，则不会进入catch
@@ -42,7 +43,6 @@ public class AiTeachPlan implements IGPTAction {
                 }
                 //将jsonResult转为JSONArray
 //                JSONArray jsonArrayData = JSONArray.parseArray(jsonResult);
-                Object object = jsonResult;
 //                StringBuilder stringBuilder = new StringBuilder();
 //                //将数据加入图表
 //                for (int i = 0 ;i<jsonArrayData.size(); i++) {
@@ -57,34 +57,49 @@ public class AiTeachPlan implements IGPTAction {
 //                String statisticsResult = stringBuilder.toString();
 //                //替代最后的生成结果
 //                fileContent = fileContent.replace("{{teachplanData}}", statisticsResult);
-                JSONObject jsonObject = (JSONObject) object;
                 //替代表格中的内容
-                for (int time = 1; time <= 4 ; time++) {
-                    JSONObject jsonObjectSingle = JSONObject.parseObject(fileContent).getJSONObject("teaching_plan");
+                int time = 1;
+                for(Object object : resultJsonObject.getJSONArray("teaching_plan")){
+                    time++;
+                    JSONObject jsonObjectSingle = (JSONObject) object;
                     fileContent = fileContent.replace("{{lesson"+time+"}}",jsonObjectSingle.getString("lesson"+time))
                             .replace("{{objectives"+time+"}}",jsonObjectSingle.getString("objectives"+time))
                             .replace("{{content"+time+"}}",jsonObjectSingle.getString("content"+time))
                             .replace("{{activities"+time+"}}",jsonObjectSingle.getString("activities"+time))
                             .replace("{{assessment"+time+"}}",jsonObjectSingle.getString("assessment"+time));
                 }
+//                //替代GPT提示中生成的内容
+//                resultJsonObject.getString("planName");
+//                fileContent = fileContent.replace("{{course_name}}", params.get("course_name"));
+//                fileContent = fileContent.replace("{{topic_title}}", params.get("topic_title"));
+//                fileContent = fileContent.replace("{{subject}}", params.get("subject"));
+//                fileContent = fileContent.replace("{{class_hours}}", params.get("class_hours"));
+//                fileContent = fileContent.replace("{{knowledge_objectives}}", params.get("knowledge_objectives"));
+//                fileContent = fileContent.replace("{{ability_objectives}}", params.get("ability_objectives"));
+//                fileContent = fileContent.replace("{{key_points}}", params.get("key_points"));
+//                fileContent = fileContent.replace("{{difficult_points}}", params.get("difficult_points"));
+//                fileContent = fileContent.replace("{{digital_resources}}", params.get("digital_resources"));
+//                fileContent = fileContent.replace("{{preparation_requirements}}", params.get("preparation_requirements"));
+//                fileContent = fileContent.replace("{{practice_activities}}", params.get("practice_activities"));
+//                fileContent = fileContent.replace("{{extension_activities}}", params.get("extension_activities"));
+//                fileContent = fileContent.replace("{{classroom_feedback}}", params.get("classroom_feedback"));
+//                fileContent = fileContent.replace("{{assessment_methods}}", params.get("assessment_methods"));
 
-                //替代GPT提示中生成的内容
-                fileContent = fileContent.replace("{{course_name}}", params.get("course_name"));
-                fileContent = fileContent.replace("{{topic_title}}", params.get("topic_title"));
-                fileContent = fileContent.replace("{{subject}}", params.get("subject"));
-                fileContent = fileContent.replace("{{class_hours}}", params.get("class_hours"));
-                fileContent = fileContent.replace("{{knowledge_objectives}}", params.get("knowledge_objectives"));
-                fileContent = fileContent.replace("{{ability_objectives}}", params.get("ability_objectives"));
-                fileContent = fileContent.replace("{{key_points}}", params.get("key_points"));
-                fileContent = fileContent.replace("{{difficult_points}}", params.get("difficult_points"));
-                fileContent = fileContent.replace("{{digital_resources}}", params.get("digital_resources"));
-                fileContent = fileContent.replace("{{preparation_requirements}}", params.get("preparation_requirements"));
-                fileContent = fileContent.replace("{{practice_activities}}", params.get("practice_activities"));
-                fileContent = fileContent.replace("{{extension_activities}}", params.get("extension_activities"));
-                fileContent = fileContent.replace("{{classroom_feedback}}", params.get("classroom_feedback"));
-                fileContent = fileContent.replace("{{assessment_methods}}", params.get("assessment_methods"));
+                fileContent = fileContent.replace("{{course_name}}", resultJsonObject.getString("course_name"));
+                fileContent = fileContent.replace("{{topic_title}}", resultJsonObject.getString("topic_title"));
+                fileContent = fileContent.replace("{{subject}}", resultJsonObject.getString("subject"));
+                fileContent = fileContent.replace("{{class_hours}}", resultJsonObject.getString("class_hours"));
+                fileContent = fileContent.replace("{{knowledge_objectives}}", resultJsonObject.getString("knowledge_objectives"));
+                fileContent = fileContent.replace("{{ability_objectives}}", resultJsonObject.getString("ability_objectives"));
+                fileContent = fileContent.replace("{{key_points}}", resultJsonObject.getString("key_points"));
+                fileContent = fileContent.replace("{{difficult_points}}", resultJsonObject.getString("difficult_points"));
+                fileContent = fileContent.replace("{{digital_resources}}", resultJsonObject.getString("digital_resources"));
+                fileContent = fileContent.replace("{{preparation_requirements}}", resultJsonObject.getString("preparation_requirements"));
+                fileContent = fileContent.replace("{{practice_activities}}", resultJsonObject.getString("practice_activities"));
+                fileContent = fileContent.replace("{{extension_activities}}",resultJsonObject.getString("extension_activities"));
+                fileContent = fileContent.replace("{{classroom_feedback}}", resultJsonObject.getString("classroom_feedback"));
+                fileContent = fileContent.replace("{{assessment_methods}}", resultJsonObject.getString("assessment_methods"));
 
-                resultJsonObject.getJSONArray("dayTaskList");
                 //随机生成文件名称
                 StringBuilder sb = new StringBuilder();
                 for (int i = 1 ; i<=12; i++) {

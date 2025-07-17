@@ -40,19 +40,17 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
     public void click(EventObject e) {
         Control button = (Control) e.getSource();
         if (SAVE_BUTTON_KEY.equals(button.getKey())) {
-//        DynamicObject dynamicObjectSubscribe = BusinessDataServiceHelper.loadSingle("ozwe_subscribe", new QFilter[]{new QFilter("creator.id", QCP.equals, requestContext.getCurrUserId())});
-//        if (ObjectUtils.isNotEmpty(dynamicObjectSubscribe)) {
 //这里是考试开始的逻辑，最好替换成动态表单弹窗-点击开始考试按钮后触发,也可以换为打开作答界面自动触发
             JSONObject jsonObjectSingle = new JSONObject();
 //            jsonObjectSingle.put("courseContent", this.getModel().getValue("lag1_basedatafield2"));//课程名字
             jsonObjectSingle.put("courseContent", "思政");
-            jsonObjectSingle.put("kpoint1",this.getModel().getValue("lag1_basedatafield"));
-            jsonObjectSingle.put("kpoint2", this.getModel().getValue("lag1_basedatafield1"));
-            jsonObjectSingle.put("kpoint3", this.getModel().getValue("lag1_basedatafield3"));
-//            jsonObjectSingle.put("kpoint1","1");
-//            jsonObjectSingle.put("kpoint2","2");
-//            jsonObjectSingle.put("kpoint3","3");
-
+            jsonObjectSingle.put("kpoint",this.getModel().getValue("lag1_linkknp.lag1_description"));
+//            jsonObjectSingle.put("kpoint2", this.getModel().getValue("lag1_linkknp2.lag1_description"));
+//            jsonObjectSingle.put("kpoint3", this.getModel().getValue("lag1_linkknp3.lag1_description"));
+            jsonObjectSingle.put("diff", this.getModel().getValue("lag1_stepperfield1"));//题目难度系数1-10
+            jsonObjectSingle.put("problemsCount", this.getModel().getValue("lag1_stepperfield"));//题目数量
+            String str = JSON.toJSONString(jsonObjectSingle);
+            this.getView().showMessage(str);
 //**基础信息配置**
 //- 课程名称：[用户输入课程名称]
 //- 难度系数：[用户输入难度系数]
@@ -66,27 +64,21 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
 //1. [知识点A]: [描述]
 //2. [知识点B]: [描述]
 //3. [知识点C]: [描述]
-            jsonObjectSingle.put("diff", this.getModel().getValue("lag1_stepperfield1"));//题目难度系数1-10
-            jsonObjectSingle.put("problemsCount", this.getModel().getValue("lag1_stepperfield"));//题目数量
-            String str = JSON.toJSONString(jsonObjectSingle);
 //            可输出调试
-
-            Map<String, String> variableMap = new HashMap<>();
-//            variableMap.put("setting", jsonObjectSingle.toJSONString());
-            //-----------------------调用任务流微服务----------------------------------------------------------------------
-            Object[] params = new Object[]{
-                    //GPT提示编码
-                    getProcessFid("process-250709B1A2338A"),
-                    jsonObjectSingle.toJSONString(),
-                    variableMap
-            };
-            Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiProcessService", "syncCall", params); // 固定写法
-            JSONObject jsonObjectResult = new JSONObject(result); // 固定写法
-            JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data"); // 固定写法
-            // 设置值
-            String value = String.valueOf(jsonObjectData.getJSONArray("questions"));
-
-            this.getView().showMessage(value);
+//            Map<String, String> variableMap = new HashMap<>();
+////-----------------------调用任务流微服务----------------------------------------------------------------------
+//            Object[] params = new Object[]{
+//                    //GPT提示编码
+//                    getProcessFid("process-250709B1A2338A"),
+//                    jsonObjectSingle.toJSONString(),
+//                    variableMap
+//            };
+//            Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiProcessService", "syncCall", params); // 固定写法
+//            JSONObject jsonObjectResult = new JSONObject(result); // 固定写法
+//            JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data"); // 固定写法
+//            // 设置值
+//            String value = String.valueOf(jsonObjectData.getJSONArray("questions"));
+//            this.getView().showMessage(value);
             //处理value为cww可读格式
 //---------------------------------------------------------------------------------------------
         }
@@ -102,5 +94,4 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
                 (new QFilter("number", QCP.equals, billNo)).toArray());
         return (dynamicObject).getLong("id");
     }
-
 }
