@@ -14,7 +14,7 @@ import kd.cosmic.debug.tools.CosmicLauncher;
  */
 public class DebugApplication {
 
-//entrence    http://127.0.0.1:8881/ierp/login.html
+//entrence    http://10.26.0.2:8881/ierp/login.html
 
     public static void main(String[] args) {
     	
@@ -25,14 +25,14 @@ public class DebugApplication {
         cosmic.setClusterNumber("cosmic");
         cosmic.setTenantNumber("ierp");
         
-//        cosmic.setConfigUrl("127.0.0.1:2181?user=zk&password=zk123456");
-        cosmic.setConfigUrl("127.0.0.1:2181?user=zookeeper&password=zk123456");
+//        cosmic.setConfigUrl("10.26.0.2:2181?user=zk&password=zk123456");
+        cosmic.setConfigUrl("10.26.0.2:2181?user=zookeeper&password=zk123456");
         //你的电脑上用这个本地回环地址不知道行不行
-//        cosmic.setMcServerUrl("http://127.0.0.1:8090");
-        cosmic.setMcServerUrl("http://127.0.0.1:8071"); 
+//        cosmic.setMcServerUrl("http://10.26.0.2:8090");
+        cosmic.setMcServerUrl("http://10.26.0.2:8071"); 
         
-//        cosmic.setFsServerUrl("127.0.0.1", 8100);
-//        cosmic.setImageServerUrl("127.0.0.1", 8100);
+//        cosmic.setFsServerUrl("10.26.0.2", 8100);
+//        cosmic.setImageServerUrl("10.26.0.2", 8100);
         cosmic.setMqConsumerRegister(true,"test1111");
         //自定义本地苍穹调试服务的端口
         cosmic.setCosmicWebPort(8881);
