@@ -23,6 +23,8 @@ import java.util.*;
  * 动态表单插件
  */
 public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
+    private static final String TKPROBLEMS = "lag1_problems";
+    private static final String TKPROBLEM = "lag1_protest";
     //定义题目是否选中的标识
     private final String UNCOM_PRO = "lag1_uncom";
     private final String COM_PRO = "lag1_com";
@@ -60,7 +62,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         Long pkid = this.getView().getFormShowParameter().getCustomParam("prolistPKID");
         if (StringUtils.isNotBlank(pkid.toString())) {
             QFilter qFilter = new QFilter("id", QCP.equals, pkid);
-            DynamicObject dys = BusinessDataServiceHelper.loadSingle("lag1_problems", "id,lag1_prolist,number", new QFilter[]{qFilter});
+            DynamicObject dys = BusinessDataServiceHelper.loadSingle(TKPROBLEMS, "id,lag1_prolist,number", new QFilter[]{qFilter});
             prolist_id = dys.getString("number");
             this.getModel().getDataEntity().set("lag1_prolistid",prolist_id);
             String prolist = dys.getString("lag1_prolist");
@@ -76,8 +78,8 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
             questionObjects = new ArrayList<>();
             // 根据题目ID列表查询题目数据
             for (String prono : pronoList) {
-                QFilter filter = new QFilter("billno", QCP.equals, prono);
-                DynamicObject question = BusinessDataServiceHelper.loadSingle("lag1_protest", new QFilter[]{filter});
+                QFilter filter = new QFilter("number", QCP.equals, prono);
+                DynamicObject question = BusinessDataServiceHelper.loadSingle(TKPROBLEM, new QFilter[]{filter});
                 if (question != null) {
                     questionObjects.add(question);
                 }
@@ -192,7 +194,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
             //提交按钮封装作答和题目传参
             getCurNo();
             saveAns(currentQuestionIndex);
-            loadQuestionData();
+//            loadQuestionData();
             loadAnswerData();
 //            this.getView().showMessage(userAnswers.toString());
             sendParameter();
@@ -273,7 +275,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         }
 
         DynamicObject currentQuestion = questionObjects.get(currentQuestionIndex);
-        String questionId = currentQuestion.getString("billno"); // 假设billno是题目ID
+        String questionId = currentQuestion.getString("number"); // 假设billno是题目ID
         String questionType = currentQuestion.getString(PROTYPE);
         // 绑定作答(可选)
         if(questionType.equals("3")||questionType.equals("4")||questionType.equals("6")||questionType.equals("7")){
@@ -300,7 +302,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         }
 
         DynamicObject currentQuestion = questionObjects.get(currentQuestionIndex);
-        String questionId = currentQuestion.getString("billno"); // 假设billno是题目ID
+        String questionId = currentQuestion.getString("number"); // 假设billno是题目ID
         String questionType = currentQuestion.getString(PROTYPE);
 
         if ("1".equals(questionType)) {

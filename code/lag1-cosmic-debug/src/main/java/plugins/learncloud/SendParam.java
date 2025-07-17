@@ -39,7 +39,7 @@ public class SendParam extends AbstractBasePlugIn implements Plugin {
             parameter.setFormId("lag1_calendar");
 
             String[] str=new String[]{
-                    JSON_DATA
+                    (this.getModel().getValue("lag1_textfield")).toString()
             };
 
             parameter.setCustomParam("treeData",str);

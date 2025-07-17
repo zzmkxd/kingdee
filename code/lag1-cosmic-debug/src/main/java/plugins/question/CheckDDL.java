@@ -24,7 +24,7 @@ import java.util.Calendar;
 /**
  * 后台任务插件
  */
-public class CheckDDL extends AbstractTask implements Plugin {
+public class CheckDDL extends AbstractTask{
 
     @Override
     public void execute(RequestContext requestContext, Map<String, Object> map) throws KDException {

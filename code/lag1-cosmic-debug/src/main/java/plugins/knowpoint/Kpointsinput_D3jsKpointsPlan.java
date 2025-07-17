@@ -145,8 +145,10 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                     dynamicObject.set("status", "C");
                     dynamicObject.set("enable", 1);
                     dynamicObject.set("name", jsonObjectSingle.getString("knowpName"));
+                    //依据所属的基础资料获取
+//                    dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_courseid"));
+//                    dynamicObject.set("lag1_coursename", this.getModel().getValue("lag1_coursename"));
                     dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_courseid"));
-                    dynamicObject.set("lag1_coursename", this.getModel().getValue("lag1_coursename"));
 
                     dynamicObject.set("lag1_knowpointplan", this.getModel().getValue("name"));
                     dynamicObject.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));
@@ -156,48 +158,11 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                     // 保存新的基础资料记录
                     SaveServiceHelper.saveOperate("lag1_knowpoints", new DynamicObject[]{dynamicObject}, null);
 
-
                 }
             }else this.getView().showMessage("毁了");
 
 //-------------------------------------------------------------------------------------------------------------------------------------
-            //修改已有的单据体，修改后
-//            IDataModel formDataModel2 = this.getModel();
-//            DynamicObject formDataEntity2 = formDataModel2.getDataEntity();// 直接使用当前表单的实体对象（formDataEntity）操作数据
-//            Long currentFormId = (Long) formDataEntity2.getPkValue(); // 获取当前表单主键（可选）
-//            String billNo = (String) formDataEntity2.get("FBillNo");  // 直接获取当前表单字段值
-//            DynamicObject materialObj = (DynamicObject) formDataEntity2.get("FMaterialId");
-//            String materialNumber = materialObj.get("FNumber").toString(); // 获取物料编码
-//            DynamicObject postSingle = BusinessDataServiceHelper.loadSingle("lag1_knowpoint", new QFilter[]{new QFilter("id", QCP.equals,currentFormId)});
-
-//            // 首先尝试加载已存在的单据（假设您知道单据ID或可以通过某些条件查询）
-//            QFilter filter = new QFilter("number", QCP.equals, this.getModel().getValue("number").toString()); // 使用编号或其他唯一标识查询
-//            DynamicObject existingBill = BusinessDataServiceHelper.loadSingle("lag1_knowpoint", new QFilter[]{filter});
-//
-//            if (existingBill != null) {
-//                // 修改已存在单据
-//                existingBill.set("name", resultJsonObject.getString("knowpoint_plan"));
-////                existingBill.set("status", "C");
-////                existingBill.set("enable", 1);
-//
-//                // 获取并清空原有单据体
-//                DynamicObjectCollection dynamicObjectCollection = existingBill.getDynamicObjectCollection("lag1_knp");
-////                dynamicObjectCollection.clear();
-//
-//                // 添加新的单据体数据
-//                for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
-//                    JSONObject jsonObjectSingle = (JSONObject) object;
-//                    DynamicObject dynamicObjectEntry = dynamicObjectCollection.addNew();
-//                    dynamicObjectEntry.set("lag1_knpid", jsonObjectSingle.getString("knpId"));
-//                    dynamicObjectEntry.set("lag1_knowpname", jsonObjectSingle.getString("knowpName"));
-//                    dynamicObjectEntry.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));
-//                    dynamicObjectEntry.set("lag1_knowp_expand", jsonObjectSingle.getString("knowpExpand"));
-//                    dynamicObjectEntry.set("lag1_chap", jsonObjectSingle.getString("chap"));
-//                    dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("description"));
-//                }
-////                SaveServiceHelper.saveOperate("lag1_knowpoint", new DynamicObject[] {existingBill}, null);
-//
-//                // 更新单据
+//修改已有的单据体，修改后// 更新单据
 //                SaveServiceHelper.update(new DynamicObject[]{existingBill});
 //            }
 //-------------------------------------------------------------------------------------------------------------------------------------

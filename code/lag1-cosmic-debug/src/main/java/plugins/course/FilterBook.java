@@ -5,6 +5,7 @@ import dm.jdbc.util.StringUtil;
 import kd.bos.base.AbstractBasePlugIn;
 import kd.bos.bill.BillShowParameter;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.entity.LocaleString;
 import kd.bos.entity.datamodel.ListSelectedRow;
 import kd.bos.entity.datamodel.ListSelectedRowCollection;
@@ -30,6 +31,7 @@ import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.sdk.plugin.Plugin;
 import org.apache.commons.lang3.StringUtils;
+import scala.Dynamic;
 
 import javax.swing.*;
 import java.util.*;
@@ -38,6 +40,10 @@ import java.util.*;
  * 基础资料插件
  */
 public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowClickListener {
+
+    private final String TKPROBLEM = "lag1_protest";
+    private final String TKBOOK = "lag1_book";
+    private final String TKPROBLEMLIST = "lag1_problems";
 
     @Override
     public void registerListener(EventObject e) {
@@ -66,34 +72,34 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
         if (StringUtils.equals("lag1_uploadpro", source.getKey())) {
             // 相关逻辑操作...
             //分别收集课程编号、书籍编号、大章节编号、小章节编号
-            DynamicObject DyObject = this.getModel().getDataEntity();
-            String courseNo = DyObject.getString("number");
-            String bookNo, bigChaperNo, liChaperNo;
-            bookNo=DyObject.getString("lag1_bookcombofield");
-            bigChaperNo=DyObject.getString("lag1_bigchapcombofield");
-            liChaperNo = DyObject.getString("lag1_littlechapcombofield");
-            if(StringUtils.isNotBlank(courseNo) && StringUtils.isNotBlank(bookNo) &&StringUtils.isNotBlank(bigChaperNo)&&StringUtils.isNotBlank(liChaperNo)){
-                //打开题目基础资料
-//                this.getView().showMessage(courseNo+" "+bookNo+" "+bigChaperNo+" "+liChaperNo);
-                BillShowParameter nxtList = new BillShowParameter();
-                nxtList.setFormId("lag1_protest");  //基础资料列表的标准表单ID
-
-                //设置打开方式为模态窗口
-                nxtList.getOpenStyle().setShowType(ShowType.Modal);
-                nxtList.setCustomParam("courseNo",courseNo);
-                nxtList.setCustomParam("bookNo",bookNo);
-                nxtList.setCustomParam("bigChaperNo",bigChaperNo);
-                nxtList.setCustomParam("liChaperNo",liChaperNo);
-
-                //设置宽高
-                StyleCss styleCss = new StyleCss();
-                styleCss.setHeight("1000");
-                styleCss.setWidth("1200");
-                nxtList.getOpenStyle().setInlineStyleCss(styleCss);
-                this.getView().showForm(nxtList);
-            }else{
-                this.getView().showMessage("选择不完整");
-            }
+//            DynamicObject DyObject = this.getModel().getDataEntity();
+//            String courseNo = DyObject.getString("number");
+//            String bookNo, bigChaperNo, liChaperNo;
+//            bookNo=DyObject.getString("lag1_bookcombofield");
+//            bigChaperNo=DyObject.getString("lag1_bigchapcombofield");
+//            liChaperNo = DyObject.getString("lag1_littlechapcombofield");
+//            if(StringUtils.isNotBlank(courseNo) && StringUtils.isNotBlank(bookNo) &&StringUtils.isNotBlank(bigChaperNo)&&StringUtils.isNotBlank(liChaperNo)){
+//                //打开题目基础资料
+////                this.getView().showMessage(courseNo+" "+bookNo+" "+bigChaperNo+" "+liChaperNo);
+//                BillShowParameter nxtList = new BillShowParameter();
+//                nxtList.setFormId(TKPROBLEM);  //基础资料列表的标准表单ID
+//
+//                //设置打开方式为模态窗口
+//                nxtList.getOpenStyle().setShowType(ShowType.Modal);
+//                nxtList.setCustomParam("courseNo",courseNo);
+//                nxtList.setCustomParam("bookNo",bookNo);
+//                nxtList.setCustomParam("bigChaperNo",bigChaperNo);
+//                nxtList.setCustomParam("liChaperNo",liChaperNo);
+//
+//                //设置宽高
+//                StyleCss styleCss = new StyleCss();
+//                styleCss.setHeight("1000");
+//                styleCss.setWidth("1200");
+//                nxtList.getOpenStyle().setInlineStyleCss(styleCss);
+//                this.getView().showForm(nxtList);
+//            }else{
+//                this.getView().showMessage("选择不完整");
+//            }
         }
     }
 
@@ -106,7 +112,7 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
         if (listSelectedRow!=null){
             Long pk = (Long) listSelectedRow.getPrimaryKeyValue();
             BillShowParameter parameter = new BillShowParameter();
-            parameter.setFormId("lag1_book");
+            parameter.setFormId(TKBOOK);
             parameter.setPkId(pk);
             parameter.getOpenStyle().setShowType(ShowType.Modal);
             this.getView().showForm(parameter);
@@ -122,14 +128,14 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
         if("lag1_addbook".equalsIgnoreCase(itemKey)){
             //添加教材页面
             BillShowParameter nxtList = new BillShowParameter();
-            nxtList.setFormId("lag1_book");  //基础资料列表的标准表单ID
+            nxtList.setFormId(TKBOOK);  //基础资料列表的标准表单ID
 
             //设置打开方式为模态窗口
             nxtList.getOpenStyle().setShowType(ShowType.Modal);
             String courseId = this.getModel().getValue("number").toString();
-            String courseName = this.getModel().getValue("name").toString();
+//            String courseName = this.getModel().getValue("name").toString();
             if(StringUtils.isNotBlank(courseId)) nxtList.setCustomParam("courseId",courseId);
-            if(StringUtils.isNotBlank(courseName)) nxtList.setCustomParam("courseName",courseName);
+//            if(StringUtils.isNotBlank(courseName)) nxtList.setCustomParam("courseName",courseName);
 
             //设置宽高
             StyleCss styleCss = new StyleCss();
@@ -140,7 +146,7 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
             this.getView().showForm(nxtList);
         }else if("lag1_addproblem".equalsIgnoreCase(itemKey)){
             BillShowParameter billShowParameter = new BillShowParameter();
-            billShowParameter.setFormId("lag1_protest");
+            billShowParameter.setFormId(TKPROBLEM);
             billShowParameter.getOpenStyle().setShowType(ShowType.Modal);
 
             String courseId = this.getModel().getValue("number").toString();
@@ -153,7 +159,7 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
             BillShowParameter parameter = new BillShowParameter();
 
             // 2. 设置表单ID为目标基础资料表单lag1_problems
-            parameter.setFormId("lag1_problems");
+            parameter.setFormId(TKPROBLEMLIST);
 
             // 3. 设置打开方式为模态窗口
             parameter.getOpenStyle().setShowType(ShowType.Modal);
@@ -188,10 +194,11 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
         }
     }
 
+
     private void setBookFilter(String courseId) {
         BillList bookList = this.getView().getControl("lag1_billlistap");
         if(bookList!=null){
-            QFilter filter = new QFilter("lag1_courseid", QCP.equals,courseId);
+            QFilter filter = new QFilter("lag1_courseidtxt", QCP.equals,courseId);
             bookList.setFilter(filter);
             bookList.refresh();
         }else{

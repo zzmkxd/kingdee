@@ -22,12 +22,11 @@ public class DirectoryGeneration extends AbstractBasePlugIn implements Plugin {
       super.afterBindData(e);
         JSONObject jsonResultObject = new JSONObject();
         for (int i = 1; i <= 8; i++) {
-            jsonResultObject.put("lag1_chapter" + i , this.getModel().getValue("lag1_chapter" + i).toString());
+            jsonResultObject.put("第" + i +"章", this.getModel().getValue("lag1_chapter" + i).toString());
             for(int j=1;j<=5;j++){
-                jsonResultObject.put("lag1_chapter" + i+"p"+j, this.getModel().getValue("lag1_chapter" + i+"p"+j).toString());
+                jsonResultObject.put("第" + i+"p"+j +"章", this.getModel().getValue("lag1_chapter" + i+"p"+j).toString());
             }
-
-        }//目前没有对小标题分析
+        }
         //----下面是正常提取教材代码----
         // 调用GPT开发平台微服务
         Map<String, String> variableMap = new HashMap<>();
