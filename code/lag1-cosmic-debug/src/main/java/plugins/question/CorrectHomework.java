@@ -90,6 +90,7 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
             //题目遍历
             if(questionObjects.size()>i){
                 JSONObject proJsonObject = questionObjects.get(i);
+                this.getView().showMessage("proJsonObject:"+proJsonObject);
                 String proid = proJsonObject.getString("number");   //题目id
                 String courseid = proJsonObject.getString("lag1_courseidtxt");  //课程id
                 String protypeid = proJsonObject.getString("lag1_questiontype");
@@ -123,13 +124,13 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
                 dynamicObjectEntry.set(USERans,userAnswer2);    //用户作答
                 dynamicObjectEntry.set(PROanswer,proans);   //标准答案
 
-                if(proJsonObject.containsKey("lag1_entryentity")){
-                    JSONArray entryEntityArray=proJsonObject.getJSONArray("lag1_entryentity");
+                if(proJsonObject.containsKey("lag1_entryentity_linkp")){
+                    JSONArray entryEntityArray=proJsonObject.getJSONArray("lag1_entryentity_linkp");
                     StringBuilder knowledgePoints = new StringBuilder();
                     if(entryEntityArray!=null && !entryEntityArray.isEmpty()){
                         for(int j=0;j<entryEntityArray.size();j++){
                             JSONObject entryEntity = entryEntityArray.getJSONObject(j);
-                            if(entryEntity.containsKey("lag1_knpoint1")){
+                            if(entryEntity.containsKey("lag1_knpoint1") && entryEntity.get("lag1_knpoint1") != null){
                                 JSONObject baseDataField2 = entryEntity.getJSONObject("lag1_knpoint1");
                                 if(baseDataField2.containsKey("name")){
                                     JSONObject name = baseDataField2.getJSONObject("name");
@@ -141,7 +142,7 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
                                     }
                                 }
                             }
-                            if(entryEntity.containsKey("lag1_knpoint2")){
+                            if(entryEntity.containsKey("lag1_knpoint2") && entryEntity.get("lag1_knpoint2") != null){
                                 JSONObject baseDataField2 = entryEntity.getJSONObject("lag1_knpoint2");
                                 if(baseDataField2.containsKey("name")){
                                     JSONObject name = baseDataField2.getJSONObject("name");

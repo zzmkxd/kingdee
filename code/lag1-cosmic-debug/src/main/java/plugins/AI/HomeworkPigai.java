@@ -99,7 +99,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             int sum=0;
             // entryentity是单据体标识，your_field_key是要修改的字段标识
             DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-            this.getView().showMessage(Integer.toString(entryRows.size()));
+//            this.getView().showMessage(Integer.toString(entryRows.size()));
             // 将JSONObject转换为金蝶可识别的DynamicObject数组
             for (int j = 0; j < entryRows.size(); j++) {
                 JSONObject jsonRow = resultJsonObject.getJSONArray("answer").getJSONObject(j);
@@ -238,7 +238,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         for(DynamicObject entryEntity:dataEntities){
             //new成绩关联表的表单对象
             String proid = entryEntity.getString("lag1_proid"); //题目id
-            this.getView().showMessage("proid"+proid);
+//            this.getView().showMessage("proid"+proid);
 
 //            String protype = entryEntity.getString("lag1_protype");
             String userscore = entryEntity.getString("lag1_userscore");
@@ -247,6 +247,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
 //            String prodifficulty = entryEntity.getString("lag1_difficulty");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
+            this.getView().showMessage("kn"+knpoints);
             String[] knpointArr = knpoints.split(",");
             String knpoint1="";
             String knpoint2 = "";
@@ -262,7 +263,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
 
             if(existingRecord!=null){
-                this.getView().showMessage(existingRecord.toString());
+//                this.getView().showMessage(existingRecord.toString());
                 existingRecord.set("lag1_score",Integer.parseInt(userscore));
                 SaveServiceHelper.update(existingRecord);
             }else{
