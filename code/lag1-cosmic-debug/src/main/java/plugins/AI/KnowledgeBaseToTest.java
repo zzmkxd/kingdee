@@ -3,8 +3,11 @@ package plugins.AI;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kingdee.cosmic.ctrl.kdf.data.logging.Logger;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.dataentity.metadata.dynamicobject.DynamicProperty;
+import kd.bos.entity.property.BasedataProp;
 import kd.bos.exception.KDException;
 import kd.bos.ext.form.control.CountDown;
 import kd.bos.form.control.Button;
@@ -42,15 +45,35 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
         if (SAVE_BUTTON_KEY.equals(button.getKey())) {
 //这里是考试开始的逻辑，最好替换成动态表单弹窗-点击开始考试按钮后触发,也可以换为打开作答界面自动触发
             JSONObject jsonObjectSingle = new JSONObject();
+
+
+        for(int i=1;i<=3;i++){
+            DynamicObject material = (DynamicObject) this.getModel().getValue("lag1_linkknp"+i);
+            String name = material.getString("name");      // 名称
+            String spec = material.getString("lag1_description"); // 描述
+            jsonObjectSingle.put("kpoint"+i,name+" "+spec);
+        }
+
 //            jsonObjectSingle.put("courseContent", this.getModel().getValue("lag1_basedatafield2"));//课程名字
-            jsonObjectSingle.put("courseContent", "思政");
-            jsonObjectSingle.put("kpoint",this.getModel().getValue("lag1_linkknp.lag1_description"));
-//            jsonObjectSingle.put("kpoint2", this.getModel().getValue("lag1_linkknp2.lag1_description"));
-//            jsonObjectSingle.put("kpoint3", this.getModel().getValue("lag1_linkknp3.lag1_description"));
-            jsonObjectSingle.put("diff", this.getModel().getValue("lag1_stepperfield1"));//题目难度系数1-10
-            jsonObjectSingle.put("problemsCount", this.getModel().getValue("lag1_stepperfield"));//题目数量
-            String str = JSON.toJSONString(jsonObjectSingle);
-            this.getView().showMessage(str);
+        jsonObjectSingle.put("courseContent", "思政");
+        jsonObjectSingle.put("diff", this.getModel().getValue("lag1_stepperfield1"));//题目难度系数1-10
+        jsonObjectSingle.put("problemsCount", this.getModel().getValue("lag1_stepperfield"));//题目数量
+        String str = JSON.toJSONString(jsonObjectSingle);
+        //调用AI开发平台微服务
+        Map<String , String> variableMap = new HashMap<>();
+        Object[] params = new Object[] {
+                //提示词
+                getPromptFid("prompt-250709EF041ADA"),
+                str,
+                variableMap
+        };
+        Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
+        JSONObject jsonObjectResult = new JSONObject(result);
+        JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
+        //设置值
+        String str2 = jsonObjectData.getString("llmValue");//JSON结构的玩意
+        String jsonResult = str2.replaceAll("\\s*|\r|\n|\t", "");
+        this.getView().showMessage(jsonResult);
 //**基础信息配置**
 //- 课程名称：[用户输入课程名称]
 //- 难度系数：[用户输入难度系数]
@@ -86,7 +109,16 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
 //    lag1_basedatafield lag1_basedatafield1 lag1_basedatafield3 三个知识
 //    lag1_stepperfield 题目数量 lag1_stepperfield1 题目难度系数1-10
 //        }
+
     }
+    //获取提示词的Fid
+    public long getPromptFid(String billNo) {
+        DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_prompt",
+                "number," + "id",
+                (new QFilter("number", QCP.equals, billNo)).toArray());
+        return dynamicObject.getLong("id");
+    }
+
     // 获取GPT提示的Fid（固定函数）
     public long getProcessFid(String billNo) {
         DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_process",
