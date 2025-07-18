@@ -62,8 +62,13 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         Long pkid = this.getView().getFormShowParameter().getCustomParam("prolistPKID");
         if (StringUtils.isNotBlank(pkid.toString())) {
             QFilter qFilter = new QFilter("id", QCP.equals, pkid);
-            DynamicObject dys = BusinessDataServiceHelper.loadSingle(TKPROBLEMS, "id,lag1_prolist,number", new QFilter[]{qFilter});
+            DynamicObject dys = BusinessDataServiceHelper.loadSingle(TKPROBLEMS, "id,lag1_prolist,number,lag1_combofield", new QFilter[]{qFilter});
             prolist_id = dys.getString("number");
+            String prolistType = dys.getString("lag1_combofield");
+            Integer prolistTypeNum = Integer.valueOf(prolistType)-1;
+            this.getModel().setValue("lag1_combofield",prolistTypeNum);
+//            this.getView().showMessage("prolistType"+prolistType);
+//            this.getModel().getDataEntity().set("lag1_combofield",prolistType);
             this.getModel().getDataEntity().set("lag1_prolistid",prolist_id);
             String prolist = dys.getString("lag1_prolist");
             String[] pronoArray = prolist.split(",");
