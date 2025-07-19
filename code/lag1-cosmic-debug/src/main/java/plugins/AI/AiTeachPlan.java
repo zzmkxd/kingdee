@@ -3,11 +3,14 @@ package plugins.AI;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import kd.bos.context.RequestContext;
 import kd.bos.fileservice.FileItem;
 import kd.bos.fileservice.FileService;
 import kd.bos.fileservice.FileServiceFactory;
 import kd.bos.form.gpt.IGPTAction;
 import kd.bos.form.plugin.AbstractFormPlugin;
+import kd.bos.url.UrlService;
+import kd.bos.util.FileNameUtils;
 import kd.sdk.plugin.Plugin;
 
 import java.io.File;
@@ -30,8 +33,8 @@ public class AiTeachPlan implements IGPTAction {
                 //获取文件字符串
                 String fileContent = getFileContent();
                 //获取传入参数
-                String jsonResult = params.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
-
+                String jsonResult = params.get("prompt_output").replaceAll("\\s*|\r|\n|\t","");
+//                为我生成计算机网络，1个课时的课程，涉及的核心知识点是TCP/IP,网络互通,外网端口映射
                 JSONObject resultJsonObject = null;
                 try {
                     //若全部生成JSON字符串，则不会进入catch
@@ -100,6 +103,7 @@ public class AiTeachPlan implements IGPTAction {
                         e.printStackTrace();
                     }
                 }
+
                 //将字符串写入文件
                 byte[] bytes =fileContent.getBytes();
                 try {
@@ -107,20 +111,33 @@ public class AiTeachPlan implements IGPTAction {
                     fos.write(bytes);
                     //获取到文件服务器，并将文件上传至文件服务器
                     FileService fs = FileServiceFactory.getAttachmentFileService();
-                    String path = "/User/DayEvaluate/"+targetFile.getName();
+//                    String path = "/User/DayEvaluate/"+targetFile.getName();
+                    // 1. 生成标准路径
+                    RequestContext ctx = RequestContext.get();
+                    String path = FileNameUtils.getAttachmentFileName(
+                            ctx.getTenantId(),
+                            ctx.getAccountId(),
+                            "my_plugin",  // 替换为你的插件标识
+                            targetFile.getName()
+                    );
                     FileItem fi = new FileItem(targetFile.getName(), path, new FileInputStream(targetFile));
                     fi.setCreateNewFileWhenExists(true);
                     //获取到文件路径
+                    fi.setCreateNewFileWhenExists(true);
                     path= fs.upload(fi);
                     //拼接URL，将最终的URL输出
-                    result.put("endUrl", System.getProperty("domain.contextUrl")+"/attachment/download.do?path="+path+"&method=autoJump&title=教案.docx&iconType=document");
-
+//                    result.put("endUrl", System.getProperty("domain.contextUrl")+
+//                            "/attachment/download.do?path="+path+
+//                            "&method=autoJump&title=教案.docx&iconType=document");
+                    result.put("endUrl", UrlService.getDomainContextUrl()+
+                            "/attachment/download.do?path="+path+
+                            "&method=autoJump&title=教案.docx&iconType=document");
                     targetFile.delete();
                     fos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
+                result.put("jsonResult",jsonResult);
             } catch (Exception e) {
 
                 e.printStackTrace();
@@ -135,7 +152,7 @@ public class AiTeachPlan implements IGPTAction {
      * @throws Exception
      */
     private static String getFileContent() throws Exception{
-        File file = new File("D:/教案生成模板.xml");
+        File file = new File("D:\\教案生成模板.xml");
         if(!file.exists()){
             return null;
         }

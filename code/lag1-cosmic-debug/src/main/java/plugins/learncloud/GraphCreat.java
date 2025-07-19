@@ -43,7 +43,7 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
 //            JSONObject jsonResultObject = new JSONObject();
 //            jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
 //            jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
-//            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entryentity_daytask");
+//            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entity_daytask");
 //            JSONArray jsonTaskArray = new JSONArray();
 //            for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
 //                JSONObject jsonObjectSingle = new JSONObject();
@@ -182,7 +182,7 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
 
         // 此处需修改成实际分类数据，以下为案例数据
         List<String> categoryData = new ArrayList<>();
-        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entryentity_daytask");
+        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entity_daytask");
         for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
             String str = dynamicObjectSingle.getString("lag1_task_name");
             categoryData.add(str);
@@ -194,7 +194,7 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
 
         // 此处需添加实际数构建，以下为案例数据
         List<BigDecimal> valueData = new ArrayList<>();
-        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entryentity_daytask");
+        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entity_daytask");
         for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
 //            jsonObjectSingle.put("expectTime", dynamicObjectSingle.getString("lag1_expect_minutes"));
             int i=Integer.parseInt(dynamicObjectSingle.getString("lag1_expect_minutes"));
@@ -208,7 +208,7 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
 
         // 此处需添加实际数构建，以下为案例数据
         List<BigDecimal> valueData = new ArrayList<>();
-        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entryentity_daytask");
+        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entity_daytask");
         for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
             int i=Integer.parseInt(dynamicObjectSingle.getString("lag1_finish_minute"));
             valueData.add(new BigDecimal(i));

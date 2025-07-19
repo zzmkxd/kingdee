@@ -74,11 +74,11 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
             //调用AI开发平台微服务
             Map<String , String> variableMap = new HashMap<>();
-            variableMap.put("pigaiResult", jsonResultObject.toJSONString());
+//            variableMap.put("pigaiResult", jsonResultObject.toJSONString());
             Object[] params = new Object[] {
                     //提示词
                     getPromptFid("prompt-2507094056E37A"),
-                    "",
+                    jsonResultObject.toJSONString(),
                     variableMap
             };
             Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
@@ -288,7 +288,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject(TKPROBLEM_SCORE);
                 dynamicObject.set("lag1_studentid",studentid);
                 dynamicObject.set("lag1_studentname",studentname);
-
+                dynamicObject.set("status", "C");
+                dynamicObject.set("enable", 1);
                 dynamicObject.set("lag1_proid",problem);
                 dynamicObject.set("lag1_score",Integer.parseInt(userscore));
                 dynamicObject.set("lag1_courseid",course);
