@@ -35,7 +35,7 @@ public class TaskEvaluate extends AbstractFormPlugin implements Plugin {
             JSONObject jsonResultObject = new JSONObject();
             jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
             jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
-            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entryentity_daytask");
+            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entity_daytask");
             JSONArray jsonTaskArray = new JSONArray();
             for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
                 JSONObject jsonObjectSingle = new JSONObject();
@@ -55,8 +55,8 @@ public class TaskEvaluate extends AbstractFormPlugin implements Plugin {
 
             Object[] params = new Object[] {
                     //提示词
-                    getPromptFid("prompt-2506188951459F"),
-                    "",
+                    getPromptFid("prompt-250719B00B4A89"),
+                    jsonResultObject.toJSONString(),
                     variableMap
             };
             Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);

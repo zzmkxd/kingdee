@@ -53,7 +53,7 @@ public class LearningTaskCalendar implements IGPTAction {
 //            lag1_textfield
 //            dynamicObject.set("lag1_textfield", str);
             //操作单据体
-            DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_entryentity_daytask");
+            DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_entity_daytask");
             for (Object object : resultJsonObject.getJSONArray("dayTaskList")) {
                 JSONObject jsonObjectSingle = (JSONObject) object;
                 DynamicObject dynamicObjectEntry = dynamicObjectCollection.addNew();

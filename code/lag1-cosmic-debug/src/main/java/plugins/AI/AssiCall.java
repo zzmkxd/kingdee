@@ -5,16 +5,20 @@ import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
 import kd.bos.form.control.events.ItemClickEvent;
+import kd.bos.form.events.CustomEventArgs;
 import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
+import kd.bos.util.JSONUtils;
 import kd.sdk.plugin.Plugin;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.EventObject;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 动态表单插件
@@ -29,23 +33,36 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
         button.addClickListener(this);
     }
     @Override
+    public void customEvent(CustomEventArgs e) {
+        // 检查事件名称
+            String args = e.getEventArgs();
+            if ("propsUpdated".equals(e.getEventName())) {
+                this.getView().showMessage("原始数据:" + args);
+                String pageId = this.getView().getMainView().getPageId();
+                Object pkvalue = getProcessFid("process-250618841BB5F0");
+                String bookList="计算机网络";
+                JSONObject needJson = new JSONObject();
+                needJson.put("bookList", bookList);
+                DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId,args);
+           }
+    }
+    @Override
     public void click(EventObject evt) {
         super.click(evt);
         // 判断事件源是否为目标按钮
         Control source = (Control) evt.getSource();
         if (BTN_KEY.equals(source.getKey())) {
-//             显示消息弹窗
-            this.getView().showMessage("这是一条测试消息通知");
             String pageId = this.getView().getMainView().getPageId();
-            String ass="你好";
-            Object pkvalue = getProcessFid("process-250618841BB5F0");
-            String bookList="计算机网络";
-//            String pageList="2";
-            JSONObject needJson = new JSONObject();
-            needJson.put("bookList", bookList);
-//            needJson.put("userNeed", pageList);
-            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "1");
-            DispatchServiceHelper.invokeBizService("ai","gai","GaiService","selectProcessInSideBar",pkvalue,pageId,new HashMap(), needJson.toJSONString());
+            Object pkvalue = getProcessFid("process-2507146475CBF3");
+            JSONObject params = new JSONObject();
+            params.put("topic_title", "生态系统的稳定性");
+            params.put("subject", "生物");
+            params.put("class_hours", "3课时");
+            params.put("key_points", "生态平衡、生物多样性、人类活动影响");
+//            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "你好");
+//            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, new HashMap<>(), params);
+            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "----------------------正在搜索----------------------\n");
+
         }
     }
     public Object getProcessFid(String billNo) {
