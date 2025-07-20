@@ -27,11 +27,6 @@ public class AutoSaveBillPlugin extends AbstractFormPlugin implements CountDownL
         countdown.addCountDownListener(this);
         super.registerListener(e);
     }
-    @Override//倒考试计时结束时，触发该事件
-    public void onCountDownEnd(CountDownEvent evt) {
-
-        CountDownListener.super.onCountDownEnd(evt);
-    }
     @Override
     public void initialize() {
         super.initialize();
@@ -48,7 +43,6 @@ public class AutoSaveBillPlugin extends AbstractFormPlugin implements CountDownL
         if (StringUtils.equals("xxx", key)) {
             startTimer();
         }
-
     }
 
     private void startTimer() {
@@ -87,6 +81,9 @@ public class AutoSaveBillPlugin extends AbstractFormPlugin implements CountDownL
             this.getView().showMessage("考试计时结束！总时长：" + targetSeconds + "分钟");
         }
         //此处加入提交按钮的点击触发逻辑
+
+
+        //倒考试计时结束时，触发该提交事件
     }
 
     private String formatTime(int totalSeconds) {

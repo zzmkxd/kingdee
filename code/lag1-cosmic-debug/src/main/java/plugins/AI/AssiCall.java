@@ -54,15 +54,8 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
         if (BTN_KEY.equals(source.getKey())) {
             String pageId = this.getView().getMainView().getPageId();
             Object pkvalue = getProcessFid("process-2507146475CBF3");
-            JSONObject params = new JSONObject();
-            params.put("topic_title", "生态系统的稳定性");
-            params.put("subject", "生物");
-            params.put("class_hours", "3课时");
-            params.put("key_points", "生态平衡、生物多样性、人类活动影响");
-//            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "你好");
-//            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, new HashMap<>(), params);
             DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "----------------------正在搜索----------------------\n");
-
+//            process-250709B1A2338A
         }
     }
     public Object getProcessFid(String billNo) {
