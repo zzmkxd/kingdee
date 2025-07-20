@@ -216,7 +216,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         showParameter.setCustomParam("problemList",questionObjects);
         showParameter.setCustomParam("ansList",userAnswers);
         showParameter.setCustomParam("prolistId",prolist_id);
-        showParameter.setCustomParam("aiornor","ai");
+        showParameter.setCustomParam("aiornor","normal");
         this.getView().showForm(showParameter);
     }
 

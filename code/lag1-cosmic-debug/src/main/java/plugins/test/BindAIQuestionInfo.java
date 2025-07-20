@@ -1,5 +1,6 @@
 package plugins.test;
 
+import com.alibaba.fastjson.JSONObject;
 import kd.bos.bill.BillShowParameter;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.form.ShowType;
@@ -35,7 +36,7 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
     private final String SUBMIT_BTN = "lag1_submitbtn";
     //    传参
     private String ProObject="";
-    private List<String> questionJsonList = new ArrayList<>(); // 存储每道题目的JSON字符串
+    private List<JsonObject> questionJsonList = new ArrayList<>(); // 存储每道题目的JSON字符串
 
     //存储做题数据：用户答案
     private List<String> userAnswers = new ArrayList<>();
@@ -82,11 +83,12 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         }
     }
     private void sendParameter() {
-        this.getView().showMessage("ans"+userAnswers);
+//        this.getView().showMessage("ans"+userAnswers);
         BillShowParameter showParameter = new BillShowParameter();
         showParameter.getOpenStyle().setShowType(ShowType.InCurrentForm); //替换当前页面内容
         showParameter.setFormId("lag1_homework_correct");
         showParameter.setCustomParam("problemList",questionJsonList);
+//        this.getView().showMessage("qjl:"+questionJsonList.toString());
         showParameter.setCustomParam("ansList",userAnswers);
         showParameter.setCustomParam("aiornor","ai");
 //        showParameter.setCustomParam("prolistId",prolist_id);
@@ -180,8 +182,9 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         // 遍历questions数组，将每道题目转为字符串存储
         for (JsonValue value : questions) {
             if (value.getValueType() == JsonValue.ValueType.OBJECT) {
-                JsonObject questionObj = (JsonObject) value;
-                questionJsonList.add(questionObj.toString());
+                questionJsonList.add((JsonObject) value);
+//                JsonObject questionObj = (JsonObject) value;
+//                questionJsonList.add(questionObj.toString());
 //                this.getView().showMessage(questionObj.toString());
             }
         }
@@ -207,10 +210,11 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
             return;
         }
 
-        // 解析当前题目的JSON字符串
-        JsonReader jsonReader = Json.createReader(new StringReader(questionJsonList.get(currentQuestionIndex)));
-        JsonObject questionObj = jsonReader.readObject();
+//        // 解析当前题目的JSON字符串
+//        JsonReader jsonReader = Json.createReader(new StringReader(questionJsonList.get(currentQuestionIndex)));
+//        JsonObject questionObj = jsonReader.readObject();
 
+        JsonObject questionObj = questionJsonList.get(currentQuestionIndex);
         // 提取题目描述（question字段）并绑定到PRODES字段
         String questionText = questionObj.getString("question");
         this.getModel().setValue(PRODES, questionText); // 绑定到动态表单字段
@@ -224,10 +228,10 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
             return;
         }
 
-        // 解析当前题目的JSON字符串
-        JsonReader jsonReader = Json.createReader(new StringReader(questionJsonList.get(currentQuestionIndex)));
-        JsonObject questionObj = jsonReader.readObject();
-
+//        // 解析当前题目的JSON字符串
+//        JsonReader jsonReader = Json.createReader(new StringReader(questionJsonList.get(currentQuestionIndex)));
+//        JsonObject questionObj = jsonReader.readObject();
+//        JsonObject questionObj = questionJsonList.get(currentQuestionIndex);
         // 提取题目描述（question字段）并绑定到PRODES字段
 //        String questionText = questionObj.getString("question");
 //        this.getModel().setValue(PRODES, questionText); // 绑定到动态表单字段

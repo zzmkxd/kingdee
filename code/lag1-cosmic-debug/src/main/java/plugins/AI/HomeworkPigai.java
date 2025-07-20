@@ -36,6 +36,7 @@ import java.util.*;
  * 基础资料插件
  */
 public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
+    private String AIORNOR = "";    //是否ai出题
     //题目分数表单据体名词
     private static final String ENTRY_ENTITY_COLLECTION = "lag1_entryentity_pigai";
     //成绩关联表的表单标识
@@ -110,11 +111,28 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 newRow.set("lag1_ai_pigai", jsonRow.getString("analysis"));
             }
             this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
+            AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
+            if (AIORNOR.equals("normal")){
+//                this.getView().showMessage("binddata");
+                bindData(); //绑定至成绩关联表
+            }else {
+//                this.getView().showMessage("ai:ai");
+            }
             // 刷新界面显示
             this.getView().updateView(ENTRY_ENTITY_COLLECTION);
-            bindData(); //绑定至成绩关联表
         }
 
+    }
+
+    /**
+     * 获取aiornormal
+     * @param e
+     */
+    @Override
+    public void beforeBindData(EventObject e) {
+        super.beforeBindData(e);
+        AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
+//        this.getView().showMessage("hp"+AIORNOR);
     }
 
     //获取提示词的Fid
@@ -263,7 +281,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
 
             if(existingRecord!=null){
-//                this.getView().showMessage(existingRecord.toString());
+                this.getView().showMessage(existingRecord.toString());
                 existingRecord.set("lag1_score",Integer.parseInt(userscore));
                 SaveServiceHelper.update(existingRecord);
             }else{

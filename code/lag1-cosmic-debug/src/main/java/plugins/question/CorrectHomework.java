@@ -12,6 +12,10 @@ import kd.sdk.plugin.Plugin;
 import net.sf.json.JSON;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -33,6 +37,7 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
     private final String PROid = "lag1_proid";  //题目ID
     private final String PROtype = "lag1_protype";  //题目类型
     private final String COURSEid = "lag1_courseid";    //课程id
+    private String AIORNOR = "";
 
 
     //所有题目列表
@@ -47,7 +52,6 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
         if(totProblems.size()==1 && totProblems.get(0).getString(PROid).isEmpty()){
 //            this.getView().showMessage("tot为空");
             loadQuestionData();
-            bindQuestionData();
         }else{
 //            this.getView().showMessage(totProblems.get(0).getString(PROid));
         }
@@ -63,10 +67,108 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
      * 加载数据
      */
     private void loadQuestionData() {
-        questionObjects=this.getView().getFormShowParameter().getCustomParam("problemList");
-        userAnswers = this.getView().getFormShowParameter().getCustomParam("ansList");
-        prolist_id = this.getView().getFormShowParameter().getCustomParam("prolistId");
+        AIORNOR = this.getView().getFormShowParameter().getCustomParam("aiornor");
+        this.getModel().getDataEntity().set("lag1_aiornor",AIORNOR);
+        if (AIORNOR.equals("normal")){
+            questionObjects=this.getView().getFormShowParameter().getCustomParam("problemList");
+//            this.getView().showMessage("qestioinObjects:"+questionObjects);
+            userAnswers = this.getView().getFormShowParameter().getCustomParam("ansList");
+            prolist_id = this.getView().getFormShowParameter().getCustomParam("prolistId");
+            bindQuestionData();
+        }else {
+            userAnswers = this.getView().getFormShowParameter().getCustomParam("ansList");
+            questionObjects=this.getView().getFormShowParameter().getCustomParam("problemList");
+//            this.getView().showMessage("qo2:"+questionObjects);
+//            Object raw = this.getView().getFormShowParameter().getCustomParam("problemList");
+//
+//            if (raw instanceof List) {
+//                List<?> list = (List<?>) raw;
+//                questionObjects.clear();
+//                for (Object o : list) {
+//                    if (o instanceof String) {
+//                        questionObjects.add(JSONObject.parseObject((String) o));
+//                    } else if (o instanceof JSONObject) {
+//                        questionObjects.add((JSONObject) o);
+//                    } else if (o instanceof DynamicObject) {
+//                        DynamicObject dy = (DynamicObject) o;
+//                        JSONObject json = new JSONObject();
+//                        json.put("id", dy.getString("id"));
+//                        json.put("question", dy.getString("question"));
+//                        json.put("difficulty", dy.getString("difficulty"));
+//                        json.put("answer", dy.getString("answer"));
+//                        Object kp = dy.get("knowledge_points");
+//                        if (kp instanceof List) {
+//                            json.put("knowledge_points", new JSONArray((List<Object>) kp));
+//                        } else {
+//                            json.put("knowledge_points", new JSONArray());
+//                        }
+//                        questionObjects.add(json);
+//                    } else {
+//                        this.getView().showMessage("未知类型：" + o.getClass());
+//                    }
+//                }
+//            }
+            bindQuestionData2();
+//            this.getView().showMessage(AIORNOR);
+        }
 //        this.getView().showMessage("userAnswers.size:"+userAnswers.size()+"\n"+"prolist_id:"+prolist_id);
+    }
+
+    private void bindQuestionData2() {
+        DynamicObject DO = this.getModel().getDataEntity();
+        //获取totproblems单据体集合
+        DynamicObjectCollection totProblems = DO.getDynamicObjectCollection(TOTproblems);
+        totProblems.clear();
+        //绑定学生id
+        DO.set("lag1_textfield", RequestContext.get().getCurrUserId());
+        for(int i=0;i<userAnswers.size();i++){
+            DynamicObject dynamicObjectEntry = totProblems.addNew();    //单据体条目
+            String userAnswer = userAnswers.get(i);
+            String userAnswer2="";
+            if(userAnswer.equals("")) userAnswer2="未作答";
+            else userAnswer2 = userAnswer;
+
+            //题目遍历
+            if(questionObjects.size()>i) {
+                JSONObject proJsonObject = questionObjects.get(i);
+//                this.getView().showMessage("proJsonObject:" + proJsonObject);
+                // 先拿到 "id" 对象// 再从中提取 "string"
+                JSONObject idObj = proJsonObject.getJSONObject("id");
+                String proid = idObj.getString("string");
+
+                JSONObject prodesObj = proJsonObject.getJSONObject("question");
+                String prodes = prodesObj.getString("string");
+
+                JSONObject prodiffiObj = proJsonObject.getJSONObject("difficulty");
+                String prodiffi = prodiffiObj.getString("string");
+
+                JSONObject proansObj = proJsonObject.getJSONObject("answer");
+                String proans = proansObj.getString("string");
+
+                dynamicObjectEntry.set(PROid, proid);    //题目id
+                dynamicObjectEntry.set(PROdes, prodes);  //题干
+                dynamicObjectEntry.set(PROdifficulty, prodiffi); //难度
+                dynamicObjectEntry.set(USERans, userAnswer2);    //用户作答
+                dynamicObjectEntry.set(PROanswer, proans);   //标准答案
+
+                if (proJsonObject.containsKey("knowledge_points")) {
+
+                    JSONArray entryEntityArray = proJsonObject.getJSONArray("knowledge_points");
+                    StringBuilder knowledgePoints = new StringBuilder();
+
+                    for (int j = 0; j < entryEntityArray.size(); j++) {
+                        JSONObject item = entryEntityArray.getJSONObject(j);
+                        String kp = item.getString("string");
+                        if (knowledgePoints.length() > 0) knowledgePoints.append(",");
+                        knowledgePoints.append(kp);
+                    }
+
+                    dynamicObjectEntry.set("lag1_link_kpoints", knowledgePoints.toString());
+                } else {
+                    dynamicObjectEntry.set("lag1_link_kpoints", "未绑定知识点");
+                }
+            }
+        }
     }
 
     /**
@@ -90,7 +192,7 @@ public class CorrectHomework extends AbstractBasePlugIn implements Plugin {
             //题目遍历
             if(questionObjects.size()>i){
                 JSONObject proJsonObject = questionObjects.get(i);
-                this.getView().showMessage("proJsonObject:"+proJsonObject);
+//                this.getView().showMessage("proJsonObject:"+proJsonObject);
                 String proid = proJsonObject.getString("number");   //题目id
                 String courseid = proJsonObject.getString("lag1_courseidtxt");  //课程id
                 String protypeid = proJsonObject.getString("lag1_questiontype");
