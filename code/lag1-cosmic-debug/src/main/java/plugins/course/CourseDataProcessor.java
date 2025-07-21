@@ -150,15 +150,15 @@ public class CourseDataProcessor extends AbstractBasePlugIn implements Plugin {
         JSONObject jsonResultObject = new JSONObject();
         for (int i = 1; i <= 15; i++) {
             String tem1 = this.getModel().getValue("lag1_chapter" + i).toString();
-            if(tem1==null || !tem1.equals("")){
-                jsonResultObject.put("lag1_chapter" + i , tem1);
+            if(tem1!=null || !tem1.equals("")){
+                jsonResultObject.put("chapter" + i , tem1);
             }
 
             if(i<16){
                 for(int j=1;j<=5;j++){
                     String tem2=this.getModel().getValue("lag1_chapter" + i+"p"+j).toString();
-                    if(tem2==null || !tem1.equals("")){
-                        jsonResultObject.put("lag1_chapter" + i+"p"+j, tem2);
+                    if(tem2 !=null || !tem1.equals("")){
+                        jsonResultObject.put("chapter" + i+"p"+j, tem2);
                     }
                 }
             }

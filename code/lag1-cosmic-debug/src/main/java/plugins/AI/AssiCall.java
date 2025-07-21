@@ -40,23 +40,8 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
                 this.getView().showMessage("原始数据:" + args);
                 String pageId = this.getView().getMainView().getPageId();
                 Object pkvalue = getProcessFid("process-250618841BB5F0");
-                String bookList="计算机网络";
-                JSONObject needJson = new JSONObject();
-                needJson.put("bookList", bookList);
                 DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId,args);
            }
-    }
-    @Override
-    public void click(EventObject evt) {
-        super.click(evt);
-        // 判断事件源是否为目标按钮
-        Control source = (Control) evt.getSource();
-        if (BTN_KEY.equals(source.getKey())) {
-            String pageId = this.getView().getMainView().getPageId();
-            Object pkvalue = getProcessFid("process-2507146475CBF3");
-            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "----------------------正在搜索----------------------\n");
-//            process-250709B1A2338A
-        }
     }
     public Object getProcessFid(String billNo) {
         DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_process",

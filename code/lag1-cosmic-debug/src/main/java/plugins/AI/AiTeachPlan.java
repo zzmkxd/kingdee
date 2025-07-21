@@ -38,7 +38,7 @@ public class AiTeachPlan implements IGPTAction {
             }
             //获取传入参数
             String jsonResult = params.get("damn").replaceAll("\\s*|\r|\n|\t","");
-//                为我生成计算机网络（计算机学科），1个课时的课程，涉及的核心知识点是TCP/IP,网络互通,外网端口映射
+//                为我生成计算机网络（计算机学科）的教案，共计4个课时的课程，涉及的核心知识点是TCP/IP,DHCP动态分配IP,网络互通,外网端口映射
             JSONObject resultJsonObject = null;
             try {
                 //若全部生成JSON字符串，则不会进入catch
