@@ -4,10 +4,14 @@ import dm.jdbc.util.StringUtil;
 import javafx.scene.control.RadioButton;
 import kd.bos.bill.BillShowParameter;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.ext.form.control.CountDown;
+import kd.bos.ext.form.control.events.CountDownEvent;
+import kd.bos.ext.form.control.events.CountDownListener;
 import kd.bos.form.FormShowParameter;
 import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
+import kd.bos.form.events.PreOpenFormEventArgs;
 import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.list.ListShowParameter;
 import kd.bos.orm.query.QCP;
@@ -16,13 +20,14 @@ import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.sdk.plugin.Plugin;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.util.ByteArray;
+import plugins.timer.AutoSaveBillPlugin;
 
 import java.util.*;
 
 /**
  * 动态表单插件
  */
-public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
+public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,CountDownListener  {
     private static final String TKPROBLEMS = "lag1_problems";
     private static final String TKPROBLEM = "lag1_protest";
     //定义题目是否选中的标识
@@ -41,6 +46,8 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
     private final String ANS_FOUR = "lag1_ans4";
     private final String ANS_TXT="lag1_textareafield";  //答案多行文本
     private String prolist_id = ""; //组卷表单id
+    private String testorhw = "";
+    private String EXAM_DURATION = "lag1_num_target";
 
 
     //存储做题数据：用户答案
@@ -52,9 +59,16 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
 
     private List<String> pronoList=new ArrayList<>();
 
+    //倒计时相关变量
+//    private boolean isRunning = false; // 是否正在运行
+    private CountDown countDown; // 倒考试计时控件
+    private int targetSeconds = 0; // 考试时长（秒）
+
     @Override
     public void initialize() {
         super.initialize();
+        // 在initialize方法中初始化控件引用
+        countDown = this.getView().getControl("lag1_countdownap");
     }
 
     private void loadQuestionData() {
@@ -62,8 +76,9 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         Long pkid = this.getView().getFormShowParameter().getCustomParam("prolistPKID");
         if (StringUtils.isNotBlank(pkid.toString())) {
             QFilter qFilter = new QFilter("id", QCP.equals, pkid);
-            DynamicObject dys = BusinessDataServiceHelper.loadSingle(TKPROBLEMS, "id,lag1_prolist,number,lag1_combofield", new QFilter[]{qFilter});
+            DynamicObject dys = BusinessDataServiceHelper.loadSingle(TKPROBLEMS, "id,lag1_prolist,number,lag1_combofield,lag1_integerfield", new QFilter[]{qFilter});
             prolist_id = dys.getString("number");
+            this.getModel().getDataEntity().set(EXAM_DURATION,dys.getString("lag1_integerfield"));
             String prolistType = dys.getString("lag1_combofield");
             Integer prolistTypeNum = Integer.valueOf(prolistType)-1;
             this.getModel().setValue("lag1_combofield",prolistTypeNum);
@@ -178,7 +193,12 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
         nxtBTN.addClickListener(this);
         Button submitBTN = this.getView().getControl(SUBMIT_BTN);
         submitBTN.addClickListener(this);
+        countDown = this.getView().getControl("lag1_countdownap");
+        if (countDown != null) {
+            countDown.addCountDownListener(this); // 直接传递当前实例
+        }
     }
+
 
     @Override
     public void click(EventObject evt) {
@@ -265,9 +285,20 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
     @Override
     public void beforeBindData(EventObject e) {
         super.beforeBindData(e);
+//        countDown = this.getView().getControl("lag1_countdownap");
         //检查是否已经加载过数据
-        if(questionObjects.isEmpty() || pronoList.isEmpty()){
+        if(questionObjects.isEmpty() || pronoList.isEmpty() || testorhw==""){
             loadQuestionData();
+        }
+    }
+
+    @Override
+    public void afterBindData(EventObject e) {
+        super.afterBindData(e);
+        testorhw = this.getModel().getDataEntity().getString("lag1_combofield");
+        if(testorhw.equals("1")){
+            //考试
+            startTimer();
         }
     }
 
@@ -528,6 +559,78 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin {
      */
     private void showAnsText(){
         this.getView().setVisible(true,ANS_TXT);
+    }
+
+    /**
+     * 倒计时相关函数
+     */
+    public void startTimer() {
+//        if (!isRunning && countDown != null) {
+        if (countDown != null) {
+            // 获取考试时长（分钟）
+            Object targetValue = this.getModel().getValue("lag1_num_target");
+//            this.getView().showMessage("考试时长"+targetValue);
+            if (targetValue != null) {
+                int targetMinutes = 0;
+                if (targetValue instanceof Integer) {
+                    targetMinutes = (Integer) targetValue;
+                } else if (targetValue instanceof Number) {
+                    targetMinutes = ((Number) targetValue).intValue();
+                } else {
+                }
+                targetSeconds = targetMinutes * 60; // 转换为秒
+                // 启动考试计时器
+//                isRunning = true;
+                // 设置倒考试计时控件的时长并启动
+                countDown.setDuration(targetSeconds);
+                countDown.start();
+                // 显示开始考试计时消息
+                this.getView().showMessage("考试计时开始！考试时长：" + formatTime(targetSeconds));
+
+
+            }
+        }
+    }
+
+    @Override
+    public void preOpenForm(PreOpenFormEventArgs e) {
+        super.preOpenForm(e);
+    }
+
+    public void countDownEnded() {
+        // 考试计时结束时触发
+//        if (isRunning) {
+//            isRunning = false;
+//            this.getView().showMessage("考试计时结束！剩余时长：" + targetSeconds + "秒");
+//        }
+        //此处加入提交按钮的点击触发逻辑
+
+
+        //倒考试计时结束时，触发该提交事件
+    }
+
+    /**
+     * 倒计时控件的结束方法
+     * @param evt
+     */
+    @Override
+    public void onCountDownEnd(CountDownEvent evt) {
+//        this.getView().showMessage("倒计时结束事件已触发"); // 调试用
+        this.getView().showMessage("考试结束");
+        CountDownListener.super.onCountDownEnd(evt);
+        Button submitBtn = this.getView().getControl(SUBMIT_BTN);
+        if (submitBtn != null) {
+            submitBtn.click(); // 触发按钮的点击事件[3](@ref)[5](@ref)
+        }
+        //调用submit方法提交考试
+//        countDownEnded();
+    }
+
+    private String formatTime(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 }
 
