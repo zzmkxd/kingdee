@@ -172,8 +172,8 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
     }
     private void loadQuestionData() {
 //        this.getView().showMessage("loadq");
-//        ProObject=this.getView().getFormShowParameter().getCustomParam("proObject");
-        ProObject= "{\"questions\":[{\"id\":\"1\",\"question\":\"简述自由竞争向垄断资本主义的转变过程。\",\"difficulty\":\"2\",\"answer\":\"自由竞争向垄断资本主义的转变过程主要包括：1)生产和资本的高度集中，企业规模扩大；2)竞争导致部分企业被淘汰或被兼并；3)少数大企业通过协议或联合形成垄断组织；4)垄断组织控制生产和市场，获取高额垄断利润。\",\"knowledge_points\":[\"垄断资本主义的形成\"]},{\"id\":\"2\",\"question\":\"全球化与科技革命对当代资本主义有哪些影响？\",\"difficulty\":\"3\",\"answer\":\"全球化与科技革命对当代资本主义的影响包括：1)全球化促进了资本、商品和劳动力的跨国流动，扩大了市场范围；2)科技革命提高了生产效率，改变了生产方式；3)加剧了国际竞争，推动了资本主义生产关系的调整；4)带来了新的社会问题和矛盾，如数字鸿沟和就业结构变化。\",\"knowledge_points\":[\"当代资本主义的新变化\"]},{\"id\":\"3\",\"question\":\"资本主义经济制度的剥削性与矛盾性体现在哪些方面？\",\"difficulty\":\"4\",\"answer\":\"资本主义经济制度的剥削性体现在资本家通过占有生产资料剥削工人的剩余价值；矛盾性体现在：1)生产社会化与生产资料私人占有之间的矛盾；2)个别企业生产的有组织性与整个社会生产的无政府状态之间的矛盾；3)生产能力无限扩大与劳动人民有支付能力需求相对缩小之间的矛盾。\",\"knowledge_points\":[\"资本主义经济制度的特征\"]}]}";
+        ProObject=this.getView().getFormShowParameter().getCustomParam("questionlist");
+//        ProObject= "{\"questions\":[{\"id\":\"1\",\"question\":\"简述自由竞争向垄断资本主义的转变过程。\",\"difficulty\":\"2\",\"answer\":\"自由竞争向垄断资本主义的转变过程主要包括：1)生产和资本的高度集中，企业规模扩大；2)竞争导致部分企业被淘汰或被兼并；3)少数大企业通过协议或联合形成垄断组织；4)垄断组织控制生产和市场，获取高额垄断利润。\",\"knowledge_points\":[\"垄断资本主义的形成\"]},{\"id\":\"2\",\"question\":\"全球化与科技革命对当代资本主义有哪些影响？\",\"difficulty\":\"3\",\"answer\":\"全球化与科技革命对当代资本主义的影响包括：1)全球化促进了资本、商品和劳动力的跨国流动，扩大了市场范围；2)科技革命提高了生产效率，改变了生产方式；3)加剧了国际竞争，推动了资本主义生产关系的调整；4)带来了新的社会问题和矛盾，如数字鸿沟和就业结构变化。\",\"knowledge_points\":[\"当代资本主义的新变化\"]},{\"id\":\"3\",\"question\":\"资本主义经济制度的剥削性与矛盾性体现在哪些方面？\",\"difficulty\":\"4\",\"answer\":\"资本主义经济制度的剥削性体现在资本家通过占有生产资料剥削工人的剩余价值；矛盾性体现在：1)生产社会化与生产资料私人占有之间的矛盾；2)个别企业生产的有组织性与整个社会生产的无政府状态之间的矛盾；3)生产能力无限扩大与劳动人民有支付能力需求相对缩小之间的矛盾。\",\"knowledge_points\":[\"资本主义经济制度的特征\"]}]}";
         // 使用javax.json解析
         JsonReader jsonReader = Json.createReader(new StringReader(ProObject));
         JsonObject rootObject = jsonReader.readObject();
