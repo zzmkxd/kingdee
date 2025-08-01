@@ -31,6 +31,7 @@ public class KnowpointsDataProcessor extends AbstractBasePlugIn implements Plugi
         private static final String KNEXPAND = "lag1_expand";
         private static final String KNCHAP = "lag1_chap";
         private static final String KNDES = "lag1_description";
+        private String rootName = "";
 
         // 需要提取的字段标识
         private final String[] TARGET_FIELDS = {
@@ -194,6 +195,9 @@ public class KnowpointsDataProcessor extends AbstractBasePlugIn implements Plugi
         //1构建节点列表
         List<Map<String,Object>> nodes = new ArrayList<>();
         List<Map<String,Object>> links = new ArrayList<>();
+        //手动添加根节点root
+        rootName=this.getModel().getDataEntity().getString("name");
+        nodes.add(createNode("0",rootName, 0,null,false,null));
 
         //遍历每一行数据
         for(DynamicObject entryRow : entryRows){
@@ -201,7 +205,7 @@ public class KnowpointsDataProcessor extends AbstractBasePlugIn implements Plugi
 //            int knid = Integer.parseInt((String) entryRow.get(KNID));
             String knname = (String) entryRow.get(KNNAME);
             String knparent = (String) entryRow.get(KNPARENT);
-            if(Integer.parseInt(knparent)==0) knparent=null;    //根节点操作父节点为null
+//            if(Integer.parseInt(knparent)==0) knparent=null;    //根节点操作父节点为null
 //            int knparent = Integer.parseInt((String) entryRow.get(KNPARENT));
             String knexpand = (String) entryRow.get(KNEXPAND);
 //            int knexpand = Integer.parseInt((String) entryRow.get(KNEXPAND));
@@ -236,6 +240,7 @@ public class KnowpointsDataProcessor extends AbstractBasePlugIn implements Plugi
     @Override
         public void afterLoadData(EventObject e) {
             super.afterLoadData(e);
+//            this.getView().showMessage(rootName);
         }
 
         private Map<String,Object> createNode(String id, String name, int group, String parentId, boolean expanded, String desc){

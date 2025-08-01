@@ -148,17 +148,17 @@ public class CourseDataProcessor extends AbstractBasePlugIn implements Plugin {
     public void afterBindData(EventObject e) {
         super.afterBindData(e);
         JSONObject jsonResultObject = new JSONObject();
-        for (int i = 1; i <= 15; i++) {
+        for (int i = 1; i <= 8; i++) {
             String tem1 = this.getModel().getValue("lag1_chapter" + i).toString();
-            if(tem1==null || !tem1.equals("")){
-                jsonResultObject.put("lag1_chapter" + i , tem1);
+            if(tem1!=null || !tem1.equals("")){
+                jsonResultObject.put("chapter" + i , tem1);
             }
 
-            if(i<16){
-                for(int j=1;j<=5;j++){
+            if(i<8){
+                for(int j=1;j<=3;j++){
                     String tem2=this.getModel().getValue("lag1_chapter" + i+"p"+j).toString();
-                    if(tem2==null || !tem1.equals("")){
-                        jsonResultObject.put("lag1_chapter" + i+"p"+j, tem2);
+                    if(tem2 !=null || !tem1.equals("")){
+                        jsonResultObject.put("chapter" + i+"p"+j, tem2);
                     }
                 }
             }
@@ -172,7 +172,7 @@ public class CourseDataProcessor extends AbstractBasePlugIn implements Plugin {
         Object[] params = new Object[]{
                 //GPT提示编码
                 getPromptFid("prompt-250708D5B99E7D"),
-                "开始分析这些知识点",
+                jsonResultObject.toJSONString(),
                 variableMap
         };
         Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);

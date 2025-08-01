@@ -10,6 +10,8 @@ import kd.bos.dataentity.metadata.dynamicobject.DynamicProperty;
 import kd.bos.entity.property.BasedataProp;
 import kd.bos.exception.KDException;
 import kd.bos.ext.form.control.CountDown;
+import kd.bos.form.FormShowParameter;
+import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
 import kd.bos.form.plugin.AbstractFormPlugin;
@@ -73,7 +75,13 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
         //设置值
         String str2 = jsonObjectData.getString("llmValue");//JSON结构的玩意
         String jsonResult = str2.replaceAll("\\s*|\r|\n|\t", "");
-        this.getView().showMessage(jsonResult);
+        //打开ai做题界面并传参
+        FormShowParameter showParameter = new FormShowParameter();
+        showParameter.getOpenStyle().setShowType(ShowType.Modal);
+        showParameter.setFormId("lag1_aiquesitions");
+        showParameter.setCustomParam("questionlist",jsonResult);
+        this.getView().showForm(showParameter);
+//        this.getView().showMessage(jsonResult);
 //**基础信息配置**
 //- 课程名称：[用户输入课程名称]
 //- 难度系数：[用户输入难度系数]

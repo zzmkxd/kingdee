@@ -3,8 +3,10 @@ package plugins.learncloud;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.bill.BillShowParameter;
 import kd.bos.form.FormShowParameter;
 import kd.bos.form.ShowType;
+import kd.bos.form.StyleCss;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
 import kd.sdk.plugin.Plugin;
@@ -38,12 +40,17 @@ public class SendParam extends AbstractBasePlugIn implements Plugin {
             parameter.getOpenStyle().setShowType(ShowType.Modal);
             parameter.setFormId("lag1_calendar");
 
+            //设置宽高
+            StyleCss styleCss = new StyleCss();
+            styleCss.setHeight("600");
+            styleCss.setWidth("1200");
+
             String[] str=new String[]{
                     (this.getModel().getValue("lag1_textfield")).toString()
             };
 
             parameter.setCustomParam("treeData",str);
-// 打开目标页面
+//            parameter.setInlineStyleCss(styleCss);
             this.getView().showForm(parameter);
         }
     }

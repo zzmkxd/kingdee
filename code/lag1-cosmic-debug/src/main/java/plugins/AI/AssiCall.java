@@ -39,31 +39,9 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
             if ("propsUpdated".equals(e.getEventName())) {
                 this.getView().showMessage("原始数据:" + args);
                 String pageId = this.getView().getMainView().getPageId();
-                Object pkvalue = getProcessFid("process-250618841BB5F0");
-                String bookList="计算机网络";
-                JSONObject needJson = new JSONObject();
-                needJson.put("bookList", bookList);
+                Object pkvalue = getProcessFid("process-2507146475CBF3");
                 DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId,args);
            }
-    }
-    @Override
-    public void click(EventObject evt) {
-        super.click(evt);
-        // 判断事件源是否为目标按钮
-        Control source = (Control) evt.getSource();
-        if (BTN_KEY.equals(source.getKey())) {
-            String pageId = this.getView().getMainView().getPageId();
-            Object pkvalue = getProcessFid("process-2507146475CBF3");
-            JSONObject params = new JSONObject();
-            params.put("topic_title", "生态系统的稳定性");
-            params.put("subject", "生物");
-            params.put("class_hours", "3课时");
-            params.put("key_points", "生态平衡、生物多样性、人类活动影响");
-//            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "你好");
-//            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, new HashMap<>(), params);
-            DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId, "----------------------正在搜索----------------------\n");
-
-        }
     }
     public Object getProcessFid(String billNo) {
         DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_process",
