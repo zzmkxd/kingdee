@@ -39,7 +39,7 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
             if ("propsUpdated".equals(e.getEventName())) {
                 this.getView().showMessage("原始数据:" + args);
                 String pageId = this.getView().getMainView().getPageId();
-                Object pkvalue = getProcessFid("process-250618841BB5F0");
+                Object pkvalue = getProcessFid("process-2507146475CBF3");
                 DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId,args);
            }
     }
