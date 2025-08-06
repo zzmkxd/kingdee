@@ -46,8 +46,7 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
         Control button = (Control) e.getSource();
         if (SAVE_BUTTON_KEY.equals(button.getKey())) {
 //这里是考试开始的逻辑，最好替换成动态表单弹窗-点击开始考试按钮后触发,也可以换为打开作答界面自动触发
-            JSONObject jsonObjectSingle = new JSONObject();
-
+        JSONObject jsonObjectSingle = new JSONObject();
 
         for(int i=1;i<=3;i++){
             DynamicObject material = (DynamicObject) this.getModel().getValue("lag1_linkknp"+i);
@@ -56,7 +55,6 @@ public class KnowledgeBaseToTest extends AbstractFormPlugin implements Plugin {
             jsonObjectSingle.put("kpoint"+i,name+" "+spec);
         }
 
-//            jsonObjectSingle.put("courseContent", this.getModel().getValue("lag1_basedatafield2"));//课程名字
         jsonObjectSingle.put("courseContent", "思政");
         jsonObjectSingle.put("diff", this.getModel().getValue("lag1_stepperfield1"));//题目难度系数1-10
         jsonObjectSingle.put("problemsCount", this.getModel().getValue("lag1_stepperfield"));//题目数量

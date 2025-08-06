@@ -11,10 +11,9 @@ temp/*
 webapp/*
 
 
-code/lag1-cosmic-debug/src/main/java/lag1/cosmic/debug
 # 忽略整个 code/ 目录下的所有内容
 code/*
-
+node_modules/*
 # 但排除 plugins/ 目录及其子目录内容（不忽略）
 !code/**/plugins/
 !code/**/plugins/*

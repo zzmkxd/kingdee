@@ -75,7 +75,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
             //调用AI开发平台微服务
             Map<String , String> variableMap = new HashMap<>();
-//            variableMap.put("pigaiResult", jsonResultObject.toJSONString());
             Object[] params = new Object[] {
                     //提示词
                     getPromptFid("prompt-2507094056E37A"),
@@ -97,10 +96,10 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"answer\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
+
             int sum=0;
             // entryentity是单据体标识，your_field_key是要修改的字段标识
             DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-//            this.getView().showMessage(Integer.toString(entryRows.size()));
             // 将JSONObject转换为金蝶可识别的DynamicObject数组
             for (int j = 0; j < entryRows.size(); j++) {
                 JSONObject jsonRow = resultJsonObject.getJSONArray("answer").getJSONObject(j);
@@ -113,7 +112,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
             AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
             if (AIORNOR.equals("normal")){
-//                this.getView().showMessage("binddata");
                 bindData(); //绑定至成绩关联表
             }else {
 //                this.getView().showMessage("ai:ai");
@@ -132,9 +130,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     public void beforeBindData(EventObject e) {
         super.beforeBindData(e);
         AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
-//        this.getView().showMessage("hp"+AIORNOR);
     }
-
     //获取提示词的Fid
     public long getPromptFid(String billNo) {
         DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_prompt",
@@ -145,8 +141,11 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     @Override
     public void afterBindData(EventObject e) {
         super.afterBindData(e);
+        radarchart();
+        piechart();
+    }
+    public void radarchart(){
         RadarChart chart = this.getControl("lag1_radarchartap");
-        PieChart pieChart = this.getControl("lag1_piechartap");
         RadarAxis radarAxis = new RadarAxis();// 构建轴
         List<RadarIndicator> indicators = new ArrayList<RadarIndicator>();
         RadarIndicator indicator1 = new RadarIndicator("基础题掌握度",6500);
@@ -182,9 +181,10 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
         long org = UserServiceHelper.getUserDefaultOrgID(Long.valueOf(RequestContext.get().getUserId()));
         UserServiceHelper.setUserDefaultOrg(Long.valueOf(RequestContext.get().getUserId()), 100000L);
-        System.out.println(org);
+    }
 
-//        -----------------------------------------------------------------------------------------------------------------
+    public void piechart(){
+        PieChart pieChart = this.getControl("lag1_piechartap");
         pieChart.setShowTitle(false);
         pieChart.setShowTooltip(true);
         pieChart.addTooltip("trigger","item");
@@ -227,6 +227,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         series.setPropValue("emphasis",map);
         this.getView().updateView("lag1_piechartap");
     }
+
     private ItemValue[] getDefaultProfitData() {
         ItemValue[] items = new ItemValue[4];
         ItemValue item1 = new ItemValue("困难题平均分", new BigDecimal(10));
@@ -256,14 +257,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         for(DynamicObject entryEntity:dataEntities){
             //new成绩关联表的表单对象
             String proid = entryEntity.getString("lag1_proid"); //题目id
-//            this.getView().showMessage("proid"+proid);
-
-//            String protype = entryEntity.getString("lag1_protype");
             String userscore = entryEntity.getString("lag1_userscore");
-
             String courseid = entryEntity.getString("lag1_courseid");
-
-//            String prodifficulty = entryEntity.getString("lag1_difficulty");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
             this.getView().showMessage("kn"+knpoints);
             String[] knpointArr = knpoints.split(",");
@@ -328,8 +323,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                     this.getView().showMessage("exception: "+e);
                 }
             }
-
-
         }
         this.getView().showMessage("更新数据成功");
     }

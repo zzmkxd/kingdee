@@ -37,7 +37,7 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
         // 检查事件名称
             String args = e.getEventArgs();
             if ("propsUpdated".equals(e.getEventName())) {
-                this.getView().showMessage("原始数据:" + args);
+                this.getView().showMessage("识别结果:" + args);
                 String pageId = this.getView().getMainView().getPageId();
                 Object pkvalue = getProcessFid("process-2507146475CBF3");
                 DispatchServiceHelper.invokeBizService("ai", "gai", "GaiService","selectProcessInSideBar",pkvalue, pageId,args);
@@ -45,8 +45,7 @@ public class AssiCall extends AbstractFormPlugin implements Plugin {
     }
     public Object getProcessFid(String billNo) {
         DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_process",
-                "number," +
-                        "id",
+                "number," + "id",
                 (new QFilter("number", QCP.equals, billNo)).toArray());
         long idd = dynamicObject.getLong("id");
         return Long.parseLong(String.valueOf(idd));
