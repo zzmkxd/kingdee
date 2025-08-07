@@ -21,6 +21,8 @@ import kd.sdk.plugin.Plugin;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.util.ByteArray;
 import plugins.timer.AutoSaveBillPlugin;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 
 import java.util.*;
 
@@ -40,10 +42,10 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
     private final String SUBMIT_BTN = "lag1_buttonap2";
     private final String CUR_NO = "lag1_currentquestionindex";
 
-    private final String ANS_ONE = "lag1_ans1";
-    private final String ANS_TWO = "lag1_ans2";
-    private final String ANS_THREE = "lag1_ans3";
-    private final String ANS_FOUR = "lag1_ans4";
+//    private final String ANS_ONE = "lag1_ans1";
+//    private final String ANS_TWO = "lag1_ans2";
+//    private final String ANS_THREE = "lag1_ans3";
+//    private final String ANS_FOUR = "lag1_ans4";
     private final String ANS_TXT="lag1_textareafield";  //答案多行文本
     private String prolist_id = ""; //组卷表单id
     private String testorhw = "";
@@ -64,11 +66,19 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
     private CountDown countDown; // 倒考试计时控件
     private int targetSeconds = 0; // 考试时长（秒）
 
+    /**
+     * 定义缓存对象
+     */
+    private DistributeSessionlessCache cache;
+
     @Override
     public void initialize() {
         super.initialize();
         // 在initialize方法中初始化控件引用
         countDown = this.getView().getControl("lag1_countdownap");
+
+        // 初始化缓存
+        cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
     }
 
     private void loadQuestionData() {
@@ -121,25 +131,25 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
     /**
      * 得到当前已保存的答案
      */
-    private String getCurAns(int curNo){
-        DynamicObject DO = this.getModel().getDataEntity();
-        String ans = "";
-        switch (curNo){
-            case 0:
-                ans = DO.getString(ANS_ONE);
-                break;
-            case 1:
-                ans = DO.getString(ANS_TWO);
-                break;
-            case 2:
-                ans = DO.getString(ANS_THREE);
-                break;
-            case 3:
-                ans = DO.getString(ANS_FOUR);
-                break;
-        }
-        return ans;
-    }
+//    private String getCurAns(int curNo){
+//        DynamicObject DO = this.getModel().getDataEntity();
+//        String ans = "";
+//        switch (curNo){
+//            case 0:
+//                ans = DO.getString(ANS_ONE);
+//                break;
+//            case 1:
+//                ans = DO.getString(ANS_TWO);
+//                break;
+//            case 2:
+//                ans = DO.getString(ANS_THREE);
+//                break;
+//            case 3:
+//                ans = DO.getString(ANS_FOUR);
+//                break;
+//        }
+//        return ans;
+//    }
 
     private String getRadioCheck(){
         //单选按钮组标识lag1_radiogroupfield
@@ -152,30 +162,34 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
      * @param
      */
     private void saveAns(int curNo){
+        loadQuestionData();
+        String questionId = pronoList.get(curNo);
         String ans="";  //用户作答
-        String ansSavePlace="";
-        if (curNo==0) ansSavePlace=ANS_ONE;
-        else if (curNo==1) ansSavePlace=ANS_TWO;
-        else if (curNo==2) ansSavePlace=ANS_THREE;
-        else if (curNo==3) ansSavePlace=ANS_FOUR;
+//        String ansSavePlace="";
+//        if (curNo==0) ansSavePlace=ANS_ONE;
+//        else if (curNo==1) ansSavePlace=ANS_TWO;
+//        else if (curNo==2) ansSavePlace=ANS_THREE;
+//        else if (curNo==3) ansSavePlace=ANS_FOUR;
 
         //判断是哪种类型的题目
-        loadQuestionData();
         DynamicObject currentQuestion = questionObjects.get(curNo);
         String questionType = currentQuestion.getString(PROTYPE);
 //        this.getView().showMessage("questionType"+questionType);
 //        this.getView().showMessage(questionType);
         if(questionType.equals("1")){
             String num = getRadioCheck();
-            if(num.equals("1")) this.getModel().setValue(ansSavePlace,"A");
-            else if(num.equals("2")) this.getModel().setValue(ansSavePlace,"B");
-            else if(num.equals("3")) this.getModel().setValue(ansSavePlace,"C");
-            else if(num.equals("4")) this.getModel().setValue(ansSavePlace,"D");
+//            if(num.equals("1")) this.getModel().setValue(ansSavePlace,"A");
+//            else if(num.equals("2")) this.getModel().setValue(ansSavePlace,"B");
+//            else if(num.equals("3")) this.getModel().setValue(ansSavePlace,"C");
+//            else if(num.equals("4")) this.getModel().setValue(ansSavePlace,"D");
+            ans = num.equals("1") ? "A" : num.equals("2") ? "B" : num.equals("3") ? "C" : "D";
         }else if(questionType.equals("3")||questionType.equals("4") || questionType.equals("6")||questionType.equals("7")){
             ans = (String) this.getModel().getValue(ANS_TXT);
 //            this.getView().showMessage(ans);
-            this.getModel().setValue(ansSavePlace,ans);
+//            this.getModel().setValue(ansSavePlace,ans);
         }
+        // 将答案存储到缓存中
+        cache.put(questionId, ans);
         this.getModel().setValue(ANS_TXT,"");   //清空
     }
 
@@ -222,6 +236,11 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
 //            loadQuestionData();
             loadAnswerData();
 //            this.getView().showMessage(userAnswers.toString());
+            //清理缓存
+            for(int curNo=0;curNo<pronoList.size();curNo++){
+                String questionId = pronoList.get(curNo);
+                cache.remove(questionId);
+            }
             sendParameter();
         }
     }
@@ -242,19 +261,22 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
 
     private void loadAnswerData() {
         for(int i=0;i<pronoList.size();i++){
-            if (i==0){
-                String ans = (String) this.getModel().getValue(ANS_ONE);
-                userAnswers.add(ans);
-            }else if(i==1){
-                String ans = (String) this.getModel().getValue(ANS_TWO);
-                userAnswers.add(ans);
-            }else if(i==2){
-                String ans = (String) this.getModel().getValue(ANS_THREE);
-                userAnswers.add(ans);
-            }else if(i==3){
-                String ans = (String) this.getModel().getValue(ANS_FOUR);
-                userAnswers.add(ans);
-            }
+            String questionId = pronoList.get(i);
+            String ans = cache.get(questionId);
+            userAnswers.add(ans);
+//            if (i==0){
+//                String ans = (String) this.getModel().getValue(ANS_ONE);
+//                userAnswers.add(ans);
+//            }else if(i==1){
+//                String ans = (String) this.getModel().getValue(ANS_TWO);
+//                userAnswers.add(ans);
+//            }else if(i==2){
+//                String ans = (String) this.getModel().getValue(ANS_THREE);
+//                userAnswers.add(ans);
+//            }else if(i==3){
+//                String ans = (String) this.getModel().getValue(ANS_FOUR);
+//                userAnswers.add(ans);
+//            }
         }
     }
 
@@ -313,18 +335,21 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         DynamicObject currentQuestion = questionObjects.get(currentQuestionIndex);
         String questionId = currentQuestion.getString("number"); // 假设billno是题目ID
         String questionType = currentQuestion.getString(PROTYPE);
+
+        //从缓存中国读取答案
+        String stuAns=cache.get(questionId);
         // 绑定作答(可选)
         if(questionType.equals("3")||questionType.equals("4")||questionType.equals("6")||questionType.equals("7")){
-            String stuAns="";
-            if(currentQuestionIndex==0){
-                stuAns= (String) this.getModel().getValue(ANS_ONE);
-            }else if(currentQuestionIndex==1){
-                stuAns = (String) this.getModel().getValue(ANS_TWO);
-            }else if(currentQuestionIndex==2){
-                stuAns = (String) this.getModel().getValue(ANS_THREE);
-            }else if(currentQuestionIndex==3){
-                stuAns = (String) this.getModel().getValue(ANS_FOUR);
-            }
+//            String stuAns="";
+//            if(currentQuestionIndex==0){
+//                stuAns= (String) this.getModel().getValue(ANS_ONE);
+//            }else if(currentQuestionIndex==1){
+//                stuAns = (String) this.getModel().getValue(ANS_TWO);
+//            }else if(currentQuestionIndex==2){
+//                stuAns = (String) this.getModel().getValue(ANS_THREE);
+//            }else if(currentQuestionIndex==3){
+//                stuAns = (String) this.getModel().getValue(ANS_FOUR);
+//            }
             this.getModel().setValue(ANS_TXT,stuAns);
         }
     }
@@ -621,6 +646,12 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         Button submitBtn = this.getView().getControl(SUBMIT_BTN);
         if (submitBtn != null) {
             submitBtn.click(); // 触发按钮的点击事件[3](@ref)[5](@ref)
+        }
+
+        //清理缓存
+        for(int curNo=0;curNo<pronoList.size();curNo++){
+            String questionId = pronoList.get(curNo);
+            cache.remove(questionId);
         }
         //调用submit方法提交考试
 //        countDownEnded();
