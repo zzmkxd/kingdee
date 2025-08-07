@@ -15,6 +15,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 
 /**
  * 动态表单插件
@@ -25,11 +27,11 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
     private final String PROSTUANS = "lag1_stuans";
 
     //学生作答
-    private final String ANS_ONE = "lag1_ans1";
-    private final String ANS_TWO = "lag1_ans2";
-    private final String ANS_THREE = "lag1_ans3";
-    private final String ANS_FOUR = "lag1_ans4";
-    private final String ANS_FIVE = "lag1_ans5";
+//    private final String ANS_ONE = "lag1_ans1";
+//    private final String ANS_TWO = "lag1_ans2";
+//    private final String ANS_THREE = "lag1_ans3";
+//    private final String ANS_FOUR = "lag1_ans4";
+//    private final String ANS_FIVE = "lag1_ans5";
 
     private final String PRE_BTN = "lag1_prevbutton";
     private final String NXT_BTN = "lag1_nextbutton";
@@ -47,6 +49,21 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
     //总题目数
     private int totalQuestion=0;
 
+    /**
+     * 定义缓存对象，用于存储学生的答案
+     * @param e
+     */
+    private DistributeSessionlessCache cache;
+
+    private final String CANCEL_BTN = "btncancel";
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        // 初始化缓存
+        cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
+    }
+
     @Override
     public void registerListener(EventObject e) {
         super.registerListener(e);
@@ -57,6 +74,8 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         nxtBTN.addClickListener(this);
         Button submitBTN = this.getView().getControl(SUBMIT_BTN);
         submitBTN.addClickListener(this);
+        Button cancelBTN = this.getView().getControl(CANCEL_BTN);
+        cancelBTN.addClickListener(this);
     }
 
     @Override
@@ -80,6 +99,11 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
             loadAnswerData();
 //            this.getView().showMessage(userAnswers.toString());
             sendParameter();
+        }else if(StringUtils.equals(CANCEL_BTN,source.getKey())){
+            //取消，清除缓存并关闭
+            //清理缓存
+            clearCache();
+//            this.getView().showMessage("取消");
         }
     }
     private void sendParameter() {
@@ -94,26 +118,32 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
 //        showParameter.setCustomParam("prolistId",prolist_id);
 //        //题单id
         this.getView().showForm(showParameter);
+
+        //清理缓存
+        clearCache();
     }
 
     private void loadAnswerData() {
         for(int i=0;i<questionJsonList.size();i++){
-            if (i==0){
-                String ans = (String) this.getModel().getValue(ANS_ONE);
-                userAnswers.add(ans);
-            }else if(i==1){
-                String ans = (String) this.getModel().getValue(ANS_TWO);
-                userAnswers.add(ans);
-            }else if(i==2){
-                String ans = (String) this.getModel().getValue(ANS_THREE);
-                userAnswers.add(ans);
-            }else if(i==3){
-                String ans = (String) this.getModel().getValue(ANS_FOUR);
-                userAnswers.add(ans);
-            }else if (i==4){
-                String ans = (String) this.getModel().getValue(ANS_FOUR);
-                userAnswers.add(ans);
-            }
+            String questionId = String.valueOf(i);
+            String ans = cache.get(questionId);
+            userAnswers.add(ans);
+//            if (i==0){
+//                String ans = (String) this.getModel().getValue(ANS_ONE);
+//                userAnswers.add(ans);
+//            }else if(i==1){
+//                String ans = (String) this.getModel().getValue(ANS_TWO);
+//                userAnswers.add(ans);
+//            }else if(i==2){
+//                String ans = (String) this.getModel().getValue(ANS_THREE);
+//                userAnswers.add(ans);
+//            }else if(i==3){
+//                String ans = (String) this.getModel().getValue(ANS_FOUR);
+//                userAnswers.add(ans);
+//            }else if (i==4){
+//                String ans = (String) this.getModel().getValue(ANS_FOUR);
+//                userAnswers.add(ans);
+//            }
         }
     }
 
@@ -129,16 +159,18 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
      */
     private void saveAns(int curNo){
         String ans="";  //用户作答
-        String ansSavePlace="";
-        if (curNo==0) ansSavePlace=ANS_ONE;
-        else if (curNo==1) ansSavePlace=ANS_TWO;
-        else if (curNo==2) ansSavePlace=ANS_THREE;
-        else if (curNo==3) ansSavePlace=ANS_FOUR;
-        else if (curNo==4) ansSavePlace=ANS_FIVE;
-
+//        String ansSavePlace="";
+//        if (curNo==0) ansSavePlace=ANS_ONE;
+//        else if (curNo==1) ansSavePlace=ANS_TWO;
+//        else if (curNo==2) ansSavePlace=ANS_THREE;
+//        else if (curNo==3) ansSavePlace=ANS_FOUR;
+//        else if (curNo==4) ansSavePlace=ANS_FIVE;
         ans = (String) this.getModel().getValue(PROSTUANS);
-        this.getModel().setValue(ansSavePlace,ans);
+        String questionId = String.valueOf(curNo);
 
+        //将答案存储到缓存中
+        cache.put(questionId,ans);
+//        this.getModel().setValue(ansSavePlace,ans);
         this.getModel().setValue(PROSTUANS,"");   //清空
     }
 
@@ -240,18 +272,28 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
 //        String questionType = currentQuestion.getString(PROTYPE);
         // 绑定作答(可选)
             String stuAns="";
-            if(currentQuestionIndex==0){
-                stuAns= (String) this.getModel().getValue(ANS_ONE);
-            }else if(currentQuestionIndex==1){
-                stuAns = (String) this.getModel().getValue(ANS_TWO);
-            }else if(currentQuestionIndex==2){
-                stuAns = (String) this.getModel().getValue(ANS_THREE);
-            }else if(currentQuestionIndex==3){
-                stuAns = (String) this.getModel().getValue(ANS_FOUR);
-            }else if(currentQuestionIndex==4){
-                stuAns = (String) this.getModel().getValue(ANS_FIVE);
-            }
+            String questionId = String.valueOf(currentQuestionIndex);   //当前题目ID
+            stuAns = cache.get(questionId);
+//            if(currentQuestionIndex==0){
+//                stuAns= (String) this.getModel().getValue(ANS_ONE);
+//            }else if(currentQuestionIndex==1){
+//                stuAns = (String) this.getModel().getValue(ANS_TWO);
+//            }else if(currentQuestionIndex==2){
+//                stuAns = (String) this.getModel().getValue(ANS_THREE);
+//            }else if(currentQuestionIndex==3){
+//                stuAns = (String) this.getModel().getValue(ANS_FOUR);
+//            }else if(currentQuestionIndex==4){
+//                stuAns = (String) this.getModel().getValue(ANS_FIVE);
+//            }
             this.getModel().setValue(PROSTUANS,stuAns);
 
+    }
+
+    private void clearCache() {
+        // 清除缓存
+        for (int i = 0; i < questionJsonList.size(); i++) {
+            String questionId = String.valueOf(i);
+            cache.remove(questionId);
+        }
     }
 }
