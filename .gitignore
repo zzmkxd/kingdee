@@ -1,0 +1,50 @@
+.gradle
+.idea
+.vscode
+
+# 忽略所有文件和目录
+*
+
+
+# 保留目标目录（需逐级取消忽略父目录）
+!code/
+!code/lag1-cosmic-debug/
+!code/lag1-cosmic-debug/src/
+!code/lag1-cosmic-debug/src/main/
+!code/lag1-cosmic-debug/src/main/java/
+!code/lag1-cosmic-debug/src/main/java/plugins/
+!code/lag1-cosmic-debug/src/main/java/plugins/**/*
+
+!public
+!public/**/*
+
+!.gitignore
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+gradle-wrapper.properties
+
+
+
+
+
