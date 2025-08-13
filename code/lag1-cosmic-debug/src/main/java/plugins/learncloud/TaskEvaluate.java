@@ -27,7 +27,6 @@ public class TaskEvaluate extends AbstractFormPlugin implements Plugin {
         super.registerListener(e);
         this.addItemClickListeners("tbmain");
     }
-
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         if (e.getItemKey().equalsIgnoreCase("lag1_evaluate")) {

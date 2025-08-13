@@ -1,2 +1,0 @@
-export declare type SetFilterContainerBaseDataSearchClosedEvent = $.kd.bos.filter.events.SetFilterContainerBaseDataSearchClosedEvent;
-export declare const SetFilterContainerBaseDataSearchClosedEvent: $.kd.bos.filter.events.SetFilterContainerBaseDataSearchClosedEvent_C;

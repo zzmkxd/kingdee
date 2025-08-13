@@ -14,7 +14,6 @@ public class BindParam extends AbstractFormPlugin implements Plugin {
     public void beforeBindData(EventObject e) {
         super.beforeBindData(e);
         Object treeDataObj = this.getView().getFormShowParameter().getCustomParam("treeData");
-//        this.getView().showMessage("json"+treeDataObj.toString());
         CustomControl customControl = this.getView().getControl("lag1_customcontrolap");
         customControl.setData(treeDataObj);
     }

@@ -21,14 +21,6 @@ import java.util.*;
  * 基础资料插件
  */
 public class GraphCreat extends AbstractFormPlugin implements Plugin {
-//    @Override
-//    public void afterBindData(EventObject e) {
-//        super.afterBindData(e);
-//        PointLineChart pointLineChart = this.getControl("lag1_pointlinechartap");
-//        plugins.learncloud.PointLineChartHelper pointLineChartHelper = new PointLineChartHelper();
-//        pointLineChartHelper.drawChart(pointLineChart);
-//        this.getView().updateView("lag1_pointlinechartap");//刷新控件
-//    }
     @Override
     public void registerListener(EventObject e) {
         //注册点击事件
@@ -39,24 +31,6 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         if (e.getItemKey().equalsIgnoreCase("lag1_baritemap")) {
-//            //获取日任务信息，并且以JSON字符串的形式展现
-//            JSONObject jsonResultObject = new JSONObject();
-//            jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
-//            jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
-//            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity("lag1_entity_daytask");
-//            JSONArray jsonTaskArray = new JSONArray();
-//            for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
-//                JSONObject jsonObjectSingle = new JSONObject();
-//                jsonObjectSingle.put("taskName", dynamicObjectSingle.getString("lag1_task_name"));
-//                jsonObjectSingle.put("expectTime", dynamicObjectSingle.getString("lag1_expect_minutes"));
-//                jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_diff"));
-//                jsonObjectSingle.put("description", dynamicObjectSingle.getString("lag1_description"));
-//                jsonObjectSingle.put("finishTime", dynamicObjectSingle.getString("lag1_finish_minute"));
-//                jsonObjectSingle.put("finishSituation", dynamicObjectSingle.getString("lag1_finish"));
-//                jsonTaskArray.add(jsonObjectSingle);
-//            }
-//            jsonResultObject.put("taskIntroduction", jsonTaskArray);
-//        }
             PointLineChart pointLineChart = this.getControl("lag1_pointlinechartap");
             PointLineChartHelper pointLineChartHelper = new PointLineChartHelper();
             drawChart(pointLineChart);
@@ -221,13 +195,11 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
     private void createLineSeries(PointLineChart pointLineChart, String name, List<BigDecimal> values, String color) {
         // 折线的名字
         LineSeries expireSeries = pointLineChart.createSeries(name);
-
         // 设置折线上文本的相关属性
         Label label = new Label();
         label.setShow(true);
         label.setColor("#000000");
         expireSeries.setLabel(label);
-
         // 连线颜色
         expireSeries.setItemColor(color);
         // 动画效果

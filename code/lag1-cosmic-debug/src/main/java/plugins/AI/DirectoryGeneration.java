@@ -33,8 +33,8 @@ public class DirectoryGeneration extends AbstractBasePlugIn implements Plugin {
                 }
             }
         }
-        //----下面是正常提取教材代码----
-        // 调用GPT开发平台微服务
+//----下面是正常提取教材代码----
+// 调用GPT开发平台微服务
 //        Map<String, String> variableMap = new HashMap<>();
 //        variableMap.put("courseinfo", jsonResultObject.toJSONString());
 //      Object[] params = new Object[]{
@@ -74,7 +74,7 @@ public class DirectoryGeneration extends AbstractBasePlugIn implements Plugin {
                     String subChapterKey = "第" + i + "_" + j + "章";
                     if (jsonResultObject.containsKey(subChapterKey)) {
                         // 添加子节点（标注"第X.Y章"，缩进表示层级）
-                        markdown.append("  * **第" + i + "." + j + "章**: ").append(jsonResultObject.getString(subChapterKey)).append("\n");
+                        markdown.append("  - **第" + i + "." + j + "章**: ").append(jsonResultObject.getString(subChapterKey)).append("\n");
                     }
                 }
             }

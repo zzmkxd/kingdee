@@ -44,7 +44,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     private static final String TKPROBLEM = "lag1_protest";
     private static final String TKCOURSE = "lag1_course";
     private static final String TKKNPOINT = "lag1_knowpoints";
-
+    private Integer data1=0;
+    private Integer data2=0;
     @Override
     public void registerListener(EventObject e) {
         //注册点击事件
@@ -54,7 +55,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         if (e.getItemKey().equalsIgnoreCase("lag1_ai_pingfen")) {
-            //获取日任务信息，并且以JSON字符串的形式展现
             JSONObject jsonResultObject = new JSONObject();
             jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
             jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
@@ -118,8 +118,12 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             }
             // 刷新界面显示
             this.getView().updateView(ENTRY_ENTITY_COLLECTION);
+            updateUserdata();
         }
 
+    }
+    public void updateUserdata(){
+        //开始写各字段数据
     }
 
     /**
@@ -141,18 +145,18 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     @Override
     public void afterBindData(EventObject e) {
         super.afterBindData(e);
-        radarchart();
         piechart();
+        radarchart();
     }
     public void radarchart(){
         RadarChart chart = this.getControl("lag1_radarchartap");
         RadarAxis radarAxis = new RadarAxis();// 构建轴
         List<RadarIndicator> indicators = new ArrayList<RadarIndicator>();
-        RadarIndicator indicator1 = new RadarIndicator("基础题掌握度",6500);
-        RadarIndicator indicator2 = new RadarIndicator("高难创新能力",16000);
-        RadarIndicator indicator3 = new RadarIndicator("全面程度",30000);
-        RadarIndicator indicator4 = new RadarIndicator("选择题答题技巧",38000);
-        RadarIndicator indicator5 = new RadarIndicator("问答题答题技巧",52000);
+        RadarIndicator indicator1 = new RadarIndicator("基础题掌握度",10);
+        RadarIndicator indicator2 = new RadarIndicator("高难创新能力",10);
+        RadarIndicator indicator3 = new RadarIndicator("全面程度",10);
+        RadarIndicator indicator4 = new RadarIndicator("选择题答题技巧",10);
+        RadarIndicator indicator5 = new RadarIndicator("问答题答题技巧",10);
         indicators.add(indicator1);
         indicators.add(indicator2);
         indicators.add(indicator3);
@@ -162,9 +166,26 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         chart.addRadarAxis(radarAxis);
         RadarSeries radarSeries = new RadarSeries();
         RadarData radarData = new RadarData();//构建数据
-        radarData.setName("张泽明(这里传学号)");//数据一
+        radarData.setName(this.getModel().getDataEntity().getString("creator")+"的能力维度分析");//数据一
 //        radarData.setValue(new Number[] {4200, 3000, 20000, 35000, 50000, 18000});
-        radarData.setValue(new Number[] {4200, 3000, 20000, 35000, 50000});
+        int n1=0,n2=0;
+        int sum1=0,sum2=0;
+        DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        for(DynamicObject entryEntity:dataEntities){
+            if(Objects.equals(entryEntity.getString("lag1_standard_answer"), "A")
+                    || Objects.equals(entryEntity.getString("lag1_standard_answer"), "B")
+                    || Objects.equals(entryEntity.getString("lag1_standard_answer"), "C")
+                    || Objects.equals(entryEntity.getString("lag1_standard_answer"), "D")){
+                    n1++;
+                    sum1+=Integer.parseInt(entryEntity.getString("lag1_userscore"));
+            }else {
+                n2++;
+                sum2+=Integer.parseInt(entryEntity.getString("lag1_userscore"));
+            }
+        }
+        radarData.setValue(new Number[] {data1, data2, (data1+data2)/2, n1 == 0 ? 0 : sum1/n1, n2 == 0 ? 0 : sum2/n2 });
+
+
         Map<String, Object>tooltip = new HashMap<String, Object>();
         tooltip.put("trigger", "item");
         RadarData radarData1 = new RadarData();
@@ -229,15 +250,44 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     }
 
     private ItemValue[] getDefaultProfitData() {
+        DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        int n1 = 0, n2 = 0, n3 = 0, n4 = 0;
+        int s1 = 0, s2 = 0, s3 = 0, s4 = 0;
+        for (DynamicObject entryEntity : dataEntities) {
+            //new成绩关联表的表单对象
+            if (Objects.equals(entryEntity.getString("lag1_difficulty"), "1")) {
+                n1++;
+                s1 += Integer.parseInt(entryEntity.getString("lag1_userscore"));
+            } else if (Objects.equals(entryEntity.getString("lag1_difficulty"), "2")) {
+                n2++;
+                s2 += Integer.parseInt(entryEntity.getString("lag1_userscore"));
+            } else if (Objects.equals(entryEntity.getString("lag1_difficulty"), "3")) {
+                n3++;
+                s3 += Integer.parseInt(entryEntity.getString("lag1_userscore"));
+            } else if (Objects.equals(entryEntity.getString("lag1_difficulty"), "4")) {
+                n4++;
+                s4 += Integer.parseInt(entryEntity.getString("lag1_userscore"));
+            }
+        }
         ItemValue[] items = new ItemValue[4];
-        ItemValue item1 = new ItemValue("困难题平均分", new BigDecimal(10));
-        items[0] = item1;
-        ItemValue item2 = new ItemValue("进阶题平均分", new BigDecimal(7));
-        items[1] = item2;
-        ItemValue item3 = new ItemValue("中等题平均分", new BigDecimal(5));
-        items[2] = item3;
-        ItemValue item4 = new ItemValue("基础题平均分", new BigDecimal(4));
+        ItemValue item1 = new ItemValue("困难题平均分", new BigDecimal(0));
+        ItemValue item2 = new ItemValue("进阶题平均分", new BigDecimal(0));
+        ItemValue item3 = new ItemValue("中等题平均分", new BigDecimal(0));;
+        ItemValue item4 = new ItemValue("基础题平均分", new BigDecimal(0));
+        if (n4 != 0)
+            item1 = new ItemValue("困难题平均分", new BigDecimal(s4 / n4));
+        if (n3 != 0)
+            item2 = new ItemValue("进阶题平均分", new BigDecimal(s3 / n3));
+        if (n2 != 0)
+            item3 = new ItemValue("中等题平均分", new BigDecimal(s2 / n2));
+        if (n1 != 0)
+            item4 = new ItemValue("基础题平均分", new BigDecimal(s1 / n1));
         items[3] = item4;
+        items[2] = item3;
+        items[1] = item2;
+        items[0] = item1;
+        data1 = (s1 + s2) / (n1 + n2 + 1);
+        data2 = (s4 + s3) / (n4 + n3 + 1);
         return items;
     }
 
@@ -245,7 +295,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
      * 成绩关联表方法
      */
     private void bindData(){
-        //            获取当前表单的数据实体
+        //获取当前表单的数据实体
         DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
         if(dataEntities==null){
             this.getView().showMessage("未找到数据实体");
