@@ -62,7 +62,7 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             }
             //设置对应属性
             dynamicObject.set("number", sb1.toString());
-            dynamicObject.set("name", resultJsonObject.getString("knowpoint_plan"));
+            dynamicObject.set("name", this.getModel().getValue("name").toString()+"知识点衔接方案");
             dynamicObject.set("status", "C");
             dynamicObject.set("enable", 1);
             dynamicObject.set("creator", RequestContext.get().getCurrUserId());
