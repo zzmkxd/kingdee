@@ -55,6 +55,7 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
         }
     }
     public void test() {
+//        已作答过的要排除题目跑一轮成绩关联表，用字符串存 （用","分隔的题目id）(按userid找，并只留下一列字段-题目id 用其转换成列表存储)
         QFilter filter = new QFilter("lag1_studentid", QCP.equals, String.valueOf(RequestContext.get().getCurrUserId()));
         // 查询所有数据 加载具体的题号
         DynamicObject[] problemScores = BusinessDataServiceHelper.load(
@@ -84,6 +85,7 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
         System.out.println("学生已作答题目总数：" + totalCount);
     }
     public void test2(String knpname) {
+//        每次在首页打开，后端发送给前端最低的7~10个知识点和权重--前端点击某个知识点，会向后端发送该知识点名字，按该知识点筛选题目(按知识点找，并只留下一列字段-题目id 用其转换成列表存储)
 // 1. 构建过滤条件（lag1_knpoint1 或 lag1_knpoint2 = "社会主义实践的探索"）
         QFilter filter1 = new QFilter("lag1_entryentity_linkp.lag1_knpoint1.name", QCP.equals, knpname)
                 .and(new QFilter("lag1_entryentity_linkp.lag1_knpoint1", QCP.is_notnull, null));
@@ -109,6 +111,7 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
     }
 
     public void demo() {
+//        题库用遍历保存的方式，遍历一遍后整张表后保存为csv文件
         // 1. 查询数据
         DynamicObject[] protests = BusinessDataServiceHelper.load(
                 "lag1_protest",
