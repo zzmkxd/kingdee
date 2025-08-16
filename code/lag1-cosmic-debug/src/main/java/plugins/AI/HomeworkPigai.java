@@ -39,6 +39,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     private String AIORNOR = "";    //是否ai出题
     //题目分数表单据体名词
     private static final String ENTRY_ENTITY_COLLECTION = "lag1_entryentity_pigai";
+    //用户数据表的表单标识
+    private static final String USERDATA_BIAODAN = "lag1_user_data";
     //成绩关联表的表单标识
     private static final String TKPROBLEM_SCORE= "lag1_problem_score";
     private static final String TKPROBLEM = "lag1_protest";
@@ -113,19 +115,71 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
             if (AIORNOR.equals("normal")){
                 bindData(); //绑定至成绩关联表
+                updateUserdata(); //更新用户数据表
             }else {
 //                this.getView().showMessage("ai:ai");
             }
             // 刷新界面显示
             this.getView().updateView(ENTRY_ENTITY_COLLECTION);
-            updateUserdata();
         }
 
     }
+    private DynamicObject findExistingRecord_UserData(String studentid, String knpname) {
+        // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
+        String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
+
+        // 构建 QFilter 条件
+        QFilter filter1 = new QFilter("lag1_studentid", QCP.equals, studentid);
+        QFilter filter2 = new QFilter("lag1_linkkp.name", QCP.equals, knpname);
+        QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
+
+        // 执行查询
+        DynamicObject[] records = BusinessDataServiceHelper.load(USERDATA_BIAODAN, fields, new QFilter[]{combinedFilter});
+
+        // 返回第一条记录（如果没有则返回 null）
+        return records.length > 0 ? records[0] : null;
+    }
     public void updateUserdata(){
         //开始写各字段数据
+        //获取当前表单的数据实体
+        DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        if(dataEntities==null){
+            this.getView().showMessage("未找到数据实体");
+            return;
+        }
+        String studentid = String.valueOf(RequestContext.get().getCurrUserId());
+        String studentname=RequestContext.get().getUserName();
+        //遍历单据体每一行,lag1_proid, lag1_protype,
+        for(DynamicObject entryEntity:dataEntities) {
+            //new成绩关联表的表单对象
+            String proid = entryEntity.getString("lag1_proid"); //题目id
+            String userscore = entryEntity.getString("lag1_userscore");
+            String courseid = entryEntity.getString("lag1_courseid");
+            String knpoints = entryEntity.getString("lag1_link_kpoints");
+            this.getView().showMessage("kn" + knpoints);
+            String[] knpointArr = knpoints.split(",");
+            String knpoint1 = "";
+            String knpoint2 = "";
+            if (knpointArr.length > 0) {
+                knpoint1 = knpointArr[0].trim();
+            }
+            if (knpointArr.length > 1) {
+                knpoint2 = knpointArr[1].trim();
+            }
+            DynamicObject existingRecord = findExistingRecord_UserData(studentid, knpoints);
+            if (existingRecord != null) {
+                this.getView().showMessage(existingRecord.toString());
+                int num = (int) existingRecord.get("lag1_ans_num") + 1;
+                existingRecord.set("lag1_ans_num", num);
+                int sum_score = (int) existingRecord.get("lag1_sum_score") + 1;
+                existingRecord.set("lag1_sum_score", sum_score );
+                existingRecord.set("lag1_data", sum_score / num);
+                SaveServiceHelper.update(existingRecord);
+            }else {
+                this.getView().showMessage("该题目让我旋转");
+            }
+        }
     }
-
     /**
      * 获取aiornormal
      * @param e
@@ -148,6 +202,108 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         piechart();
         radarchart();
     }
+
+    /**
+     * 成绩关联表方法
+     */
+    private void bindData(){
+        //获取当前表单的数据实体
+        DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        if(dataEntities==null){
+            this.getView().showMessage("未找到数据实体");
+            return;
+        }
+        String studentid = String.valueOf(RequestContext.get().getCurrUserId());
+        String studentname=RequestContext.get().getUserName();
+        //遍历单据体每一行,lag1_proid, lag1_protype,
+        for(DynamicObject entryEntity:dataEntities){
+            //new成绩关联表的表单对象
+            String proid = entryEntity.getString("lag1_proid"); //题目id
+            String userscore = entryEntity.getString("lag1_userscore");
+            String courseid = entryEntity.getString("lag1_courseid");
+            String knpoints = entryEntity.getString("lag1_link_kpoints");
+            this.getView().showMessage("kn"+knpoints);
+            String[] knpointArr = knpoints.split(",");
+            String knpoint1="";
+            String knpoint2 = "";
+            if(knpointArr.length>0){
+                knpoint1 = knpointArr[0].trim();
+            }
+            if(knpointArr.length>1){
+                knpoint2 = knpointArr[1].trim();
+            }
+            //插入之前能否先去TKPROBLEM_SCORE查找是否有数据的lag1_studentid与numer 和即将插入的studentid与proid一致，若一致，则只更新分数即lag1_score
+//                否则新建数据
+            DynamicObject existingRecord = findExistingRecord(studentid,proid);
+
+
+            if(existingRecord!=null){
+                this.getView().showMessage(existingRecord.toString());
+                existingRecord.set("lag1_score",Integer.parseInt(userscore));
+                SaveServiceHelper.update(existingRecord);
+            }else{
+                this.getView().showMessage("不存在");
+                String field1 = "number";
+                QFilter qFilter1 = new QFilter("number", QCP.equals,proid);
+                DynamicObject problem = BusinessDataServiceHelper.loadSingle(TKPROBLEM,field1,new QFilter[]{qFilter1});
+
+                String field2 = "number";
+                QFilter qFilter2 = new QFilter("number", QCP.equals,courseid);
+                DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,field2,new QFilter[]{qFilter2});
+
+                String field3 = "name";
+                QFilter qFilter3 = new QFilter("name",QCP.equals,knpoint1);
+                DynamicObject knpointname1 = BusinessDataServiceHelper.loadSingle(TKKNPOINT,field3,new QFilter[]{qFilter3});
+
+                String field4 = "name";
+                QFilter qFilter4 = new QFilter("name",QCP.equals,knpoint2);
+                DynamicObject knpointname2 = BusinessDataServiceHelper.loadSingle(TKKNPOINT,field4,new QFilter[]{qFilter4});
+
+
+                DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject(TKPROBLEM_SCORE);
+                dynamicObject.set("lag1_studentid",studentid);
+                dynamicObject.set("lag1_studentname",studentname);
+                dynamicObject.set("status", "C");
+                dynamicObject.set("enable", 1);
+                dynamicObject.set("lag1_proid",problem);
+                dynamicObject.set("lag1_score",Integer.parseInt(userscore));
+                dynamicObject.set("lag1_courseid",course);
+
+                if(!knpoint1.isEmpty()){
+                    dynamicObject.set("lag1_knowpoint1",knpointname1);
+                }else{
+//                    dynamicObject.set("lag1_knowpoint1","未绑定");
+                }
+                if(!knpoint1.isEmpty()){
+                    dynamicObject.set("lag1_knowpoint2",knpointname2);
+                }else{
+//                    dynamicObject.set("lag1_knowpoint2","未绑定");
+                }
+                try {
+                    SaveServiceHelper.saveOperate(TKPROBLEM_SCORE,new DynamicObject[]{dynamicObject},null);
+                }catch (Exception e){
+                    this.getView().showMessage("exception: "+e);
+                }
+            }
+        }
+        this.getView().showMessage("更新数据成功");
+    }
+    private DynamicObject findExistingRecord(String studentid, String proid) {
+        // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
+        String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
+
+        // 构建 QFilter 条件
+        QFilter filter1 = new QFilter("lag1_studentid", QCP.equals, studentid);
+        QFilter filter2 = new QFilter("lag1_proid.number", QCP.equals, proid);
+        QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
+
+        // 执行查询
+        DynamicObject[] records = BusinessDataServiceHelper.load(TKPROBLEM_SCORE, fields, new QFilter[]{combinedFilter});
+
+        // 返回第一条记录（如果没有则返回 null）
+        return records.length > 0 ? records[0] : null;
+    }
+
     public void radarchart(){
         RadarChart chart = this.getControl("lag1_radarchartap");
         RadarAxis radarAxis = new RadarAxis();// 构建轴
@@ -176,8 +332,8 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                     || Objects.equals(entryEntity.getString("lag1_standard_answer"), "B")
                     || Objects.equals(entryEntity.getString("lag1_standard_answer"), "C")
                     || Objects.equals(entryEntity.getString("lag1_standard_answer"), "D")){
-                    n1++;
-                    sum1+=Integer.parseInt(entryEntity.getString("lag1_userscore"));
+                n1++;
+                sum1+=Integer.parseInt(entryEntity.getString("lag1_userscore"));
             }else {
                 n2++;
                 sum2+=Integer.parseInt(entryEntity.getString("lag1_userscore"));
@@ -289,106 +445,5 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         data1 = (s1 + s2) / (n1 + n2 + 1);
         data2 = (s4 + s3) / (n4 + n3 + 1);
         return items;
-    }
-
-    /**
-     * 成绩关联表方法
-     */
-    private void bindData(){
-        //获取当前表单的数据实体
-        DynamicObjectCollection dataEntities = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-        if(dataEntities==null){
-            this.getView().showMessage("未找到数据实体");
-            return;
-        }
-        String studentid = String.valueOf(RequestContext.get().getCurrUserId());
-        String studentname=RequestContext.get().getUserName();
-        //遍历单据体每一行,lag1_proid, lag1_protype,
-        for(DynamicObject entryEntity:dataEntities){
-            //new成绩关联表的表单对象
-            String proid = entryEntity.getString("lag1_proid"); //题目id
-            String userscore = entryEntity.getString("lag1_userscore");
-            String courseid = entryEntity.getString("lag1_courseid");
-            String knpoints = entryEntity.getString("lag1_link_kpoints");
-            this.getView().showMessage("kn"+knpoints);
-            String[] knpointArr = knpoints.split(",");
-            String knpoint1="";
-            String knpoint2 = "";
-            if(knpointArr.length>0){
-                knpoint1 = knpointArr[0].trim();
-            }
-            if(knpointArr.length>1){
-                knpoint2 = knpointArr[1].trim();
-            }
-            //插入之前能否先去TKPROBLEM_SCORE查找是否有数据的lag1_studentid与numer 和即将插入的studentid与proid一致，若一致，则只更新分数即lag1_score
-//                否则新建数据
-            DynamicObject existingRecord = findExistingRecord(studentid,proid);
-
-
-            if(existingRecord!=null){
-                this.getView().showMessage(existingRecord.toString());
-                existingRecord.set("lag1_score",Integer.parseInt(userscore));
-                SaveServiceHelper.update(existingRecord);
-            }else{
-                this.getView().showMessage("不存在");
-                String field1 = "number";
-                QFilter qFilter1 = new QFilter("number", QCP.equals,proid);
-                DynamicObject problem = BusinessDataServiceHelper.loadSingle(TKPROBLEM,field1,new QFilter[]{qFilter1});
-
-                String field2 = "number";
-                QFilter qFilter2 = new QFilter("number", QCP.equals,courseid);
-                DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,field2,new QFilter[]{qFilter2});
-
-                String field3 = "name";
-                QFilter qFilter3 = new QFilter("name",QCP.equals,knpoint1);
-                DynamicObject knpointname1 = BusinessDataServiceHelper.loadSingle(TKKNPOINT,field3,new QFilter[]{qFilter3});
-
-                String field4 = "name";
-                QFilter qFilter4 = new QFilter("name",QCP.equals,knpoint2);
-                DynamicObject knpointname2 = BusinessDataServiceHelper.loadSingle(TKKNPOINT,field4,new QFilter[]{qFilter4});
-
-
-                DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject(TKPROBLEM_SCORE);
-                dynamicObject.set("lag1_studentid",studentid);
-                dynamicObject.set("lag1_studentname",studentname);
-                dynamicObject.set("status", "C");
-                dynamicObject.set("enable", 1);
-                dynamicObject.set("lag1_proid",problem);
-                dynamicObject.set("lag1_score",Integer.parseInt(userscore));
-                dynamicObject.set("lag1_courseid",course);
-
-                if(!knpoint1.isEmpty()){
-                    dynamicObject.set("lag1_knowpoint1",knpointname1);
-                }else{
-//                    dynamicObject.set("lag1_knowpoint1","未绑定");
-                }
-                if(!knpoint1.isEmpty()){
-                    dynamicObject.set("lag1_knowpoint2",knpointname2);
-                }else{
-//                    dynamicObject.set("lag1_knowpoint2","未绑定");
-                }
-                try {
-                    SaveServiceHelper.saveOperate(TKPROBLEM_SCORE,new DynamicObject[]{dynamicObject},null);
-                }catch (Exception e){
-                    this.getView().showMessage("exception: "+e);
-                }
-            }
-        }
-        this.getView().showMessage("更新数据成功");
-    }
-    private DynamicObject findExistingRecord(String studentid, String proid) {
-        // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
-        String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
-
-        // 构建 QFilter 条件
-        QFilter filter1 = new QFilter("lag1_studentid", QCP.equals, studentid);
-        QFilter filter2 = new QFilter("lag1_proid.number", QCP.equals, proid);
-        QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
-
-        // 执行查询
-        DynamicObject[] records = BusinessDataServiceHelper.load(TKPROBLEM_SCORE, fields, new QFilter[]{combinedFilter});
-
-        // 返回第一条记录（如果没有则返回 null）
-        return records.length > 0 ? records[0] : null;
     }
 }
