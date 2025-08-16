@@ -181,6 +181,43 @@ public class FilterBook extends AbstractBasePlugIn implements Plugin, ListRowCli
 
             // 7. 打开表单
             this.getView().showForm(parameter);
+        }else if ("lag1_resource".equalsIgnoreCase(itemKey)) {
+            String courseId = this.getModel().getValue("number").toString();
+            // 查询共享资源区基础资料(lag1_resource)中是否存在字段number等于courseId的条目
+            QFilter filter = new QFilter("number", QCP.equals, courseId);
+            DynamicObject[] resources = BusinessDataServiceHelper.load(
+                    "lag1_resource",
+                    String.valueOf(new String[]{"number"}), // 只查询number字段
+                    new QFilter[]{filter}
+            );
+            boolean isExist = resources != null && resources.length > 0;
+
+            if (isExist) {
+                // 如果存在，打开对应的表单
+                DynamicObject resource = resources[0]; // 获取第一个匹配的条目
+                String resourceNumber = resource.getString("number"); // 获取资源编号
+
+                // 动态获取主键字段的值
+                Object primaryKeyValue = resource.getPkValue(); // 获取主键字段的值
+
+                // 使用BillShowParameter打开表单
+                BillShowParameter parameter = new BillShowParameter();
+                parameter.setFormId("lag1_resource"); // 表单名称
+                parameter.setPkId(primaryKeyValue); // 使用主键字段的值
+                parameter.getOpenStyle().setShowType(ShowType.Modal); // 设置为模态窗口
+                this.getView().showForm(parameter); // 调用showForm方法打开表单
+            } else {
+                // 如果不存在，提示用户
+//                this.getView().showMessage("未找到对应的共享资源区基础资料");
+                String courseName = this.getModel().getValue("name").toString();
+                // 使用BillShowParameter打开表单
+                BillShowParameter parameter = new BillShowParameter();
+                parameter.setFormId("lag1_resource"); // 表单名称
+                parameter.getOpenStyle().setShowType(ShowType.Modal); // 设置为模态窗口
+                parameter.setCustomParam("courseId",courseId);
+                parameter.setCustomParam("courseName",courseName);
+                this.getView().showForm(parameter); // 调用showForm方法打开表单
+            }
         }
     }
     //   根据课程编号筛选教材列表
