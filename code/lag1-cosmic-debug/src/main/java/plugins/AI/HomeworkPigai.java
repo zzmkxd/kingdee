@@ -115,7 +115,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
             if (AIORNOR.equals("normal")){
                 bindData(); //绑定至成绩关联表
-                updateUserdata(); //更新用户数据表
+//                updateUserdata(); //更新用户数据表
             }else {
 //                this.getView().showMessage("ai:ai");
             }
@@ -158,26 +158,34 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             String knpoints = entryEntity.getString("lag1_link_kpoints");
             this.getView().showMessage("kn" + knpoints);
             String[] knpointArr = knpoints.split(",");
-            String knpoint1 = "";
-            String knpoint2 = "";
-            if (knpointArr.length > 0) {
+            String knpoint1 = null;
+            String knpoint2 = null;
+
+            DynamicObject existingRecord = null;
+            if (knpointArr.length > 1) {
+                knpoint1 = knpointArr[0].trim();
+                knpoint2 = knpointArr[1].trim();
+            }else if (knpointArr.length > 0) {
                 knpoint1 = knpointArr[0].trim();
             }
-            if (knpointArr.length > 1) {
-                knpoint2 = knpointArr[1].trim();
-            }
-            DynamicObject existingRecord = findExistingRecord_UserData(studentid, knpoints);
-            if (existingRecord != null) {
-                this.getView().showMessage(existingRecord.toString());
-                int num = (int) existingRecord.get("lag1_ans_num") + 1;
-                existingRecord.set("lag1_ans_num", num);
-                int sum_score = (int) existingRecord.get("lag1_sum_score") + 1;
-                existingRecord.set("lag1_sum_score", sum_score );
-                existingRecord.set("lag1_data", sum_score / num);
-                SaveServiceHelper.update(existingRecord);
-            }else {
-                this.getView().showMessage("该题目让我旋转");
-            }
+
+            if(knpoint1 != null) existingRecord = findExistingRecord_UserData(studentid, knpoint1);
+            updateData(existingRecord);
+            if(knpoint2 != null) existingRecord = findExistingRecord_UserData(studentid, knpoint2);
+            updateData(existingRecord);
+        }
+    }
+    public void updateData(DynamicObject record){
+        if (record != null) {
+            this.getView().showMessage(record.toString());
+            int num = (int) record.get("lag1_ans_num") + 1;
+            record.set("lag1_ans_num", num);
+            int sum_score = (int) record.get("lag1_sum_score") + 1;
+            record.set("lag1_sum_score", sum_score );
+            record.set("lag1_data", sum_score / num);
+            SaveServiceHelper.update(record);
+        }else {
+            this.getView().showMessage("该题目让我旋转");
         }
     }
     /**
@@ -202,7 +210,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         piechart();
         radarchart();
     }
-
     /**
      * 成绩关联表方法
      */
@@ -269,16 +276,11 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 dynamicObject.set("lag1_score",Integer.parseInt(userscore));
                 dynamicObject.set("lag1_courseid",course);
 
-                if(!knpoint1.isEmpty()){
+                if(!knpoint1.isEmpty())
                     dynamicObject.set("lag1_knowpoint1",knpointname1);
-                }else{
-//                    dynamicObject.set("lag1_knowpoint1","未绑定");
-                }
-                if(!knpoint1.isEmpty()){
+                if(!knpoint2.isEmpty())
                     dynamicObject.set("lag1_knowpoint2",knpointname2);
-                }else{
-//                    dynamicObject.set("lag1_knowpoint2","未绑定");
-                }
+
                 try {
                     SaveServiceHelper.saveOperate(TKPROBLEM_SCORE,new DynamicObject[]{dynamicObject},null);
                 }catch (Exception e){
@@ -288,6 +290,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         }
         this.getView().showMessage("更新数据成功");
     }
+
     private DynamicObject findExistingRecord(String studentid, String proid) {
         // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
         String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
