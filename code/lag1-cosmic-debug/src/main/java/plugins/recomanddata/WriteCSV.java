@@ -1,16 +1,50 @@
 package plugins.recomanddata;
+
+import com.alibaba.fastjson.JSONObject;
+import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.dataentity.entity.DynamicObjectCollection;
+import kd.bos.form.control.events.ItemClickEvent;
+import kd.bos.logging.Log;
+import kd.bos.logging.LogFactory;
+import kd.bos.mq.MQFactory;
+import kd.bos.mq.MessagePublisher;
+import kd.bos.orm.query.QCP;
+import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
+import kd.bos.servicehelper.QueryServiceHelper;
+import kd.bos.servicehelper.operation.SaveServiceHelper;
+import kd.sdk.plugin.Plugin;
+import plugins.MQ.MulThreadsEdit;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EventObject;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.form.control.events.ItemClickEvent;
+import kd.bos.logging.Log;
+import kd.bos.logging.LogFactory;
+import kd.bos.servicehelper.BusinessDataServiceHelper;
+import plugins.MQ.MulThreadsEdit;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EventObject;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class WriteCSV {
+public class WriteCSV  extends AbstractBasePlugIn implements Plugin {
 /*
 lag1_protest
 
@@ -27,8 +61,22 @@ lag1_itemd
 
 lag1_standard_answer
 */
-
-    public void demo() {
+    @Override
+    public void registerListener(EventObject e){
+        // 注册点击事件
+        super.registerListener(e);
+        this.addItemClickListeners("toolbarap");
+    }
+    Log Logger = LogFactory.getLog(MulThreadsEdit.class);
+    @Override
+    public void itemClick(ItemClickEvent evt) {
+        super.itemClick(evt);
+        String itemKey = evt.getItemKey();
+        if ("lag1_baritemap2".equals(itemKey)) {
+            toCSV();
+        }
+    }
+    public void toCSV() {
         // 1. 查询数据
         DynamicObject[] protests = BusinessDataServiceHelper.load(
                 "lag1_protest",
