@@ -130,8 +130,8 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         // 去除前 [ 和后 ]
         if(linkkpValues.isEmpty()) this.getView().showMessage("暂无相似题目，请稍后再试");
         else{
-            this.getView().showMessage("即将开始练习以下相似题目：");
             String formattedQuestionIds = linkkpValues.isEmpty() ? "" : linkkpValues.toString().substring(1, linkkpValues.toString().length() - 1);
+            this.getView().showMessage("即将开始练习以下相似题目："+linkkpValues.toString());
             openWrite(formattedQuestionIds);
         }
     }
