@@ -71,6 +71,16 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
      */
     private DistributeSessionlessCache cache;
 
+    private void chooseLoadQuestionData(){
+        //获取自定义参数isWordCloud
+        String isWordCloud = this.getView().getFormShowParameter().getCustomParam("isWordCloud");
+        if(StringUtils.equals(isWordCloud,"true")){
+            loadQuestionData2();
+        }else{
+            loadQuestionData();
+        }
+    }
+
     @Override
     public void initialize() {
         super.initialize();
@@ -81,6 +91,9 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
     }
 
+    /**
+     * 作业类型1
+     */
     private void loadQuestionData() {
         //获取pkid
         Long pkid = this.getView().getFormShowParameter().getCustomParam("prolistPKID");
@@ -122,6 +135,39 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         }
     }
 
+    /**
+     * 词云跳转2
+     */
+    private void loadQuestionData2(){
+        String prolist=this.getView().getFormShowParameter().getCustomParam("prolist");    //获取题目列表string
+        Integer prolistTypeNum = 0;
+        this.getModel().setValue("lag1_combofield",prolistTypeNum); //词云跳转默认为作业类型
+        String[] pronoArray = prolist.split(",");
+//            List<String> pronoList = new ArrayList<>();
+        for (String prono : pronoArray) {
+            String trimmedProno = prono.trim();
+            if (!trimmedProno.isEmpty()) {
+                pronoList.add(trimmedProno);
+//                    updateAnswerStatusButtons(trimmedProno);
+            }
+        }
+        questionObjects = new ArrayList<>();
+        // 根据题目ID列表查询题目数据
+        for (String prono : pronoList) {
+            QFilter filter = new QFilter("number", QCP.equals, prono);
+            DynamicObject question = BusinessDataServiceHelper.loadSingle(TKPROBLEM, new QFilter[]{filter});
+            if (question != null) {
+                questionObjects.add(question);
+            }
+        }
+
+        //默认显示第一道题目
+        if (!questionObjects.isEmpty()) {
+            bindCurrentQuestionData();
+        }
+    }
+
+
     //得到当前的currentQuestionIndex
     private void getCurNo(){
         DynamicObject DO = this.getModel().getDataEntity();
@@ -162,7 +208,8 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
      * @param
      */
     private void saveAns(int curNo){
-        loadQuestionData();
+//        loadQuestionData();
+        chooseLoadQuestionData();
         String questionId = pronoList.get(curNo);
         String ans="";  //用户作答
 //        String ansSavePlace="";
@@ -310,7 +357,8 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
 //        countDown = this.getView().getControl("lag1_countdownap");
         //检查是否已经加载过数据
         if(questionObjects.isEmpty() || pronoList.isEmpty() || testorhw==""){
-            loadQuestionData();
+//            loadQuestionData();
+            chooseLoadQuestionData();
         }
     }
 

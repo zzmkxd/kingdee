@@ -4,6 +4,8 @@ import kd.bos.base.AbstractBasePlugIn;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
+import kd.bos.form.FormShowParameter;
+import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
 import kd.bos.orm.query.QCP;
@@ -126,6 +128,14 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         List<String> linkkpValues = getStrings(recs);
         this.getView().showMessage(linkkpValues.toString());
 
+//        this.getView().showMessage(linkkpValues.toString());
+        // 去除前 [ 和后 ]
+        if(linkkpValues.isEmpty()) this.getView().showMessage("暂无相似题目，请稍后再试");
+        else{
+            String formattedQuestionIds = linkkpValues.isEmpty() ? "" : linkkpValues.toString().substring(1, linkkpValues.toString().length() - 1);
+            this.getView().showMessage("即将开始练习以下相似题目："+linkkpValues.toString());
+            openWrite(formattedQuestionIds);
+        }
     }
 
     @NotNull
@@ -143,5 +153,17 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
 //            linkkpValues.add("-------------------");
         }
         return linkkpValues;
+    }
+
+    /**
+     * 打开做题表单
+     */
+    private void openWrite(String prolist){
+        FormShowParameter nxtList = new FormShowParameter();
+        nxtList.getOpenStyle().setShowType(ShowType.Modal);
+        nxtList.setFormId("lag1_quesition_write");
+        nxtList.setCustomParam("prolist",prolist);
+        nxtList.setCustomParam("isWordCloud","true");
+        this.getView().showForm(nxtList);
     }
 }

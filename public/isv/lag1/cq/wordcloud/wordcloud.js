@@ -14,7 +14,7 @@ function init(model, props) {
 
             // 添加点击事件
             wordElement.addEventListener('click', () => {
-                showPopup(word.text);
+                // showPopup(word.text);   //自定义控件自带传参
                 model.invoke('wordClicked', word.text);
             });
 
@@ -63,6 +63,22 @@ function init(model, props) {
     console.log("wordcloud inited")
     // 页面加载时生成词云
 
+    // // 词云数据：词和对应的权重
+    // if (!window.wordData) {
+    //     window.wordData = [
+    //         {text: "人工智能", weight: 10, color: "#FF5252"},
+    //         {text: "机器学习", weight: 8, color: "#FF7043"},
+    //         {text: "深度学习", weight: 9, color: "#FFCA28"},
+    //         {text: "数据分析", weight: 7, color: "#66BB6A"},
+    //         {text: "云计算", weight: 6, color: "#26C6DA"},
+    //         {text: "区块链", weight: 5, color: "#42A5F5"},
+    //         {text: "物联网", weight: 7, color: "#7E57C2"},
+    //         {text: "大数据", weight: 8, color: "#EC407A"},
+    //         {text: "虚拟现实", weight: 6, color: "#AB47BC"},
+    //         {text: "增强现实", weight: 5, color: "#5C6BC0"}
+    //     ];
+    // }
+
     // 词云数据：词和对应的权重
     if (!window.wordData) {
         window.wordData = [
@@ -77,6 +93,9 @@ function init(model, props) {
             {text: "虚拟现实", weight: 6, color: "#AB47BC"},
             {text: "增强现实", weight: 5, color: "#5C6BC0"}
         ];
+    } else {
+        console.log(window.wordData)
+        window.wordData = JSON.parse(window.wordData);
     }
 
     // 获取DOM元素
