@@ -27,6 +27,10 @@ public class DemoConsumer implements MessageConsumer {
             obj.set("status", "C");
             obj.set("lag1_textfield1", ((int) message)%11);
             SaveServiceHelper.saveOperate("lag1_homework_correct", new DynamicObject[]{obj}, null);
+//            QFilter qFilter = new QFilter("number", QCP.equals, "ProList002");
+//            DynamicObject obj = BusinessDataServiceHelper.loadSingle("lag1_homework_correct", new QFilter[]{qFilter});
+//            obj.set("name", (String) message);
+//            SaveServiceHelper.update(obj);
         } catch (Throwable e) {
             boolean discard = false;
             if (discard){
