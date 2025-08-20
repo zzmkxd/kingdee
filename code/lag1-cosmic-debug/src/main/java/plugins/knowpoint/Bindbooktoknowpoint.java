@@ -35,9 +35,9 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
     private final String TKCOURSE="lag1_course";
     private final String TKBOOK="lag1_book";
         //全局变量
-        String postNumber;
+        String bookNumber;
         Long pkId;
-        DynamicObject postData;
+        DynamicObject bookData;
 
         @Override
         public void registerListener(EventObject e) {
@@ -55,90 +55,49 @@ public class Bindbooktoknowpoint extends AbstractFormPlugin implements Plugin {
                 Button button = (Button)source;
                 String key = button.getKey();
                 if(StringUtils.equals("lag1_pointbindcourse",key)){
-                    //打开知识点列表
-                    // 打开基础资料列表的标准方式
-                    ListShowParameter listShowParameter = new ListShowParameter();
-                    listShowParameter.setFormId("bos_list"); // 固定值，基础资料列表模板
-                    listShowParameter.setBillFormId("lag1_knowpoint"); // 基础资料标识
 
-                    //设置打开方式为模态窗口
-                    listShowParameter.getOpenStyle().setShowType(ShowType.Modal);
-//
-                    //设置宽高
-                    StyleCss styleCss = new StyleCss();
-                    styleCss.setHeight("600");
-                    styleCss.setWidth("1200");
-                    listShowParameter.getOpenStyle().setInlineStyleCss(styleCss);
-
-                    this.getView().showForm(listShowParameter);
-
-                    //录入知识点到列表
                 }
             }
         }
-
 
         //这部分才是接收知识点分析情况部分功能
         @Override
         public void beforeBindData(EventObject e) {
             super.beforeBindData(e);
 //        这里是接收参数端在beforeBIndData里面开始先接受传过来的参数
-            postNumber = this.getView().getFormShowParameter().getCustomParam("postNumber");        //这里的getCustomParam里面的标识就是在上个页面传参的时候设置的
+            bookNumber = this.getView().getFormShowParameter().getCustomParam("bookNumber");        //这里的getCustomParam里面的标识就是在上个页面传参的时候设置的
             pkId = this.getView().getFormShowParameter().getCustomParam("pkId");        //这样就可以获取到传过来的参数
-            if(StringUtils.isNotBlank(postNumber)){
-//                this.getModel().setValue("lag1_postnumber",postNumber);
+            if(StringUtils.isNotBlank(bookNumber)){
                 //查询基础资料
-                    postData = queryPostData(postNumber);
-                    if(postData!=null){
-                        //绑定文本内容
-                        //课程id
-                        String courseid = postData.getString("lag1_courseid.number");
-                        String fields = "number,name";
-                        QFilter qFilter = new QFilter("number",QCP.equals,courseid);
-                        DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,fields,new QFilter[]{qFilter});
-                        if(course!=null){
-                            this.getModel().setValue("lag1_course",course);
-                        }
-                        //教材id
-                        String bookid = postData.getString("number");
-                        String bookfields = "number";
-                        QFilter qFilter1 = new QFilter("number", QCP.equals,bookid);
-                        DynamicObject book = BusinessDataServiceHelper.loadSingle(TKBOOK,bookfields,new QFilter[]{qFilter1});
-                        if(book!=null){
-                            this.getModel().setValue("lag1_book",book);
-                        }
-                        //章节数据
-                        for (int i = 1; i <= 8; i++) {
-                            if(postData.getString("lag1_chapter" + i) != null){
-                                String chapter = postData.getString("lag1_chapter" + i);
-                                this.getModel().setValue("lag1_chapter" + i, chapter);
-                            }
-                            for(int j=1;j<=5;j++){
-                                if(postData.getString("lag1_chapter" + i+"p"+j) != null){
-                                    String chapter = postData.getString("lag1_chapter" + i+"p"+j);
-                                    this.getModel().setValue("lag1_chapter" + i+"p"+j, chapter);
-                                };
-                            }
-                        }
-
-//                        knowpoint_zzm001
-                    }else{
-                        this.getView().showMessage("没有找到章节数据");
+                bookData = queryBookData(bookNumber);
+                if(bookData!=null){
+                    //课程id
+                    String courseid = bookData.getString("lag1_courseid.number");
+                    String fields = "number,name";
+                    QFilter qFilter = new QFilter("number",QCP.equals,courseid);
+                    DynamicObject course = BusinessDataServiceHelper.loadSingle(TKCOURSE,fields,new QFilter[]{qFilter});
+                    if(course!=null){
+                        this.getModel().setValue("lag1_course",course);
                     }
+                    //教材id
+                    String bookid = bookData.getString("number");
+                    String bookfields = "number";
+                    QFilter qFilter1 = new QFilter("number", QCP.equals,bookid);
+                    DynamicObject book = BusinessDataServiceHelper.loadSingle(TKBOOK,bookfields,new QFilter[]{qFilter1});
+                    if(book!=null){
+                        this.getModel().setValue("lag1_book",book);
+                    }
+                }else{
+                    this.getView().showMessage("没有找到章节数据");
+                }
             }else{
 //                this.getView().showMessage("绑定数据错误");
             }
 
         }
 
-
-        /**
-         * 寻帖子基础资料
-         * @param postNumber
-         * @return 帖子数据对象
-         */
-        private DynamicObject queryPostData(String postNumber){
-            return BusinessDataServiceHelper.loadSingle(TKBOOK,new QFilter[]{new QFilter("number", QCP.equals,postNumber)});
+        private DynamicObject queryBookData(String bookNumber){
+            return BusinessDataServiceHelper.loadSingle(TKBOOK,new QFilter[]{new QFilter("number", QCP.equals,bookNumber)});
         }
         @Override
         public void beforeClosed(BeforeClosedEvent e) {

@@ -19,8 +19,6 @@ import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.sdk.plugin.Plugin;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.util.ByteArray;
-import plugins.timer.AutoSaveBillPlugin;
 import kd.bos.cache.CacheFactory;
 import kd.bos.cache.DistributeSessionlessCache;
 

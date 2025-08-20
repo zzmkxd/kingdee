@@ -1,4 +1,4 @@
-package plugins.test;
+package plugins.demo;
 
 
 import java.math.BigDecimal;

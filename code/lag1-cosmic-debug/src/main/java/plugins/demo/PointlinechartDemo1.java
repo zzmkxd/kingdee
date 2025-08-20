@@ -1,4 +1,4 @@
-package plugins.test;
+package plugins.demo;
 
 import kd.bos.form.chart.PointLineChart;
 import kd.bos.form.plugin.AbstractFormPlugin;
