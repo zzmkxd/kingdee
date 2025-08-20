@@ -1,4 +1,4 @@
-package plugins.test;
+package plugins.demo;
 
 import java.util.EventObject;
 
@@ -7,7 +7,6 @@ import kd.bos.form.chart.PieChart;
 import kd.bos.form.chart.PieSeries;
 import kd.bos.form.chart.Position;
 import kd.bos.form.chart.RoseType;
-import kd.bos.form.control.Rate;
 import kd.bos.form.control.events.RateEvent;
 import kd.bos.form.control.events.RateListener;
 import kd.bos.form.plugin.AbstractFormPlugin;

@@ -1,4 +1,4 @@
-package plugins.test;
+package plugins.demo;
 
 import kd.bos.dataentity.resource.ResManager;
 import kd.bos.form.chart.ItemValue;

@@ -1,4 +1,4 @@
-package plugins.test;
+package plugins.demo;
 
 import java.util.ArrayList;
 import java.util.EventObject;
