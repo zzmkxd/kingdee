@@ -1,6 +1,5 @@
-package plugins.recomanddata;
+package plugins.demo;
 
-import com.alibaba.fastjson.JSONObject;
 import kd.bos.base.AbstractBasePlugIn;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -8,24 +7,16 @@ import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.form.control.events.ItemClickEvent;
 import kd.bos.logging.Log;
 import kd.bos.logging.LogFactory;
-import kd.bos.mq.MQFactory;
-import kd.bos.mq.MessagePublisher;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.QueryServiceHelper;
-import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.sdk.plugin.Plugin;
 import plugins.MQ.MulThreadsEdit;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EventObject;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 基础资料插件

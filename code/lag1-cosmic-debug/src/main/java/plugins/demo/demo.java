@@ -1,6 +1,5 @@
-package plugins.recomanddata;
+package plugins.demo;
 
-import com.alibaba.fastjson.JSONObject;
 import kd.bos.base.AbstractBasePlugIn;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;

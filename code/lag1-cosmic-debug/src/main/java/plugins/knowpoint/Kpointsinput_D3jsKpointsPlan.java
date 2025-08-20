@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements Plugin {
     private String damn;
+    private static final String ENTRY_ENTITY_COLLECTION = "lag1_knp";
     @Override
     public void registerListener(EventObject e) {
         // 注册点击事件
@@ -50,10 +51,11 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"knowpoint_plan\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
-            this.getView().showMessage(jsonResult);
 
-            //new一个DynamicObject表单对象
-            DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_d3js_knowpoints");
+// 获取当前表单的数据包（主实体）
+            DynamicObject dynamicObject = this.getModel().getDataEntity(true);
+
+//            DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_d3js_knowpoints");
             StringBuilder sb1 = new StringBuilder();
             for (int i = 1; i <= 10; i++) {
                 int ascii = 48 + (int) (Math.random() * 9);
@@ -61,13 +63,17 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 sb1.append(c);
             }
             //设置对应属性
-            dynamicObject.set("number", sb1.toString());
-            dynamicObject.set("name", this.getModel().getValue("name").toString()+"知识点衔接方案");
-            dynamicObject.set("status", "C");
-            dynamicObject.set("enable", 1);
-            dynamicObject.set("creator", RequestContext.get().getCurrUserId());
+            this.getModel().setValue("number", sb1.toString());
+            DynamicObject basedataObj = (DynamicObject)this.getModel().getValue("lag1_course");// 获取基础资料字段的数据包
+            if (basedataObj != null) {
+                String refPropertyValue = basedataObj.getString("name");// 获取引用属性值
+                this.getModel().setValue("name", refPropertyValue+"知识点衔接方案");
+            }
+            this.getModel().setValue("status", "Approved");
+            this.getModel().setValue("enable", 1);
+//            this.getModel().setValue("creator", RequestContext.get().getCurrUserId());
             //操作表单
-            DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection("lag1_knp");
+            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
             for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
                 JSONObject jsonObjectSingle = (JSONObject) object;
                 DynamicObject dynamicObjectEntry = dynamicObjectCollection.addNew();
@@ -78,34 +84,15 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 dynamicObjectEntry.set("lag1_chap", jsonObjectSingle.getString("chap"));
                 dynamicObjectEntry.set("lag1_description", jsonObjectSingle.getString("description"));
             }
-            SaveServiceHelper.saveOperate("lag1_d3js_knowpoints", new DynamicObject[] {dynamicObject}, null);
+//            SaveServiceHelper.saveOperate("lag1_d3js_knowpoints", new DynamicObject[] {dynamicObject}, null);
+            this.getView().updateView();
         }
 //-------------------------------------------------------------------------------------------------------------------------------------
 
         if (e.getItemKey().equalsIgnoreCase("lag1_kpoint_new")) {
-//            String str=this.getModel().getValue("lag1_knowpoint1").toString();
-            String yourString = cache.get("yourValName");
-            // 调用GPT开发平台微服务
-            Map<String, String> variableMap = new HashMap<>();
-//            variableMap.put("knowpointinfos", yourString);
-            Object[] params = new Object[]{
-                    //GPT提示编码
-                    getPromptFid("prompt-250630BAA79177"),
-                    yourString,
-                    variableMap
-            };
-            Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
-
-            JSONObject jsonObjectResult2 = new JSONObject(result);
-            JSONObject jsonObjectData2 = jsonObjectResult2.getJSONObject("data");//微服务的输出，即代填入单据体的知识点JSON及正常微服务输出的各个键值对
-
-            this.getView().showMessage(jsonObjectData2.getString("llmValue"));
-
-            String llmValue2 = jsonObjectData2.getString("llmValue");//代填入单据体的知识点JSON
-//            damn=llmValue2;
-            cache.put("damn", llmValue2);
+            String jsonKnp = cache.get("damn");
             Map<String, String> params1 = new HashMap<>();
-            params1.put("jsonResult", llmValue2);
+            params1.put("jsonResult", jsonKnp);
             String jsonResult = params1.get("jsonResult").replaceAll("\\s*|\r|\n|\t","");
             JSONObject resultJsonObject = null;
             try {
@@ -117,19 +104,14 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
 
-//-------------------------------------------------------------------------------------------------------------------------------------
-// 修改已有的表单，修改如下：
-// 首先尝试加载已存在的基础资料（假设您知道基础资料的唯一标识）
-//            QFilter filter = new QFilter("name", QCP.equals, this.getModel().getValue("name").toString()); // 使用名称或其他唯一标识查询
-//            DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("lag1_knowpoints", new QFilter[]{filter});
-// 新建多个知识点
-//            JSONArray knowledgePoints = resultJsonObject.getJSONArray("knowledgePoints");
             if (resultJsonObject != null) {
                 this.getView().showMessage("正常");
                 for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
                     JSONObject jsonObjectSingle = (JSONObject) object;
+                    if(validateDotCount(jsonObjectSingle.getString("knid")) && (jsonObjectSingle.getString("description")== "")){
+                        continue;
+                    }
                     DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_knowpoints");
-
                     StringBuilder sb1 = new StringBuilder();
                     for (int i = 1; i <= 10; i++) {
                         int ascii = 48 + (int) (Math.random() * 9);
@@ -145,7 +127,6 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                     dynamicObject.set("name", jsonObjectSingle.getString("knowpName"));
                     //依据所属的基础资料获取
                     dynamicObject.set("lag1_courseid", this.getModel().getValue("lag1_course"));
-
                     dynamicObject.set("lag1_knowpointplan", this.getModel().getValue("name"));
                     dynamicObject.set("lag1_knowpointparent", jsonObjectSingle.getString("knowpointParent"));
                     dynamicObject.set("lag1_knowp_expand", jsonObjectSingle.getString("knowpExpand"));
@@ -156,26 +137,20 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
 
                 }
             }else this.getView().showMessage("毁了");
-
-//-------------------------------------------------------------------------------------------------------------------------------------
-//修改已有的单据体，修改后// 更新单据
-//                SaveServiceHelper.update(new DynamicObject[]{existingBill});
-//            }
-//-------------------------------------------------------------------------------------------------------------------------------------
         }
     }
 
-    // 获取GPT提示的Fid
-    public long getPromptFid(String billNo) {
-        DynamicObject dynamicObject = BusinessDataServiceHelper.loadSingle("gai_prompt",
-                "number," + "id",
-                (new QFilter("number", QCP.equals, billNo)).toArray());
-        return (dynamicObject).getLong("id");
-    }
 
-    @Override
-    public void afterBindData(EventObject eventObject) {
-        Markdown mk = this.getView().getControl("lag1_md");
-        mk.setText(this.getModel().getValue("lag1_knowpoint1").toString());
+    public static boolean validateDotCount(String input) {
+        // 1. 验证整体格式是否符合数字.数字.数字的模式
+        if (!input.matches("^\\d+(\\.\\d+)*$")) {
+            return false;
+        }
+
+        // 2. 计算点的数量
+        int dotCount = input.length() - input.replace(".", "").length();
+
+        // 3. 判断点数量是否<=2
+        return dotCount <= 2;
     }
 }

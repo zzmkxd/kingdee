@@ -37,7 +37,7 @@ public class BookKnowpointAI {
 
     public static void main(String[] args) {
 
-        String filePath = "D:\\桌面\\· 马克思主义理论研究和建设工程重点教材 ·.txt";
+        String filePath = "C:\\Users\\Tian_Yumi\\Desktop\\· 马克思主义理论研究和建设工程重点教材 ·.txt";
 //        String filePath = "D:\\桌面\\Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第2版） (黑马程序员) (Z-Library).txt"; // 替换为你的文件路径
         String fileContent = readFileContent(filePath);
         // 分割文本
@@ -73,10 +73,10 @@ public class BookKnowpointAI {
             e.printStackTrace();
         }
         // 输出最终结果
-        System.err.println("最终结果：" + allKnowledgePoints);
+        System.err.println(allKnowledgePoints);
     }
 
-    private static String readFileContent(String filePath) {
+    public static String readFileContent(String filePath) {
         StringBuilder content = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -99,7 +99,7 @@ public class BookKnowpointAI {
 
         return new String[]{segment};
     }
-    private static String processSegment(String segment, int segmentIndex) {
+    public static String processSegment(String segment, int segmentIndex) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // 创建JSON请求体
