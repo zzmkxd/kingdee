@@ -82,7 +82,7 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         }
 
         System.out.println("当前用户题目ID列表：" + questionIds);
-        this.getView().showMessage(questionIds.toString());
+//        this.getView().showMessage(questionIds.toString());
         // 获取记录数
         int totalCount = 0;
         if (problemScores != null) {
@@ -124,23 +124,23 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         List<Question> recs = recommendSimilarQuestions(targetId, questions, 3, excludeIds);
 
         List<String> linkkpValues = getStrings(recs);
-//        this.getView().showMessage(linkkpValues.toString());
+        this.getView().showMessage(linkkpValues.toString());
 
     }
 
     @NotNull
     private static List<String> getStrings(List<Question> recs) {
         List<String> linkkpValues = new ArrayList<>();
-        linkkpValues.add("=== 推荐结果 ===");
+//        linkkpValues.add("=== 推荐结果 ===");
         for (Question q : recs) {
 //            System.out.println("题目ID: " + q.id);
 //            System.out.println("相似度: " + q.sim);
 //            System.out.println("原始文本: " + q.mergedText);
 //            System.out.println("-------------------");
-            linkkpValues.add("题目ID: " + q.id);
-            linkkpValues.add("相似度: " + q.sim);
-            linkkpValues.add("原始文本: " + q.mergedText);
-            linkkpValues.add("-------------------");
+            linkkpValues.add(q.id);
+//            linkkpValues.add("相似度: " + q.sim);
+//            linkkpValues.add("原始文本: " + q.mergedText);
+//            linkkpValues.add("-------------------");
         }
         return linkkpValues;
     }
