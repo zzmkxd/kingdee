@@ -4,6 +4,8 @@ import kd.bos.base.AbstractBasePlugIn;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
+import kd.bos.form.FormShowParameter;
+import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
 import kd.bos.orm.query.QCP;
@@ -82,7 +84,7 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         }
 
         System.out.println("当前用户题目ID列表：" + questionIds);
-        this.getView().showMessage(questionIds.toString());
+//        this.getView().showMessage(questionIds.toString());
         // 获取记录数
         int totalCount = 0;
         if (problemScores != null) {
@@ -124,24 +126,44 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         List<Question> recs = recommendSimilarQuestions(targetId, questions, 3, excludeIds);
 
         List<String> linkkpValues = getStrings(recs);
-//        this.getView().showMessage(linkkpValues.toString());
+        this.getView().showMessage(linkkpValues.toString());
 
+//        this.getView().showMessage(linkkpValues.toString());
+        // 去除前 [ 和后 ]
+        if(linkkpValues.isEmpty()) this.getView().showMessage("暂无相似题目，请稍后再试");
+        else{
+            String formattedQuestionIds = linkkpValues.isEmpty() ? "" : linkkpValues.toString().substring(1, linkkpValues.toString().length() - 1);
+            this.getView().showMessage("即将开始练习以下相似题目："+linkkpValues.toString());
+            openWrite(formattedQuestionIds);
+        }
     }
 
     @NotNull
     private static List<String> getStrings(List<Question> recs) {
         List<String> linkkpValues = new ArrayList<>();
-        linkkpValues.add("=== 推荐结果 ===");
+//        linkkpValues.add("=== 推荐结果 ===");
         for (Question q : recs) {
 //            System.out.println("题目ID: " + q.id);
 //            System.out.println("相似度: " + q.sim);
 //            System.out.println("原始文本: " + q.mergedText);
 //            System.out.println("-------------------");
-            linkkpValues.add("题目ID: " + q.id);
-            linkkpValues.add("相似度: " + q.sim);
-            linkkpValues.add("原始文本: " + q.mergedText);
-            linkkpValues.add("-------------------");
+            linkkpValues.add(q.id);
+//            linkkpValues.add("相似度: " + q.sim);
+//            linkkpValues.add("原始文本: " + q.mergedText);
+//            linkkpValues.add("-------------------");
         }
         return linkkpValues;
+    }
+
+    /**
+     * 打开做题表单
+     */
+    private void openWrite(String prolist){
+        FormShowParameter nxtList = new FormShowParameter();
+        nxtList.getOpenStyle().setShowType(ShowType.Modal);
+        nxtList.setFormId("lag1_quesition_write");
+        nxtList.setCustomParam("prolist",prolist);
+        nxtList.setCustomParam("isWordCloud","true");
+        this.getView().showForm(nxtList);
     }
 }

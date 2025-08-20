@@ -74,7 +74,7 @@ public class QuestionRecommender {
         }
 
         // 测试：传入题目ID推荐
-        String targetId = "Question001"; // 测试ID
+        String targetId = "Question029"; // 测试ID
 
         // 创建要排除的题目ID列表
         List<String> excludeIds = Arrays.asList("Question019", "Question050","Question025","Question022","Question003");
