@@ -77,8 +77,9 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
     }
 
     public void demo() {
-// 创建查询过滤器，排除空值
-        QFilter filter = new QFilter("lag1_data", QCP.not_equals, null);
+        QFilter filter = new QFilter("lag1_data", QCP.not_equals,0);
+        filter.and(new QFilter("creator.id",QCP.equals, RequestContext.get().getCurrUserId())); //筛选本userid的条目
+
 // 设置排序条件 - 按lag1_data升序排列
         String orderBy = "lag1_data asc";
 // 查询数据，限制返回10条
@@ -87,13 +88,16 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
                 "lag1_linkkp,lag1_data", // 查询字段
                 new QFilter[]{filter},  // 过滤条件
                 orderBy,                // 排序条件
-                10                      // 限制条数
+                5                      // 限制条数
         );
 
 // 遍历结果获取lag1_linkkp字段值
         List<Object> linkkpValues = new ArrayList<>();
         for (DynamicObject obj : dataCollection) {
-            Object linkkpValue = obj.get("lag1_linkkp");
+            Object linkkpValue = obj.get("lag1_linkkp.name");
+            linkkpValues.add(linkkpValue);
+//            lag1_data
+            linkkpValue = obj.get("lag1_data");
             linkkpValues.add(linkkpValue);
         }
         this.getView().showMessage(linkkpValues.toString());
