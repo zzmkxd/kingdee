@@ -72,6 +72,9 @@ public class KpointsToJSON extends AbstractBillPlugIn implements Plugin {
             // 检查文件扩展名是否为.txt
             if (currentFileName != null && currentFileName.toLowerCase().endsWith(".txt")) {
                 fileName = currentFileName; // 返回第一个找到的.txt文件
+            }else{
+                this.getView().showMessage("没有符合条件的教材文本文件哦！");
+                return;
             }
         }
         if(fileName == ""){

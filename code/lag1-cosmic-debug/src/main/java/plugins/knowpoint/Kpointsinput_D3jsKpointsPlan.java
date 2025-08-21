@@ -35,11 +35,10 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
         this.addItemClickListeners("tbmain");
     }
     DistributeSessionlessCache cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
-
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         Control source = (Control) e.getSource();
-        if (e.getItemKey().equalsIgnoreCase("lag1_d3jsplan_creat")) {
+        if (e.getItemKey().equalsIgnoreCase("lag1_kpoint_new_d3js")) {
             String strdamn = cache.get("damn");
             String jsonResult = strdamn.replaceAll("\\s*|\r|\n|\t", "");
             JSONObject resultJsonObject = null;
@@ -51,26 +50,21 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
                 jsonResult = jsonResult.substring(jsonResult.indexOf("\"knowpoint_plan\"")-1 , jsonResult.indexOf("}]}")+3);
                 resultJsonObject = JSON.parseObject(jsonResult);
             }
-
-// 获取当前表单的数据包（主实体）
-            DynamicObject dynamicObject = this.getModel().getDataEntity(true);
-//            DynamicObject dynamicObject = BusinessDataServiceHelper.newDynamicObject("lag1_d3js_knowpoints");
-            StringBuilder sb1 = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
             for (int i = 1; i <= 10; i++) {
                 int ascii = 48 + (int) (Math.random() * 9);
                 char c = (char) ascii;
-                sb1.append(c);
+                sb2.append(c);
             }
             //设置对应属性
-            this.getModel().setValue("number", sb1.toString());
+            this.getModel().setValue("number", sb2.toString());
             DynamicObject basedataObj = (DynamicObject)this.getModel().getValue("lag1_course");// 获取基础资料字段的数据包
             if (basedataObj != null) {
                 String refPropertyValue = basedataObj.getString("name");// 获取引用属性值
                 this.getModel().setValue("name", refPropertyValue+"知识点衔接方案");
             }
-            this.getModel().setValue("status", "Approved");
+            this.getModel().setValue("status", "A");
             this.getModel().setValue("enable", 1);
-//            this.getModel().setValue("creator", RequestContext.get().getCurrUserId());
             //操作表单
             DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
             for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
@@ -85,26 +79,11 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             }
 //            SaveServiceHelper.saveOperate("lag1_d3js_knowpoints", new DynamicObject[] {dynamicObject}, null);
             this.getView().updateView();
-        }
-//-------------------------------------------------------------------------------------------------------------------------------------
 
-        if (e.getItemKey().equalsIgnoreCase("lag1_kpoint_new")) {
-            String strdamn = cache.get("damn");
-            String jsonResult = strdamn.replaceAll("\\s*|\r|\n|\t", "");
-            JSONObject resultJsonObject = null;
-            try {
-                //若全部生成JSON字符串，则不会进入catch
-                resultJsonObject = JSON.parseObject(jsonResult);
-            } catch (Exception ee) {
-                //将"knowpoint_plan"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
-                jsonResult = jsonResult.substring(jsonResult.indexOf("\"knowpoint_plan\"")-1 , jsonResult.indexOf("}]}")+3);
-                resultJsonObject = JSON.parseObject(jsonResult);
-            }
-
+//------------------------------------------------------------------------------------------------------------------------
             if (resultJsonObject != null) {
                 for (Object object : resultJsonObject.getJSONArray("knowledgePoints")) {
                     JSONObject jsonObjectSingle = (JSONObject) object;
-//                    validateDotCount(jsonObjectSingle.getString("knid"))
                     if((jsonObjectSingle.getString("description")== "")){
                         continue;
                     }
@@ -136,14 +115,4 @@ public class Kpointsinput_D3jsKpointsPlan extends AbstractBasePlugIn implements 
             }else this.getView().showMessage("毁了");
         }
     }
-//    public static boolean validateDotCount(String input) {
-//        // 1. 验证整体格式是否符合数字.数字.数字的模式
-//        if (!input.matches("^\\d+(\\.\\d+)*$")) {
-//            return false;
-//        }
-//        // 2. 计算点的数量
-//        int dotCount = input.length() - input.replace(".", "").length();
-//        // 3. 判断点数量是否<=1
-//        return dotCount <= 1;
-//    }
 }

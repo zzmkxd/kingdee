@@ -33,12 +33,9 @@ public class GraphCreat extends AbstractFormPlugin implements Plugin {
          }
     }
     public void drawChart(PointLineChart pointLineChart) {
-
         boolean isX = true;
-
         // 创建分类轴，X轴方式展现
         Axis categoryAxis = this.createCategoryAxis(pointLineChart, "任务名称", isX);
-
         // 设置分类轴nametextstyle属性，
         Map<String, Object> nametextstyle = Maps.newHashMap();
         nametextstyle.put("color", "#000000");

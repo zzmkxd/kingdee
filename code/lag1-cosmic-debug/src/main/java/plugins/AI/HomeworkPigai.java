@@ -66,7 +66,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         if (e.getItemKey().equalsIgnoreCase("lag1_ai_pingfen")) {
             if ( check_Pigai() ) {
                 //加入确认逻辑，否 则 return;
-                //是则继续
+                //是则继续？交给你了
             }
             JSONObject jsonResultObject = new JSONObject();
             jsonResultObject.put("taskName", this.getModel().getValue("name").toString());

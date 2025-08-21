@@ -72,8 +72,9 @@ lag1_standard_answer
     public void itemClick(ItemClickEvent evt) {
         super.itemClick(evt);
         String itemKey = evt.getItemKey();
-        if ("lag1_baritemap2".equals(itemKey)) {
+        if ("lag1_baritemap".equals(itemKey)) {
             toCSV();
+            this.getView().showMessage("导出成功，路径为 E:/lag1_protest.csv ");
         }
     }
     public void toCSV() {
