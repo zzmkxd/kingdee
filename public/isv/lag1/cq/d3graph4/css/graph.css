@@ -116,8 +116,8 @@ svg {
 
 .legend {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    bottom: 50px;
+    right: 50px;
     background: rgba(255, 255, 255, 0.9);
     padding: 10px;
     border-radius: 4px;

@@ -1,41 +1,6 @@
 window.initGraph = function (domElement, data) {
-    if (!data) {
-        data = {
-            nodes: [
-                {id: "1", name: "根节点", group: 1, expanded: false, description: "这是根节点，点击可以展开子节点"},
-                {id: "2", name: "子节点1", group: 2, parent: "1", description: "一级子节点，属于根节点的直接子节点"},
-                {id: "3", name: "子节点2", group: 2, parent: "1", description: "一级子节点，属于根节点的直接子节点"},
-                {id: "4", name: "子节点3", group: 3, parent: "2", description: "二级子节点，属于子节点1的子节点"},
-                {id: "5", name: "子节点4", group: 3, parent: "2", description: "二级子节点，属于子节点1的子节点"},
-                {id: "6", name: "子节点5", group: 3, parent: "3", description: "二级子节点，属于子节点2的子节点"},
-                {id: "7", name: "子节点6", group: 3, parent: "3", description: "二级子节点，属于子节点2的子节点"},
-                {id: "8", name: "子节点7", group: 4, parent: "4", description: "三级子节点，属于子节点3的子节点"},
-                {id: "9", name: "子节点8", group: 4, parent: "6", description: "三级子节点，属于子节点5的子节点"},
-            ],
-            links: [
-                {source: "1", target: "2", strength: 0.7},
-                {source: "1", target: "3", strength: 0.7},
-                {source: "2", target: "4", strength: 0.5},
-                {source: "2", target: "5", strength: 0.5},
-                {source: "3", target: "6", strength: 0.5},
-                {source: "3", target: "7", strength: 0.5},
-                {source: "4", target: "8", strength: 0.3},
-                {source: "6", target: "9", strength: 0.3},
-            ],
-        };
-    }
     const svg = d3.select("#d3js-svg"), width = svg.node().parentElement.clientWidth,
         height = svg.node().parentElement.clientHeight, g = svg.append("g");
-
-// 统一的“展开一个节点”包装器：不依赖真实事件
-    function expandOne(node) {
-        const fakeEvt = {
-            stopPropagation() {
-            }, pageX: 0, pageY: 0
-        };
-        if (typeof clickNode === "function") return clickNode(fakeEvt, node);
-        if (typeof toggleNode === "function") return toggleNode(node); // 你用的精简版
-    }
 
     const sim = d3.forceSimulation()
         .force("link", d3.forceLink().id(d => d.id).distance(100))
@@ -66,10 +31,7 @@ window.initGraph = function (domElement, data) {
         node = node.data(visibleNodes, d => d.id).join(enter => enter.append("circle")
             .attr("r", 0).attr("fill", d => d3.schemeCategory10[d.group % 10])
             .call(d3.drag().on("start", drag).on("drag", drag).on("end", dragEnd))
-            .on("click", (e, d) => {
-                toggleNode(d, e);
-                update();
-            })
+            .on("click", (e, d) => toggleNode(d, e))
             .on("dblclick", (e, d) => showInfo(d))
             .on("mouseover", (e, d) => hoverNode(d, true, e))
             .on("mouseout", (e, d) => hoverNode(d, false, e))
@@ -88,83 +50,25 @@ window.initGraph = function (domElement, data) {
         if (!d.expanded) {
             const children = data.nodes.filter(n => n.parent === d.id);
             if (!children.length) return showTip("该节点没有子节点", event);
-
-            d.children = children;                                // 记录层次
-            const idSet = new Set(children.map(c => c.id));
-
-            // 1) 从 data.links 中筛边时兼容字符串/对象两种形态
-            const raw = data.links.filter(l => {
-                const s = (l.source && (l.source.id || l.source));
-                const t = (l.target && (l.target.id || l.target));
-                return (s === d.id && idSet.has(t)) || (t === d.id && idSet.has(s));
-            });
-
-            // 2) 标准化为“用 id 的新对象”，避免复用被 d3 改写过的引用
-            const toAdd = raw.map(l => ({
-                source: (l.source.id || l.source),
-                target: (l.target.id || l.target),
-                strength: l.strength
-            }));
-
-            // 3) 边去重
-            const key = l => `${(l.source.id || l.source)}-${(l.target.id || l.target)}`;
-            const exist = new Set(visibleLinks.map(key));
-            toAdd.forEach(l => {
-                if (!exist.has(`${l.source}-${l.target}`)) visibleLinks.push(l);
-            });
-
-            // 4) 节点追加（节点本身用 id 去重由 expanded 保证）
+            const ids = children.map(c => c.id);
             visibleNodes.push(...children);
+            visibleLinks.push(...data.links.filter(l => (l.source === d.id && ids.includes(l.target)) || (l.target === d.id && ids.includes(l.source))));
             d.expanded = true;
+            update();
         } else {
-            collapse(d);  // 递归销毁（见下文 C）
+            collapse(d);
+            update();
         }
     }
 
     function collapse(d) {
-        const ids = new Set();
-        const stack = (d.children || []).slice();
-
-        while (stack.length) {
-            const cur = stack.pop();
-            ids.add(cur.id);
-            if (cur.children) stack.push(...cur.children);
-            cur.expanded = false;
-            cur.children = undefined;
-        }
-
-        visibleNodes = visibleNodes.filter(n => !ids.has(n.id));
-        visibleLinks = visibleLinks.filter(l => {
-            const s = (l.source.id || l.source);
-            const t = (l.target.id || l.target);
-            return !(ids.has(s) || ids.has(t));
-        });
-
+        const kids = visibleNodes.filter(n => n.parent === d.id);
+        kids.forEach(c => c.expanded && collapse(c));
+        const ids = kids.map(c => c.id);
+        visibleLinks = visibleLinks.filter(l => !ids.includes(l.source.id || l.source) && !ids.includes(l.target.id || l.target));
+        visibleNodes = visibleNodes.filter(n => !ids.includes(n.id));
         d.expanded = false;
-        d.children = undefined;
     }
-
-
-    function collapseAll() {
-        const root = data.nodes.find(n => !n.parent) || data.nodes[0];
-
-        // 清所有节点的状态与固定坐标
-        data.nodes.forEach(n => {
-            n.expanded = false;
-            n.children = undefined;
-            n.fx = null;
-            n.fy = null;
-        });
-
-        visibleNodes = [root];
-        visibleLinks = [];
-
-        sim.nodes(visibleNodes);
-        sim.force("link").links(visibleLinks);
-        sim.alpha(1).restart();
-        update();
-    }
-
 
     function hoverNode(d, on, e) {
         if (on) {
@@ -246,7 +150,6 @@ window.initGraph = function (domElement, data) {
             if (p && !p.expanded) toggleNode(p);
             cur = data.nodes.find(n => n.id === cur.parent);
         }
-        update();
     }
 
 // 高亮并居中
@@ -263,96 +166,53 @@ window.initGraph = function (domElement, data) {
         svg.transition().duration(750).call(d3.zoom().transform, d3.zoomIdentity.translate(width / 2 - target.x * scale, height / 2 - target.y * scale).scale(scale));
     }
 
-    function applyLayout(type) {
+// 布局切换
+    d3.select("#layoutType").on("change", function () {
+        const type = this.value;
         sim.stop();
-
-        // 清除所有现有的力
-        sim.force("link", null);
-        sim.force("charge", null);
-        sim.force("center", null);
-        sim.force("collide", null);
-        sim.force("r", null);
-        sim.force("x", null);
-        sim.force("y", null);
-
-        // 清除所有节点的固定位置
-        visibleNodes.forEach(n => {
-            n.fx = null;
-            n.fy = null;
-        });
 
         if (type === "force") {
             sim.force("link", d3.forceLink().id(d => d.id).distance(100))
                 .force("charge", d3.forceManyBody().strength(-300).distanceMax(500))
-                .force("center", d3.forceCenter(width / 2, height / 2))
-                .force("collide", d3.forceCollide().radius(25).strength(0.7));
+                .force("center", d3.forceCenter(width / 2, height / 2));
         }
-        else if (type === "radial") {
-            sim.force("link", d3.forceLink().id(d => d.id).distance(100))
-                .force("charge", d3.forceManyBody().strength(-300).distanceMax(500))
-                .force("collide", d3.forceCollide().radius(25).strength(0.7))
-                .force("r", d3.forceRadial(d => d.group * 100, width / 2, height / 2).strength(0.1));
+        if (type === "radial") {
+            sim.force("r", d3.forceRadial(d => d.group * 100, width / 2, height / 2).strength(1))
+                .force("center", null);
         }
-        else if (type === "tree") {
+        if (type === "tree") {
             const root = visibleNodes.find(n => n.id === "1");
             if (root) {
                 root.fx = width / 2;
                 root.fy = height / 3;
             }
-
-            sim.force("link", d3.forceLink().id(d => d.id).distance(100))
-                .force("charge", d3.forceManyBody().strength(-300).distanceMax(500))
-                .force("collide", d3.forceCollide().radius(25).strength(0.7))
-                .force("y", d3.forceY(d => {
-                    if (d.id === "1") return height / 3;
-                    return height / 3 + (d.group - 1) * 80;
-                }).strength(0.3))
-                .force("x", d3.forceX(width / 2).strength(0.1));
+            visibleNodes.forEach(n => {
+                if (n.group > 1) n.fy = height / 3 + (n.group - 1) * 150;
+            });
+            sim.force("y", d3.forceY(d => d.fy || height / 2).strength(.3))
+                .force("x", d3.forceX(width / 2).strength(.1))
+                .force("center", null);
         }
 
-        sim.nodes(visibleNodes);
-        sim.force("link").links(visibleLinks);
         sim.alpha(1).restart();
-    }
-
-// 修改布局切换事件处理，不再调用collapseAll
-    d3.select("#layoutType").on("change", function() {
-        const type = this.value;
-        applyLayout(type);
+    });
+// 批量展开/折叠
+    d3.select("#expandAll").on("click", () => {
+        visibleNodes.forEach(n => {
+            if (hasChildren(n) && !n.expanded) toggleNode(n);
+        });
     });
 
-// 布局切换
-    d3.select("#layoutType").on("change", function () {
-        collapseAll(); // 重置，只保留根节点
-        const type = this.value;
-        applyLayout(type);
+    d3.select("#collapseAll").on("click", () => {
+        // 根节点保留，其余都折叠
+        visibleNodes.slice().forEach(n => {
+            if (n.id !== "1" && n.expanded) toggleNode(n);
+        });
     });
-
-    function expandAll() {
-        function expandRec(node) {
-            if (hasChildren(node) && !node.expanded) {
-                toggleNode(node);   // 展开自己
-            }
-            if (node.children) {
-                node.children.forEach(child => expandRec(child));
-            }
-        }
-
-        const root = visibleNodes.find(n => !n.parent);
-        expandRec(root);
-
-        update(); // 重新绘制
-    }
-
-
-    d3.select("#expandAll").on("click", expandAll);
-
-    d3.select("#collapseAll").on("click", collapseAll);
 
 // 判断节点是否有子节点
     function hasChildren(node) {
-        return data.nodes.some(n => n.parent === node.id);
+        return data.links.some(l => l.source.id === node.id || l.source === node.id);
     }
-
 
 };
