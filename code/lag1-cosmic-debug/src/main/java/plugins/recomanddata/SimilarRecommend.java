@@ -1,13 +1,15 @@
 package plugins.recomanddata;
 
 import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.form.FormShowParameter;
-import kd.bos.form.ShowType;
+import kd.bos.form.*;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
+import kd.bos.form.events.MessageBoxClosedEvent;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
@@ -29,11 +31,22 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
 
     private static final String ENTRY_ENTITY_COLLECTION = "lag1_entryentity_pigai";
     private static final String TKPROBLEM_SCORE= "lag1_problem_score";
+    /**
+     * 定义缓存对象
+     */
+    private DistributeSessionlessCache cache;
     @Override
     public void registerListener(EventObject e) {
         super.registerListener(e);
         Button mind_btn = this.getView().getControl("lag1_xiangsi");
         mind_btn.addClickListener(this);
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        // 初始化缓存
+        cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
     }
 
     @Override
@@ -128,13 +141,20 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         List<String> linkkpValues = getStrings(recs);
         this.getView().showMessage(linkkpValues.toString());
 
-//        this.getView().showMessage(linkkpValues.toString());
-        // 去除前 [ 和后 ]
         if(linkkpValues.isEmpty()) this.getView().showMessage("暂无相似题目，请稍后再试");
         else{
             String formattedQuestionIds = linkkpValues.isEmpty() ? "" : linkkpValues.toString().substring(1, linkkpValues.toString().length() - 1);
-            this.getView().showMessage("即将开始练习以下相似题目："+linkkpValues.toString());
-            openWrite(formattedQuestionIds);
+            cache.put("formattedQuestionIds",formattedQuestionIds);
+            String message = "是否要跳转练习以下相似题目："+linkkpValues.toString();
+            ConfirmCallBackListener confirmCallBackListener = new ConfirmCallBackListener("myCallbackId",this);
+
+            // 正确方式：使用 showConfirm 而非 showMessage
+            this.getView().showConfirm(
+                    message,                  // 消息内容
+                    MessageBoxOptions.YesNo,               // 按钮选项
+                    ConfirmTypes.Default,
+                    confirmCallBackListener
+            );
         }
     }
 
@@ -165,5 +185,25 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         nxtList.setCustomParam("prolist",prolist);
         nxtList.setCustomParam("isWordCloud","true");
         this.getView().showForm(nxtList);
+    }
+
+    /**
+     * 回调监听
+     * @param messageBoxClosedEvent
+     */
+    @Override
+    public void confirmCallBack(MessageBoxClosedEvent messageBoxClosedEvent) {
+        super.confirmCallBack(messageBoxClosedEvent);
+        if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId())&&messageBoxClosedEvent.getResult() == MessageBoxResult.Yes){
+            String formattedQuestionIds= cache.get("formattedQuestionIds");
+            if(formattedQuestionIds==null){
+                this.getView().showMessage("题目列表未初始化");
+            }else{
+                openWrite(formattedQuestionIds);
+            }
+            cache.remove("formattedQuestionIds");   //销毁缓存
+        }else if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId()) && messageBoxClosedEvent.getResult()==MessageBoxResult.No){
+            cache.remove("formattedQuestionIds");   //销毁缓存
+        }
     }
 }
