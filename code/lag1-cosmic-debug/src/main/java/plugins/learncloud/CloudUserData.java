@@ -1,36 +1,43 @@
 package plugins.learncloud;
 
-import akka.stream.impl.fusing.Delay;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.entity.datamodel.ListSelectedRow;
-import kd.bos.entity.datamodel.ListSelectedRowCollection;
 import kd.bos.ext.form.control.CustomControl;
-import kd.bos.form.FormShowParameter;
-import kd.bos.form.ShowType;
+import kd.bos.form.*;
 import kd.bos.form.events.CustomEventArgs;
+import kd.bos.form.events.MessageBoxClosedEvent;
 import kd.bos.form.plugin.AbstractFormPlugin;
-import kd.bos.list.BillList;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.QueryServiceHelper;
 import kd.sdk.plugin.Plugin;
-import org.bytedeco.javacv.Parallel;
-
-import javax.xml.ws.handler.Handler;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
-
-import static kd.bos.list.ListShowParameter.BILLLISTID;
 
 /**
  * 动态表单插件
  */
 public class CloudUserData extends AbstractFormPlugin implements Plugin {
     private static final String TKPROBLEM = "lag1_protest";
+    private List<String> questionIds=new ArrayList<>();   //跳转题目编码成员变量
+    /**
+     * 定义缓存对象
+     */
+    private DistributeSessionlessCache cache;
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        // 初始化缓存
+        cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
+    }
+
     @Override
     public void afterBindData(EventObject e) {
         super.afterBindData(e);
@@ -97,7 +104,7 @@ public class CloudUserData extends AbstractFormPlugin implements Plugin {
         jsonString.append("\n]");
 
         //获取自定义控件
-        CustomControl customControl = this.getView().getControl("lag1_customcontrolap1");
+        CustomControl customControl = this.getView().getControl("lag1_customcontrolap");
         customControl.setData(jsonString.toString());
     }
 
@@ -129,7 +136,9 @@ public class CloudUserData extends AbstractFormPlugin implements Plugin {
         if(protestList.length==0){
             this.getView().showMessage("此知识点下暂时未上传题目，请稍后再试！");
         }else{
-            List<String> questionIds = new ArrayList<>();
+//            List<String> questionIds = new ArrayList<>();
+//            questionIds = new ArrayList<>();
+            questionIds.clear();
             if (protestList != null) {
                 for (DynamicObject problem : protestList) {
                     if(questionIds.size()<4) questionIds.add(problem.getString("number")); // 基础资料主键通常叫id
@@ -138,10 +147,27 @@ public class CloudUserData extends AbstractFormPlugin implements Plugin {
                 }
 
             }
-                        this.getView().showMessage("准备跳转练习知识点: "+"'"+knpname+"'下的题目："+questionIds.toString());
+
             // 去除前 [ 和后 ]
             String formattedQuestionIds = questionIds.isEmpty() ? "" : questionIds.toString().substring(1, questionIds.toString().length() - 1);
-            openWrite(formattedQuestionIds);
+            cache.put("formattedQuestionIds",formattedQuestionIds);
+
+            String message="是否要跳转练习知识点'"+knpname+"'下的题目："+questionIds.toString();
+
+            ConfirmCallBackListener confirmCallBackListener = new ConfirmCallBackListener("myCallbackId",this);
+
+            // 正确方式：使用 showConfirm 而非 showMessage
+            this.getView().showConfirm(
+                    message,                  // 消息内容
+                    MessageBoxOptions.YesNo,               // 按钮选项
+                    ConfirmTypes.Default,
+                    confirmCallBackListener
+            );
+
+//            this.getView().showMessage("准备跳转练习知识点: "+"'"+knpname+"'下的题目："+questionIds.toString());
+//            // 去除前 [ 和后 ]
+//            String formattedQuestionIds = questionIds.isEmpty() ? "" : questionIds.toString().substring(1, questionIds.toString().length() - 1);
+//            openWrite(formattedQuestionIds);
 //            this.getView().showMessage("准备跳转练习知识点: "+"'"+knpname+"'下的题目："+formattedQuestionIds);
         }
     }
@@ -156,5 +182,29 @@ public class CloudUserData extends AbstractFormPlugin implements Plugin {
         nxtList.setCustomParam("prolist",prolist);
         nxtList.setCustomParam("isWordCloud","true");
         this.getView().showForm(nxtList);
+    }
+
+    /**
+     * 回调监听
+     * @param messageBoxClosedEvent
+     */
+    @Override
+    public void confirmCallBack(MessageBoxClosedEvent messageBoxClosedEvent) {
+        super.confirmCallBack(messageBoxClosedEvent);
+        if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId())&&messageBoxClosedEvent.getResult() == MessageBoxResult.Yes){
+            String formattedQuestionIds= cache.get("formattedQuestionIds");
+            if(formattedQuestionIds==null){
+                this.getView().showMessage("题目列表未初始化");
+            }else{
+                openWrite(formattedQuestionIds);
+            }
+//            this.getView().showMessage("点击了是"+formattedQuestionIds);
+//            System.out.println("用户点击了确认");
+            cache.remove("formattedQuestionIds");   //销毁缓存
+        }else if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId()) && messageBoxClosedEvent.getResult()==MessageBoxResult.No){
+//            this.getView().showMessage("点击了否");
+//            System.out.println("用户点击了取消");
+            cache.remove("formattedQuestionIds");   //销毁缓存
+        }
     }
 }
