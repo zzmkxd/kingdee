@@ -57,6 +57,10 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     public void itemClick(ItemClickEvent e) {
         super.itemClick(e);
         if (e.getItemKey().equalsIgnoreCase("lag1_ai_pingfen")) {
+            if ( check_Pigai() ) {
+                //加入确认逻辑，否 则 return;
+                //是则继续
+            }
             JSONObject jsonResultObject = new JSONObject();
             jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
             jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
@@ -115,7 +119,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
             if (AIORNOR.equals("normal")){
                 bindData(); //绑定至成绩关联表
-//                updateUserdata(); //更新用户数据表
+                updateUserdata(); //更新用户数据表
             }else {
 //                this.getView().showMessage("ai:ai");
             }
@@ -124,6 +128,16 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         }
 
     }
+    private boolean check_Pigai() {
+        DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
+            if(!Objects.equals(dynamicObjectSingle.getString("score"), "") || !Objects.equals(dynamicObjectSingle.getString("analysis"), "")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private DynamicObject findExistingRecord_UserData(String studentid, String knpname) {
         // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
         String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
@@ -139,6 +153,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         // 返回第一条记录（如果没有则返回 null）
         return records.length > 0 ? records[0] : null;
     }
+
     public void updateUserdata(){
         //开始写各字段数据
         //获取当前表单的数据实体
@@ -175,6 +190,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             updateData(existingRecord);
         }
     }
+
     public void updateData(DynamicObject record){
         if (record != null) {
             this.getView().showMessage(record.toString());
