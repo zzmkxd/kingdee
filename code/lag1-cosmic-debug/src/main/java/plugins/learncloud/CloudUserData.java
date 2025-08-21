@@ -97,7 +97,7 @@ public class CloudUserData extends AbstractFormPlugin implements Plugin {
         jsonString.append("\n]");
 
         //获取自定义控件
-        CustomControl customControl = this.getView().getControl("lag1_customcontrolap1");
+        CustomControl customControl = this.getView().getControl("lag1_customcontrolap");
         customControl.setData(jsonString.toString());
     }
 

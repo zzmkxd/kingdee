@@ -1,13 +1,19 @@
 package plugins.AI;
 
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.kingdee.cosmic.ctrl.kdf.data.logging.Logger;
 import kd.bos.base.AbstractBasePlugIn;
 import kd.bos.context.RequestContext;
+import kd.bos.dataentity.OperateOption;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.resource.ResManager;
+import kd.bos.entity.operate.result.OperationResult;
+import kd.bos.exception.KDBizException;
+import kd.bos.exception.KDException;
 import kd.bos.ext.form.control.Markdown;
 import kd.bos.form.chart.ItemValue;
 import kd.bos.form.chart.PieChart;
@@ -18,6 +24,7 @@ import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
+import kd.bos.servicehelper.QueryServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.bos.servicehelper.user.UserServiceHelper;
 import kd.sdk.plugin.Plugin;
@@ -121,7 +128,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 bindData(); //绑定至成绩关联表
                 updateUserdata(); //更新用户数据表
             }else {
-//                this.getView().showMessage("ai:ai");
+
             }
             // 刷新界面显示
             this.getView().updateView(ENTRY_ENTITY_COLLECTION);
@@ -131,28 +138,14 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     private boolean check_Pigai() {
         DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
         for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
-            if(!Objects.equals(dynamicObjectSingle.getString("score"), "") || !Objects.equals(dynamicObjectSingle.getString("analysis"), "")) {
+            if(!Objects.equals(dynamicObjectSingle.getString("lag1_userscore"), "") || !Objects.equals(dynamicObjectSingle.getString("lag1_ai_pigai"), "")) {
                 return false;
             }
         }
         return true;
     }
 
-    private DynamicObject findExistingRecord_UserData(String studentid, String knpname) {
-        // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
-        String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
 
-        // 构建 QFilter 条件
-        QFilter filter1 = new QFilter("lag1_studentid", QCP.equals, studentid);
-        QFilter filter2 = new QFilter("lag1_linkkp.name", QCP.equals, knpname);
-        QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
-
-        // 执行查询
-        DynamicObject[] records = BusinessDataServiceHelper.load(USERDATA_BIAODAN, fields, new QFilter[]{combinedFilter});
-
-        // 返回第一条记录（如果没有则返回 null）
-        return records.length > 0 ? records[0] : null;
-    }
 
     public void updateUserdata(){
         //开始写各字段数据
@@ -167,16 +160,14 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         //遍历单据体每一行,lag1_proid, lag1_protype,
         for(DynamicObject entryEntity:dataEntities) {
             //new成绩关联表的表单对象
-            String proid = entryEntity.getString("lag1_proid"); //题目id
-            String userscore = entryEntity.getString("lag1_userscore");
-            String courseid = entryEntity.getString("lag1_courseid");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
-            this.getView().showMessage("kn" + knpoints);
+            String score = entryEntity.getString("lag1_userscore");
             String[] knpointArr = knpoints.split(",");
             String knpoint1 = null;
             String knpoint2 = null;
 
             DynamicObject existingRecord = null;
+            DynamicObject existingRecord2 = null;
             if (knpointArr.length > 1) {
                 knpoint1 = knpointArr[0].trim();
                 knpoint2 = knpointArr[1].trim();
@@ -185,23 +176,53 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             }
 
             if(knpoint1 != null) existingRecord = findExistingRecord_UserData(studentid, knpoint1);
-            updateData(existingRecord);
-            if(knpoint2 != null) existingRecord = findExistingRecord_UserData(studentid, knpoint2);
-            updateData(existingRecord);
+            updateData(existingRecord,score);
+            if(knpoint2 != null) existingRecord2 = findExistingRecord_UserData(studentid, knpoint2);
+            updateData(existingRecord2,score);
+        }
+    }
+    /**
+     * 使用loadSingle安全查询用户数据记录
+     * @param studentid 学生ID（字符串形式）
+     * @param knpname 知识点名称
+     * @return 存在的记录或null
+     */
+    private DynamicObject findExistingRecord_UserData(String studentid, String knpname) {
+        try {
+            // 1. 参数校验
+            if (StringUtils.isBlank(studentid) || StringUtils.isBlank(knpname)) {
+                throw new IllegalArgumentException("学生ID和知识点名称不能为空");
+            }
+            // 2. 构造精确查询条件
+            long studentId = Long.parseLong(studentid);
+            QFilter[] filters = new QFilter[]{
+                    new QFilter("creator", QCP.equals, studentId),
+                    new QFilter("lag1_linkkp.name", QCP.equals, knpname)
+            };
+            // 3. 使用loadSingle安全查询（自动处理路由）
+            return BusinessDataServiceHelper.loadSingle(
+                    USERDATA_BIAODAN,
+                    "lag1_ans_num,lag1_sum_score,lag1_data", // 明确指定需要字段
+                    filters
+            );
+        } catch (NumberFormatException e) {
+            throw new KDBizException("学生ID必须是数字");
+        } catch (KDException e) {
+            throw new KDBizException("查询数据失败，请稍后重试");
         }
     }
 
-    public void updateData(DynamicObject record){
+
+    public void updateData(DynamicObject record,String score){
         if (record != null) {
-            this.getView().showMessage(record.toString());
-            int num = (int) record.get("lag1_ans_num") + 1;
-            record.set("lag1_ans_num", num);
-            int sum_score = (int) record.get("lag1_sum_score") + 1;
-            record.set("lag1_sum_score", sum_score );
-            record.set("lag1_data", sum_score / num);
+            int num = record.get("lag1_ans_num") != null ? record.getInt("lag1_ans_num") : 0;
+            record.set("lag1_ans_num", num + 1);
+            // 使用DynamicObject内置安全方法
+            int sum_score = record.getInt("lag1_sum_score") + Integer.parseInt( score);
+            record.set("lag1_sum_score", sum_score);
+            if(num != 0 )record.set("lag1_data", sum_score / num);
             SaveServiceHelper.update(record);
         }else {
-            this.getView().showMessage("该题目让我旋转");
         }
     }
     /**
@@ -245,7 +266,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             String userscore = entryEntity.getString("lag1_userscore");
             String courseid = entryEntity.getString("lag1_courseid");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
-            this.getView().showMessage("kn"+knpoints);
             String[] knpointArr = knpoints.split(",");
             String knpoint1="";
             String knpoint2 = "";
@@ -261,11 +281,9 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
 
             if(existingRecord!=null){
-                this.getView().showMessage(existingRecord.toString());
                 existingRecord.set("lag1_score",Integer.parseInt(userscore));
                 SaveServiceHelper.update(existingRecord);
             }else{
-                this.getView().showMessage("不存在");
                 String field1 = "number";
                 QFilter qFilter1 = new QFilter("number", QCP.equals,proid);
                 DynamicObject problem = BusinessDataServiceHelper.loadSingle(TKPROBLEM,field1,new QFilter[]{qFilter1});
@@ -304,7 +322,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 }
             }
         }
-        this.getView().showMessage("更新数据成功");
     }
 
     private DynamicObject findExistingRecord(String studentid, String proid) {

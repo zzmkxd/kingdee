@@ -72,9 +72,9 @@ public class Binchart extends AbstractFormPlugin implements RateListener {
         String rate3Str = this.getPageCache().get("kdec_rateap4");
         ItemValue[] data = new ItemValue[3];
         demo2();
-        ItemValue data1 = new ItemValue("掌握较差知识点", lowdata > 0 ? lowdata : 33.3, "#ffb61e");
-        ItemValue data2 = new ItemValue("基本掌握知识点", standard > 0 ? standard : 33.3, "#ff8936");
-        ItemValue data3 = new ItemValue("掌握较好知识点", highdata > 0 ? standard : 33.3, "#ff7500");
+        ItemValue data1 = new ItemValue("掌握较差知识点", lowdata > 0 ? lowdata : 33.3, "#00008B");
+        ItemValue data2 = new ItemValue("基本掌握知识点", standard > 0 ? standard : 33.3, "#1E90FF");
+        ItemValue data3 = new ItemValue("掌握较好知识点", highdata > 0 ? standard : 33.3, "#ADD8E6");
         data[0] = data1;
         data[1] = data2;
         data[2] = data3;
