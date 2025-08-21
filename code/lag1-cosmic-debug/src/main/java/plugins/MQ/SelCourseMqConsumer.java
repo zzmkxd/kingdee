@@ -6,16 +6,21 @@ import kd.bos.logging.Log;
 import kd.bos.logging.LogFactory;
 import kd.bos.mq.MessageAcker;
 import kd.bos.mq.MessageConsumer;
-import kd.bos.orm.query.QCP;
-import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 
-public class DemoConsumer implements MessageConsumer {
+/**
+ * @说明 TODO
+ * @Author Tian_Yumi
+ * @Date 2025/8/22 00:55
+ * @Version 1.0
+ */
+
+public class SelCourseMqConsumer implements MessageConsumer {
     Log log = LogFactory.getLog(getClass());
     @Override
     public void onMessage(Object message, String messageId, boolean resend, MessageAcker acker) {
-        log.info("自定义DemoConsumer开始消费");
+        log.info("JirSuanMqConsumer开始起飞");
         try {
             DynamicObject obj = BusinessDataServiceHelper.newDynamicObject("lag1_homework_correct");
             //设置对应属性
@@ -27,10 +32,6 @@ public class DemoConsumer implements MessageConsumer {
             obj.set("status", "C");
             obj.set("lag1_textfield1", ((int) message)%11);
             SaveServiceHelper.saveOperate("lag1_homework_correct", new DynamicObject[]{obj}, null);
-//            QFilter qFilter = new QFilter("number", QCP.equals, "ProList002");
-//            DynamicObject obj = BusinessDataServiceHelper.loadSingle("lag1_homework_correct", new QFilter[]{qFilter});
-//            obj.set("name", (String) message);
-//            SaveServiceHelper.update(obj);
         } catch (Throwable e) {
             boolean discard = false;
             if (discard){

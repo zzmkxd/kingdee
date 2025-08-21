@@ -65,7 +65,7 @@ public class Tiaochart extends AbstractFormPlugin {
 
     public KeyValueList demo() {
 
-        QFilter filter = new QFilter("lag1_data", QCP.not_equals,null);
+        QFilter filter = new QFilter("lag1_data", QCP.not_equals,0.00);
         filter.and(new QFilter("creator.id",QCP.equals, RequestContext.get().getCurrUserId())); //筛选本userid的条目
         String orderBy = "lag1_data asc";
 

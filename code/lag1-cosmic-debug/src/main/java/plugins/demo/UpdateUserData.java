@@ -39,7 +39,7 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
         super.itemClick(evt);
         String itemKey = evt.getItemKey();
         if ("lag1_baritemap".equals(itemKey)) {
-            demo();
+            if(validateDotCount("1.1.1"))this.getView().showMessage("6");
         }
     }
 
@@ -92,6 +92,17 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
         DynamicObject[] records = BusinessDataServiceHelper.load(BIAODAN, fields, new QFilter[]{filter});
         // 返回第一条记录（如果没有则返回 null）
         return records.length > 0;
+    }
+
+    public static boolean validateDotCount(String input) {
+        // 1. 验证整体格式是否符合数字.数字.数字的模式
+        if (!input.matches("^\\d+(\\.\\d+)*$")) {
+            return false;
+        }
+        // 2. 计算点的数量
+        int dotCount = input.length() - input.replace(".", "").length();
+        // 3. 判断点数量是否<=2
+        return dotCount <= 2;
     }
 
 

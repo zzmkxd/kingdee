@@ -1,24 +1,27 @@
 package plugins.MQ;
 
 import kd.bos.base.AbstractBasePlugIn;
-import kd.bos.bill.AbstractBillPlugIn;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.form.control.events.ItemClickEvent;
-import kd.bos.list.plugin.AbstractListPlugin;
 import kd.bos.logging.Log;
 import kd.bos.logging.LogFactory;
 import kd.bos.mq.MQFactory;
 import kd.bos.mq.MessagePublisher;
-import kd.bos.orm.query.QCP;
-import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.sdk.plugin.Plugin;
 
 import java.util.EventObject;
 
-public class MulThreadsEdit extends AbstractBasePlugIn implements Plugin {
+/**
+ * @说明 TODO
+ * @Author Tian_Yumi
+ * @Date 2025/8/22 00:56
+ * @Version 1.0
+ */
+
+public class SecMulThreadsEdit extends AbstractBasePlugIn implements Plugin {
     @Override
     public void registerListener(EventObject e) {
         // 注册点击事件
