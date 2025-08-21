@@ -14,6 +14,7 @@ import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.QueryServiceHelper;
 import kd.sdk.plugin.Plugin;
 import plugins.MQ.MulThreadsEdit;
+import plugins.graph.KeyValueList;
 
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -59,13 +60,25 @@ public class UpdateUserData extends AbstractBasePlugIn implements Plugin {
                 10
         );
 // 遍历结果获取lag1_linkkp字段值
-        List<Object> linkkpValues = new ArrayList<>();
+        KeyValueList linkkpValues = new KeyValueList();
         for (DynamicObject obj : dataCollection) {
             Object linkkpValue = obj.get("lag1_linkkp.name");
-//            Object linkkpValue = obj.get("lag1_data");
-            linkkpValues.add(linkkpValue);
             Object linkdata = obj.get("lag1_data");
-            linkkpValues.add(linkdata);
+            linkkpValues.add(linkkpValue, linkdata);
+        }
+        this.getView().showMessage(linkkpValues.toString());
+    }
+    public void demo2() {
+
+        QFilter filter = new QFilter("creator.id",QCP.equals, RequestContext.get().getCurrUserId()); //筛选本userid的条目
+        DynamicObjectCollection dataCollection;
+
+        //查询数据
+        dataCollection = QueryServiceHelper.query("lag1_user_data","lag1_data", new QFilter[]{filter});
+// 遍历结果获取lag1_linkkp字段值
+        List<Object> linkkpValues = new ArrayList<>();
+        for (DynamicObject obj : dataCollection) {
+
         }
         this.getView().showMessage(linkkpValues.toString());
     }
