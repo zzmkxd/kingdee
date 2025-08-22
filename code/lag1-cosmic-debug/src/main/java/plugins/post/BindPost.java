@@ -81,6 +81,7 @@ public class BindPost extends AbstractFormPlugin implements Plugin {
                 postData.set("lag1_thumb",thumb_num);
                 SaveServiceHelper.update(postData); // 这一步至关重要！
                 this.getModel().setValue("lag1_thumb",thumb_num);
+                this.getView().showSuccessNotification("点赞成功");
             } else if(StringUtils.equals("lag1_makecomment",key)){
                 //打开评论基础资料
                 BillShowParameter nxtList = new BillShowParameter();

@@ -47,6 +47,7 @@ public class PostAutoNumberPlugin extends AbstractBasePlugIn implements Plugin {
             parentView.invokeOperation("refresh");
             this.getView().sendFormAction(parentView);
             this.getView().close(); //关闭窗口
+            this.getView().showSuccessNotification("发帖成功");
         }
     }
 }

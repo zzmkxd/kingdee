@@ -67,10 +67,11 @@ public class CommentAutoNumberPlugin extends AbstractBasePlugIn implements Plugi
 //                this.getModel().setValue("recnum","11");
                 IFormView parentView = this.getView().getParentView();
                 parentView.invokeOperation("refresh");
+                this.getView().showSuccessNotification("评论成功");
                 this.getView().sendFormAction(parentView);
                 this.getView().close();
             }else{
-                this.getView().showMessage("帖子编号为空，无法更新评论数");
+                this.getView().showErrorNotification("帖子编号为空，无法更新评论数");
             }
         }
     }

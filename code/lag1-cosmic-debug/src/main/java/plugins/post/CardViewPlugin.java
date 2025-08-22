@@ -122,6 +122,7 @@ public class CardViewPlugin extends AbstractBasePlugIn implements ItemClickListe
             SaveServiceHelper.update(postSingle); //更新数据
             //调用refresh方法刷新数据
             listview.refresh();
+            this.getView().showSuccessNotification("点赞成功");
 
 //            // 判断当前用户是否已经点赞过
 //            QFilter userFilter = new QFilter("user_id", QCP.equals, getCurrentUserId());

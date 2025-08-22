@@ -197,9 +197,31 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
 
     private String getRadioCheck(){
         //单选按钮组标识lag1_radiogroupfield
-        String value= (String) this.getModel().getValue("lag1_radiogroupfield");
-        return value;
+        Object value= (String) this.getModel().getValue("lag1_radiogroupfield");
+        String str="";
+        if(value==null){
+            str="未作答";
+        }else{
+            str= (String) value;
+        }
+        return str;
     }
+
+    //绑定已作答数据的单选按钮值函数
+    private void setRadioCheck(int i){
+        this.getModel().setValue("lag1_radiogroupfield",i);
+    }
+
+    private void clearRadioCheck(){
+        // 绑定单选按钮字段(初始状态可以都未选中)
+        setRadioCheck(5);   //前端设置为空
+//        this.getModel().setValue("lag1_radiofielda", false);
+//        this.getModel().setValue("lag1_radiofieldb", false);
+//        this.getModel().setValue("lag1_radiofieldc", false);
+//        this.getModel().setValue("lag1_radiofieldd", false);
+//        this.getModel().setValue("lag1_radiogroupfield",0);
+    }
+
 
     /**
      * 保存当前的答案
@@ -227,7 +249,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
 //            else if(num.equals("2")) this.getModel().setValue(ansSavePlace,"B");
 //            else if(num.equals("3")) this.getModel().setValue(ansSavePlace,"C");
 //            else if(num.equals("4")) this.getModel().setValue(ansSavePlace,"D");
-            ans = num.equals("1") ? "A" : num.equals("2") ? "B" : num.equals("3") ? "C" : "D";
+            ans = num.equals("1") ? "A" : num.equals("2") ? "B" : num.equals("3") ? "C" : num.equals("4")?"D":"未作答";   //若为5则为空值
         }else if(questionType.equals("3")||questionType.equals("4") || questionType.equals("6")||questionType.equals("7")){
             ans = (String) this.getModel().getValue(ANS_TXT);
 //            this.getView().showMessage(ans);
@@ -307,8 +329,15 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
     private void loadAnswerData() {
         for(int i=0;i<pronoList.size();i++){
             String questionId = pronoList.get(i);
-            String ans = cache.get(questionId);
-            userAnswers.add(ans);
+            if(cache.contains(questionId)){
+                String ans = cache.get(questionId);
+                userAnswers.add(ans);
+            }else{
+                //缓存中没有答案
+                userAnswers.add("用户未作答");    //空字符串
+            }
+
+
 //            if (i==0){
 //                String ans = (String) this.getModel().getValue(ANS_ONE);
 //                userAnswers.add(ans);
@@ -382,8 +411,14 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         String questionId = currentQuestion.getString("number"); // 假设billno是题目ID
         String questionType = currentQuestion.getString(PROTYPE);
 
-        //从缓存中国读取答案
-        String stuAns=cache.get(questionId);
+        String stuAns="";
+        //从缓存中 读取答案
+        if(cache.contains(questionId)){
+            stuAns=cache.get(questionId);
+        }else{
+            stuAns="";  //为空
+        }
+
         // 绑定作答(可选)
         if(questionType.equals("3")||questionType.equals("4")||questionType.equals("6")||questionType.equals("7")){
 //            String stuAns="";
@@ -397,6 +432,16 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
 //                stuAns = (String) this.getModel().getValue(ANS_FOUR);
 //            }
             this.getModel().setValue(ANS_TXT,stuAns);
+        }else if(questionType.equals("1")){
+            //选择题，绑定单选按钮【单选按钮组】
+            if (stuAns.equals("A") || stuAns.equals("B") || stuAns.equals("C") || stuAns.equals("D")){
+                int i=0;
+                i=stuAns.equals("A")? 1:stuAns.equals("B")? 2 :stuAns.equals("C")? 3 : stuAns.equals("D")?4:5;
+                setRadioCheck(i);
+            }else{
+                //为空，清空选项【单选按钮组】
+                clearRadioCheck();
+            }
         }
     }
 
@@ -438,11 +483,12 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
             String formattedProdes = prodesBuilder.toString();
             this.getModel().setValue("lag1_prodes",formattedProdes);
 
+//            clearRadioCheck();
             // 绑定单选按钮字段(初始状态可以都未选中)
-            this.getModel().setValue("lag1_radiofielda", false);
-            this.getModel().setValue("lag1_radiofieldb", false);
-            this.getModel().setValue("lag1_radiofieldc", false);
-            this.getModel().setValue("lag1_radiofieldd", false);
+//            this.getModel().setValue("lag1_radiofielda", false);
+//            this.getModel().setValue("lag1_radiofieldb", false);
+//            this.getModel().setValue("lag1_radiofieldc", false);
+//            this.getModel().setValue("lag1_radiofieldd", false);
 
 //            // 恢复用户之前的选择(如果有)
 //            if (userAnswers.containsKey(questionId)) {
