@@ -118,7 +118,7 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                         confirmCallBackListener
                 );
             }else{
-                this.getView().showMessage("此次作答已批改，请勿重复提交2");
+                this.getView().showMessage("此次作答已批改，请勿重复提交");
                 return;
             }
         }
@@ -127,11 +127,14 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     private boolean check_Pigai() {
         DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
         for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
-            if(!Objects.equals(dynamicObjectSingle.getString("lag1_userscore"), "") || !Objects.equals(dynamicObjectSingle.getString("lag1_ai_pigai"), "")) {
-                return false;
+//            if(!Objects.equals(dynamicObjectSingle.getString("lag1_userscore"), "") || !Objects.equals(dynamicObjectSingle.getString("lag1_ai_pigai"), "")) {
+//                return false;
+//            }
+            if(StringUtils.isEmpty(dynamicObjectSingle.getString("lag1_userscore")) || StringUtils.isEmpty(dynamicObjectSingle.getString("lag1_ai_pigai"))){
+                return true;    //批改
             }
         }
-        return true;
+        return false;   //不批改
     }
 
 
