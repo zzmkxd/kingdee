@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.kingdee.cosmic.ctrl.kdf.data.logging.Logger;
 import kd.bos.base.AbstractBasePlugIn;
+import kd.bos.cache.CacheFactory;
+import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.OperateOption;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -15,11 +17,16 @@ import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.exception.KDBizException;
 import kd.bos.exception.KDException;
 import kd.bos.ext.form.control.Markdown;
+import kd.bos.form.ConfirmCallBackListener;
+import kd.bos.form.ConfirmTypes;
+import kd.bos.form.MessageBoxOptions;
+import kd.bos.form.MessageBoxResult;
 import kd.bos.form.chart.ItemValue;
 import kd.bos.form.chart.PieChart;
 import kd.bos.form.chart.PieSeries;
 import kd.bos.form.chart.radar.*;
 import kd.bos.form.control.events.ItemClickEvent;
+import kd.bos.form.events.MessageBoxClosedEvent;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
@@ -55,6 +62,18 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     private static final String TKKNPOINT = "lag1_knowpoints";
     private Integer data1=0;
     private Integer data2=0;
+    /**
+     * 定义缓存对象
+     */
+    private DistributeSessionlessCache cache;
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        // 初始化缓存
+        cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
+    }
+
     @Override
     public void registerListener(EventObject e) {
         //注册点击事件
@@ -67,71 +86,41 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             if ( check_Pigai() ) {
                 //加入确认逻辑，否 则 return;
                 //是则继续？交给你了
-            }
-            JSONObject jsonResultObject = new JSONObject();
-            jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
-            jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
-            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-            JSONArray jsonTaskArray = new JSONArray();
-            int i=1;
-            for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
-                JSONObject jsonObjectSingle = new JSONObject();
-                jsonObjectSingle.put("id", i++);
-                jsonObjectSingle.put("problemContent", dynamicObjectSingle.getString("lag1_prodes"));//题干
-                jsonObjectSingle.put("userAnswer", dynamicObjectSingle.getString("lag1_useranswer"));//用户作答
-                jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_difficulty"));//题目难度
-                jsonObjectSingle.put("answer", dynamicObjectSingle.getString("lag1_standard_answer"));//标准答案
-                jsonObjectSingle.put("kPoints", dynamicObjectSingle.getString("lag1_link_kpoints"));//相关知识点
-                jsonTaskArray.add(jsonObjectSingle);
-            }
-            jsonResultObject.put("problemsIntroduction", jsonTaskArray);
+                //组成ai批改参数
+                JSONObject jsonResultObject = new JSONObject();
+                jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
+                jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
+                DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+                JSONArray jsonTaskArray = new JSONArray();
+                int i=1;
+                for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
+                    JSONObject jsonObjectSingle = new JSONObject();
+                    jsonObjectSingle.put("id", i++);
+                    jsonObjectSingle.put("problemContent", dynamicObjectSingle.getString("lag1_prodes"));//题干
+                    jsonObjectSingle.put("userAnswer", dynamicObjectSingle.getString("lag1_useranswer"));//用户作答
+                    jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_difficulty"));//题目难度
+                    jsonObjectSingle.put("answer", dynamicObjectSingle.getString("lag1_standard_answer"));//标准答案
+                    jsonObjectSingle.put("kPoints", dynamicObjectSingle.getString("lag1_link_kpoints"));//相关知识点
+                    jsonTaskArray.add(jsonObjectSingle);
+                }
+                jsonResultObject.put("problemsIntroduction", jsonTaskArray);
+                cache.put("jsonResultObject",jsonResultObject.toJSONString());  //存储时转换为字符串
 
-            //调用AI开发平台微服务
-            Map<String , String> variableMap = new HashMap<>();
-            Object[] params = new Object[] {
-                    //提示词
-                    getPromptFid("prompt-2507094056E37A"),
-                    jsonResultObject.toJSONString(),
-                    variableMap
-            };
-            Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
-            JSONObject jsonObjectResult = new JSONObject(result);
-            JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
-            //设置值
-            String str=jsonObjectData.getString("llmValue");//JSON结构的玩意
-            String jsonResult = str.replaceAll("\\s*|\r|\n|\t", "");
-            JSONObject resultJsonObject = null;
-            try {
-                //若全部生成JSON字符串，则不会进入catch
-                resultJsonObject = JSON.parseObject(jsonResult);
-            } catch (Exception ee) {
-                //将"knowpoint_plan"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
-                jsonResult = jsonResult.substring(jsonResult.indexOf("\"answer\"")-1 , jsonResult.indexOf("}]}")+3);
-                resultJsonObject = JSON.parseObject(jsonResult);
-            }
+                String message="是否确认批改？";
 
-            int sum=0;
-            // entryentity是单据体标识，your_field_key是要修改的字段标识
-            DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-            // 将JSONObject转换为金蝶可识别的DynamicObject数组
-            for (int j = 0; j < entryRows.size(); j++) {
-                JSONObject jsonRow = resultJsonObject.getJSONArray("answer").getJSONObject(j);
-                DynamicObject newRow = entryRows.get(j);
-                // 批量设置字段值
-                sum+=Integer.parseInt(jsonRow.getString("score"));
-                newRow.set("lag1_userscore", jsonRow.getString("score"));
-                newRow.set("lag1_ai_pigai", jsonRow.getString("analysis"));
-            }
-            this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
-            AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
-            if (AIORNOR.equals("normal")){
-                bindData(); //绑定至成绩关联表
-                updateUserdata(); //更新用户数据表
-            }else {
+                ConfirmCallBackListener confirmCallBackListener = new ConfirmCallBackListener("myCallbackId",this);
 
+                // 正确方式：使用 showConfirm 而非 showMessage
+                this.getView().showConfirm(
+                        message,                  // 消息内容
+                        MessageBoxOptions.YesNo,               // 按钮选项
+                        ConfirmTypes.Default,
+                        confirmCallBackListener
+                );
+            }else{
+                this.getView().showMessage("此次作答已批改，请勿重复提交2");
+                return;
             }
-            // 刷新界面显示
-            this.getView().updateView(ENTRY_ENTITY_COLLECTION);
         }
 
     }
@@ -481,5 +470,79 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         data1 = (s1 + s2) / (n1 + n2 + 1);
         data2 = (s4 + s3) / (n4 + n3 + 1);
         return items;
+    }
+
+    /**
+     * 回调监听
+     * @param messageBoxClosedEvent
+     */
+    @Override
+    public void confirmCallBack(MessageBoxClosedEvent messageBoxClosedEvent) {
+        super.confirmCallBack(messageBoxClosedEvent);
+        if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId())&&messageBoxClosedEvent.getResult() == MessageBoxResult.Yes){
+            String cachedJson = (String) cache.get("jsonResultObject");
+            if (cachedJson!=null){
+                JSONObject parsedJson = JSON.parseObject(cachedJson);
+                pigaiFunc(parsedJson);
+            }else{
+                this.getView().showErrorNotification("题目数据异常");
+            }
+//            this.getView().showMessage("点击了是"+formattedQuestionIds);
+//            System.out.println("用户点击了确认");
+            cache.remove("jsonResultObject");   //销毁缓存
+        }else if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId()) && messageBoxClosedEvent.getResult()==MessageBoxResult.No){
+//            this.getView().showMessage("点击了否");
+//            System.out.println("用户点击了取消");
+            cache.remove("jsonResultObject");   //销毁缓存
+        }
+    }
+
+    private void pigaiFunc(JSONObject jsonResultObject){
+        //调用AI开发平台微服务
+        Map<String , String> variableMap = new HashMap<>();
+        Object[] params = new Object[] {
+                //提示词
+                getPromptFid("prompt-2507094056E37A"),
+                jsonResultObject.toJSONString(),
+                variableMap
+        };
+        Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
+        JSONObject jsonObjectResult = new JSONObject(result);
+        JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
+        //设置值
+        String str=jsonObjectData.getString("llmValue");//JSON结构的玩意
+        String jsonResult = str.replaceAll("\\s*|\r|\n|\t", "");
+        JSONObject resultJsonObject = null;
+        try {
+            //若全部生成JSON字符串，则不会进入catch
+            resultJsonObject = JSON.parseObject(jsonResult);
+        } catch (Exception ee) {
+            //将"knowpoint_plan"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
+            jsonResult = jsonResult.substring(jsonResult.indexOf("\"answer\"")-1 , jsonResult.indexOf("}]}")+3);
+            resultJsonObject = JSON.parseObject(jsonResult);
+        }
+
+        int sum=0;
+        // entryentity是单据体标识，your_field_key是要修改的字段标识
+        DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+        // 将JSONObject转换为金蝶可识别的DynamicObject数组
+        for (int j = 0; j < entryRows.size(); j++) {
+            JSONObject jsonRow = resultJsonObject.getJSONArray("answer").getJSONObject(j);
+            DynamicObject newRow = entryRows.get(j);
+            // 批量设置字段值
+            sum+=Integer.parseInt(jsonRow.getString("score"));
+            newRow.set("lag1_userscore", jsonRow.getString("score"));
+            newRow.set("lag1_ai_pigai", jsonRow.getString("analysis"));
+        }
+        this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
+        AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
+        if (AIORNOR.equals("normal")){
+            bindData(); //绑定至成绩关联表
+            updateUserdata(); //更新用户数据表
+        }else {
+
+        }
+        // 刷新界面显示
+        this.getView().updateView(ENTRY_ENTITY_COLLECTION);
     }
 }
