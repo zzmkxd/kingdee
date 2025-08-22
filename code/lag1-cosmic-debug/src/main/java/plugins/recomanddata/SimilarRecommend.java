@@ -139,7 +139,7 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
         List<Question> recs = recommendSimilarQuestions(targetId, questions, 3, excludeIds);
 
         List<String> linkkpValues = getStrings(recs);
-//        this.getView().showMessage(linkkpValues.toString());
+//        this.getView().showMessage(linkkpValues.toString());//
 
         if(linkkpValues.isEmpty()) this.getView().showMessage("暂无相似题目，请稍后再试");
         else{

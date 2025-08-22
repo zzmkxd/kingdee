@@ -11,11 +11,11 @@ import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 
-public class DemoConsumer implements MessageConsumer {
+public class JirSuanMqConsumer implements MessageConsumer {
     Log log = LogFactory.getLog(getClass());
     @Override
     public void onMessage(Object message, String messageId, boolean resend, MessageAcker acker) {
-        log.info("自定义DemoConsumer开始消费");
+        log.info("JirSuanMqConsumer开始起飞");
         try {
             DynamicObject obj = BusinessDataServiceHelper.newDynamicObject("lag1_homework_correct");
             //设置对应属性

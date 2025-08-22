@@ -1,31 +1,30 @@
 package plugins.AI;
 
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.aliyun.odps.utils.StringUtils;
+import com.kingdee.cosmic.ctrl.kdf.data.logging.Logger;
 import kd.bos.base.AbstractBasePlugIn;
-import kd.bos.cache.CacheFactory;
-import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.context.RequestContext;
+import kd.bos.dataentity.OperateOption;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.resource.ResManager;
+import kd.bos.entity.operate.result.OperationResult;
+import kd.bos.exception.KDBizException;
+import kd.bos.exception.KDException;
 import kd.bos.ext.form.control.Markdown;
-import kd.bos.form.ConfirmCallBackListener;
-import kd.bos.form.ConfirmTypes;
-import kd.bos.form.MessageBoxOptions;
-import kd.bos.form.MessageBoxResult;
 import kd.bos.form.chart.ItemValue;
 import kd.bos.form.chart.PieChart;
 import kd.bos.form.chart.PieSeries;
 import kd.bos.form.chart.radar.*;
 import kd.bos.form.control.events.ItemClickEvent;
-import kd.bos.form.events.MessageBoxClosedEvent;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.DispatchServiceHelper;
+import kd.bos.servicehelper.QueryServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.bos.servicehelper.user.UserServiceHelper;
 import kd.sdk.plugin.Plugin;
@@ -56,18 +55,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
     private static final String TKKNPOINT = "lag1_knowpoints";
     private Integer data1=0;
     private Integer data2=0;
-    /**
-     * 定义缓存对象
-     */
-    private DistributeSessionlessCache cache;
-
-    @Override
-    public void initialize() {
-        super.initialize();
-        // 初始化缓存
-        cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache("customRegion");
-    }
-
     @Override
     public void registerListener(EventObject e) {
         //注册点击事件
@@ -79,74 +66,86 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         if (e.getItemKey().equalsIgnoreCase("lag1_ai_pingfen")) {
             if ( check_Pigai() ) {
                 //加入确认逻辑，否 则 return;
-                //是则继续
-
-                //组成ai批改参数
-                JSONObject jsonResultObject = new JSONObject();
-                jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
-                jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
-                DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-                JSONArray jsonTaskArray = new JSONArray();
-                int i=1;
-                for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
-                    JSONObject jsonObjectSingle = new JSONObject();
-                    jsonObjectSingle.put("id", i++);
-                    jsonObjectSingle.put("problemContent", dynamicObjectSingle.getString("lag1_prodes"));//题干
-                    jsonObjectSingle.put("userAnswer", dynamicObjectSingle.getString("lag1_useranswer"));//用户作答
-                    jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_difficulty"));//题目难度
-                    jsonObjectSingle.put("answer", dynamicObjectSingle.getString("lag1_standard_answer"));//标准答案
-                    jsonObjectSingle.put("kPoints", dynamicObjectSingle.getString("lag1_link_kpoints"));//相关知识点
-                    jsonTaskArray.add(jsonObjectSingle);
-                }
-                jsonResultObject.put("problemsIntroduction", jsonTaskArray);
-                cache.put("jsonResultObject",jsonResultObject.toJSONString());  //存储时转换为字符串
-
-                String message="是否确认批改？";
-
-                ConfirmCallBackListener confirmCallBackListener = new ConfirmCallBackListener("myCallbackId",this);
-
-                // 正确方式：使用 showConfirm 而非 showMessage
-                this.getView().showConfirm(
-                        message,                  // 消息内容
-                        MessageBoxOptions.YesNo,               // 按钮选项
-                        ConfirmTypes.Default,
-                        confirmCallBackListener
-                );
-            }else{
-                this.getView().showMessage("此次作答已批改，请勿重复提交");
-                return;
+                //是则继续？交给你了
             }
+            JSONObject jsonResultObject = new JSONObject();
+            jsonResultObject.put("taskName", this.getModel().getValue("name").toString());
+            jsonResultObject.put("createTime", this.getModel().getValue("createtime").toString());
+            DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+            JSONArray jsonTaskArray = new JSONArray();
+            int i=1;
+            for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
+                JSONObject jsonObjectSingle = new JSONObject();
+                jsonObjectSingle.put("id", i++);
+                jsonObjectSingle.put("problemContent", dynamicObjectSingle.getString("lag1_prodes"));//题干
+                jsonObjectSingle.put("userAnswer", dynamicObjectSingle.getString("lag1_useranswer"));//用户作答
+                jsonObjectSingle.put("diff", dynamicObjectSingle.getString("lag1_difficulty"));//题目难度
+                jsonObjectSingle.put("answer", dynamicObjectSingle.getString("lag1_standard_answer"));//标准答案
+                jsonObjectSingle.put("kPoints", dynamicObjectSingle.getString("lag1_link_kpoints"));//相关知识点
+                jsonTaskArray.add(jsonObjectSingle);
+            }
+            jsonResultObject.put("problemsIntroduction", jsonTaskArray);
+
+            //调用AI开发平台微服务
+            Map<String , String> variableMap = new HashMap<>();
+            Object[] params = new Object[] {
+                    //提示词
+                    getPromptFid("prompt-2507094056E37A"),
+                    jsonResultObject.toJSONString(),
+                    variableMap
+            };
+            Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
+            JSONObject jsonObjectResult = new JSONObject(result);
+            JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
+            //设置值
+            String str=jsonObjectData.getString("llmValue");//JSON结构的玩意
+            String jsonResult = str.replaceAll("\\s*|\r|\n|\t", "");
+            JSONObject resultJsonObject = null;
+            try {
+                //若全部生成JSON字符串，则不会进入catch
+                resultJsonObject = JSON.parseObject(jsonResult);
+            } catch (Exception ee) {
+                //将"knowpoint_plan"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
+                jsonResult = jsonResult.substring(jsonResult.indexOf("\"answer\"")-1 , jsonResult.indexOf("}]}")+3);
+                resultJsonObject = JSON.parseObject(jsonResult);
+            }
+
+            int sum=0;
+            // entryentity是单据体标识，your_field_key是要修改的字段标识
+            DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
+            // 将JSONObject转换为金蝶可识别的DynamicObject数组
+            for (int j = 0; j < entryRows.size(); j++) {
+                JSONObject jsonRow = resultJsonObject.getJSONArray("answer").getJSONObject(j);
+                DynamicObject newRow = entryRows.get(j);
+                // 批量设置字段值
+                sum+=Integer.parseInt(jsonRow.getString("score"));
+                newRow.set("lag1_userscore", jsonRow.getString("score"));
+                newRow.set("lag1_ai_pigai", jsonRow.getString("analysis"));
+            }
+            this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
+            AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
+            if (AIORNOR.equals("normal")){
+                bindData(); //绑定至成绩关联表
+                updateUserdata(); //更新用户数据表
+            }else {
+
+            }
+            // 刷新界面显示
+            this.getView().updateView(ENTRY_ENTITY_COLLECTION);
         }
 
     }
     private boolean check_Pigai() {
         DynamicObjectCollection dynamicObjectCollection = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
         for (DynamicObject dynamicObjectSingle : dynamicObjectCollection) {
-//            if(!Objects.equals(dynamicObjectSingle.getString("lag1_userscore"), "") || !Objects.equals(dynamicObjectSingle.getString("lag1_ai_pigai"), "")) {
-//                return true;
-//            }
-            if(StringUtils.isEmpty(dynamicObjectSingle.getString("lag1_userscore")) || StringUtils.isEmpty(dynamicObjectSingle.getString("lag1_ai_pigai"))){
-                return true;    //批改
+            if(!Objects.equals(dynamicObjectSingle.getString("lag1_userscore"), "") || !Objects.equals(dynamicObjectSingle.getString("lag1_ai_pigai"), "")) {
+                return false;
             }
         }
-        return false;   //不批改
+        return true;
     }
 
-    private DynamicObject findExistingRecord_UserData(String studentid, String knpname) {
-        // 定义要查询的字段（可选，如果不需要特定字段可以传 null 或空字符串）
-        String fields = "lag1_score"; // 或者直接传 null/"" 表示查询所有字段
 
-        // 构建 QFilter 条件
-        QFilter filter1 = new QFilter("creator.number", QCP.equals, studentid);
-        QFilter filter2 = new QFilter("lag1_linkkp.name", QCP.equals, knpname);
-        QFilter combinedFilter = QFilter.and(filter1, filter2); // 组合两个条件
-
-        // 执行查询
-        DynamicObject[] records = BusinessDataServiceHelper.load(USERDATA_BIAODAN, fields, new QFilter[]{combinedFilter});
-
-        // 返回第一条记录（如果没有则返回 null）
-        return records.length > 0 ? records[0] : null;
-    }
 
     public void updateUserdata(){
         //开始写各字段数据
@@ -161,16 +160,14 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         //遍历单据体每一行,lag1_proid, lag1_protype,
         for(DynamicObject entryEntity:dataEntities) {
             //new成绩关联表的表单对象
-            String proid = entryEntity.getString("lag1_proid"); //题目id
-            String userscore = entryEntity.getString("lag1_userscore");
-            String courseid = entryEntity.getString("lag1_courseid");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
-//            this.getView().showMessage("kn" + knpoints);
+            String score = entryEntity.getString("lag1_userscore");
             String[] knpointArr = knpoints.split(",");
             String knpoint1 = null;
             String knpoint2 = null;
 
             DynamicObject existingRecord = null;
+            DynamicObject existingRecord2 = null;
             if (knpointArr.length > 1) {
                 knpoint1 = knpointArr[0].trim();
                 knpoint2 = knpointArr[1].trim();
@@ -178,29 +175,54 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 knpoint1 = knpointArr[0].trim();
             }
 
-            if(knpoint1 != null){
-                existingRecord = findExistingRecord_UserData(studentid, knpoint1);
-                updateData(existingRecord);
-                this.getView().showMessage("更新数据");
+            if(knpoint1 != null) existingRecord = findExistingRecord_UserData(studentid, knpoint1);
+            updateData(existingRecord,score);
+            if(knpoint2 != null) existingRecord2 = findExistingRecord_UserData(studentid, knpoint2);
+            updateData(existingRecord2,score);
+        }
+    }
+    /**
+     * 使用loadSingle安全查询用户数据记录
+     * @param studentid 学生ID（字符串形式）
+     * @param knpname 知识点名称
+     * @return 存在的记录或null
+     */
+    private DynamicObject findExistingRecord_UserData(String studentid, String knpname) {
+        try {
+            // 1. 参数校验
+            if (StringUtils.isBlank(studentid) || StringUtils.isBlank(knpname)) {
+                throw new IllegalArgumentException("学生ID和知识点名称不能为空");
             }
-            if(knpoint2 != null){
-                existingRecord = findExistingRecord_UserData(studentid, knpoint2);
-                updateData(existingRecord);
-            }
+            // 2. 构造精确查询条件
+            long studentId = Long.parseLong(studentid);
+            QFilter[] filters = new QFilter[]{
+                    new QFilter("creator", QCP.equals, studentId),
+                    new QFilter("lag1_linkkp.name", QCP.equals, knpname)
+            };
+            // 3. 使用loadSingle安全查询（自动处理路由）
+            return BusinessDataServiceHelper.loadSingle(
+                    USERDATA_BIAODAN,
+                    "lag1_ans_num,lag1_sum_score,lag1_data", // 明确指定需要字段
+                    filters
+            );
+        } catch (NumberFormatException e) {
+            throw new KDBizException("学生ID必须是数字");
+        } catch (KDException e) {
+            throw new KDBizException("查询数据失败，请稍后重试");
         }
     }
 
-    public void updateData(DynamicObject record){
+
+    public void updateData(DynamicObject record,String score){
         if (record != null) {
-            this.getView().showMessage(record.toString());
-            int num = (int) record.get("lag1_ans_num") + 1;
-            record.set("lag1_ans_num", num);
-            int sum_score = (int) record.get("lag1_sum_score") + 1;
-            record.set("lag1_sum_score", sum_score );
-            record.set("lag1_data", sum_score / num);
+            int num = record.get("lag1_ans_num") != null ? record.getInt("lag1_ans_num") : 0;
+            record.set("lag1_ans_num", num + 1);
+            // 使用DynamicObject内置安全方法
+            int sum_score = record.getInt("lag1_sum_score") + Integer.parseInt( score);
+            record.set("lag1_sum_score", sum_score);
+            if(num != 0 )record.set("lag1_data", sum_score / num);
             SaveServiceHelper.update(record);
         }else {
-            this.getView().showMessage("该题目让我旋转");
         }
     }
     /**
@@ -244,7 +266,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
             String userscore = entryEntity.getString("lag1_userscore");
             String courseid = entryEntity.getString("lag1_courseid");
             String knpoints = entryEntity.getString("lag1_link_kpoints");
-            this.getView().showMessage("kn"+knpoints);
             String[] knpointArr = knpoints.split(",");
             String knpoint1="";
             String knpoint2 = "";
@@ -260,11 +281,9 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
 
             if(existingRecord!=null){
-                this.getView().showMessage(existingRecord.toString());
                 existingRecord.set("lag1_score",Integer.parseInt(userscore));
                 SaveServiceHelper.update(existingRecord);
             }else{
-                this.getView().showMessage("不存在");
                 String field1 = "number";
                 QFilter qFilter1 = new QFilter("number", QCP.equals,proid);
                 DynamicObject problem = BusinessDataServiceHelper.loadSingle(TKPROBLEM,field1,new QFilter[]{qFilter1});
@@ -303,7 +322,6 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
                 }
             }
         }
-        this.getView().showMessage("更新数据成功");
     }
 
     private DynamicObject findExistingRecord(String studentid, String proid) {
@@ -463,79 +481,5 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
         data1 = (s1 + s2) / (n1 + n2 + 1);
         data2 = (s4 + s3) / (n4 + n3 + 1);
         return items;
-    }
-
-    /**
-     * 回调监听
-     * @param messageBoxClosedEvent
-     */
-    @Override
-    public void confirmCallBack(MessageBoxClosedEvent messageBoxClosedEvent) {
-        super.confirmCallBack(messageBoxClosedEvent);
-        if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId())&&messageBoxClosedEvent.getResult() == MessageBoxResult.Yes){
-            String cachedJson = (String) cache.get("jsonResultObject");
-            if (cachedJson!=null){
-                JSONObject parsedJson = JSON.parseObject(cachedJson);
-                pigaiFunc(parsedJson);
-            }else{
-                this.getView().showErrorNotification("题目数据异常");
-            }
-//            this.getView().showMessage("点击了是"+formattedQuestionIds);
-//            System.out.println("用户点击了确认");
-            cache.remove("jsonResultObject");   //销毁缓存
-        }else if("myCallbackId".equals(messageBoxClosedEvent.getCallBackId()) && messageBoxClosedEvent.getResult()==MessageBoxResult.No){
-//            this.getView().showMessage("点击了否");
-//            System.out.println("用户点击了取消");
-            cache.remove("jsonResultObject");   //销毁缓存
-        }
-    }
-
-    private void pigaiFunc(JSONObject jsonResultObject){
-        //调用AI开发平台微服务
-        Map<String , String> variableMap = new HashMap<>();
-        Object[] params = new Object[] {
-                //提示词
-                getPromptFid("prompt-2507094056E37A"),
-                jsonResultObject.toJSONString(),
-                variableMap
-        };
-        Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
-        JSONObject jsonObjectResult = new JSONObject(result);
-        JSONObject jsonObjectData = jsonObjectResult.getJSONObject("data");
-        //设置值
-        String str=jsonObjectData.getString("llmValue");//JSON结构的玩意
-        String jsonResult = str.replaceAll("\\s*|\r|\n|\t", "");
-        JSONObject resultJsonObject = null;
-        try {
-            //若全部生成JSON字符串，则不会进入catch
-            resultJsonObject = JSON.parseObject(jsonResult);
-        } catch (Exception ee) {
-            //将"knowpoint_plan"的上一个字符作为开始，以}]}字符作为结束，则最后需要+3
-            jsonResult = jsonResult.substring(jsonResult.indexOf("\"answer\"")-1 , jsonResult.indexOf("}]}")+3);
-            resultJsonObject = JSON.parseObject(jsonResult);
-        }
-
-        int sum=0;
-        // entryentity是单据体标识，your_field_key是要修改的字段标识
-        DynamicObjectCollection entryRows = this.getModel().getEntryEntity(ENTRY_ENTITY_COLLECTION);
-        // 将JSONObject转换为金蝶可识别的DynamicObject数组
-        for (int j = 0; j < entryRows.size(); j++) {
-            JSONObject jsonRow = resultJsonObject.getJSONArray("answer").getJSONObject(j);
-            DynamicObject newRow = entryRows.get(j);
-            // 批量设置字段值
-            sum+=Integer.parseInt(jsonRow.getString("score"));
-            newRow.set("lag1_userscore", jsonRow.getString("score"));
-            newRow.set("lag1_ai_pigai", jsonRow.getString("analysis"));
-        }
-        this.getModel().setValue("lag1_textfield1",String.valueOf(sum/entryRows.size()));
-        AIORNOR = this.getModel().getDataEntity().getString("lag1_aiornor");
-        if (AIORNOR.equals("normal")){
-            bindData(); //绑定至成绩关联表
-            updateUserdata(); //更新用户数据表
-        }else {
-//                this.getView().showMessage("ai:ai");
-        }
-        // 刷新界面显示
-        this.getView().updateView(ENTRY_ENTITY_COLLECTION);
     }
 }

@@ -32,7 +32,7 @@ public class MulThreadsEdit extends AbstractBasePlugIn implements Plugin {
         String itemKey = evt.getItemKey();
         if ("lag1_concurrent".equals(itemKey)) {
             // 普通处理
-            for (int i = 1; i < 3; i++) {
+            for (int i = 1; i < 20000; i++) {
                 DynamicObject obj = BusinessDataServiceHelper.newDynamicObject("lag1_homework_correct");
                 //设置对应属性
                 obj.set("number", "ProList002");
@@ -48,7 +48,7 @@ public class MulThreadsEdit extends AbstractBasePlugIn implements Plugin {
             // 使用MQ处理
             this.getView().showMessage("进入循环");
             MessagePublisher mp = MQFactory.get().createSimplePublisher("lag1_learn", "erkai_queue");
-            for (int i = 1; i < 3; i++) {
+            for (int i = 1; i < 20000; i++) {
                 mp.publish(i);
             }
         }

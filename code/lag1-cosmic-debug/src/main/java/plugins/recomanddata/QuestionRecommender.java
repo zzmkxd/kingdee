@@ -59,7 +59,7 @@ public class QuestionRecommender {
 
 
     public static void main(String[] args) throws Exception {
-        String csvPath = "data/lag1_protest.csv";
+        String csvPath = "E:\\lag1_protest.csv";
         String word2vecPath = "data/45000-small.txt";
 
         // 加载词向量

@@ -37,7 +37,7 @@ public class BookKnowpointAI {
 
     public static void main(String[] args) {
 
-        String filePath = "C:\\Users\\Tian_Yumi\\Desktop\\· 马克思主义理论研究和建设工程重点教材 ·.txt";
+        String filePath = "C:\\Users\\Tian_Yumi\\Desktop\\软件测试.txt";
 //        String filePath = "D:\\桌面\\Java EE企业级应用开发教程（Spring+Spring MVC+MyBatis）（第2版） (黑马程序员) (Z-Library).txt"; // 替换为你的文件路径
         String fileContent = readFileContent(filePath);
         // 分割文本
@@ -109,10 +109,10 @@ public class BookKnowpointAI {
         ObjectNode messageNode = objectMapper.createObjectNode();
         messageNode.put("role", "user");
         messageNode.put("content", "在下面的数万字大学教材切片找到目录，整理目录粗略对应的知识点。" +
-                "格式要求：序号[知识点名称]:(知识点简要描述)，知识点分别以a a.b a.b.c 的格式编号(其中abc都代表阿拉伯数字)，分别代表一 二 三 层级的知识点，示例：1 2.3 6.1.2；" +
+                "格式要求：序号[知识点名称]:(知识点简要描述)，知识点分别以a a.b a.b.c 的格式编号(其中abc都代表阿拉伯数字)，分别代表一 二 三 层级的知识点，示例：1 2.3 6.1.4；" +
                 "内容要求：将知识点分为3个层级，如果目录只有第一、第二两个层级，没有第三个层级，可以概括两到三个教材目录或标题，来作为大层级知识点，并且在每个第二层级下自己填充第三层级的知识点。" +
-                "每个第二层级最多填充3个第三层级知识点(a.b.c中c<=3)。如果目录多于2个层级，可概括目录或标题的第一、第二层级作为知识点的第一第二层级，但必须把第二层级数量控制在4个以内(a.b中b<=4)，并且在每个第二层级下自己填充第三层级的知识点。" +
-                "数量要求：一二层级数量小于对应的教材目录，每个第二层级最多填充3个第三层级知识点(a.b.c中c<=3)。" +
+                "每个第二层级最多填充4个第三层级知识点(a.b.c中c<=4)。如果目录多于2个层级，可概括目录或标题的第一、第二层级作为知识点的第一第二层级，但必须把第二层级数量控制在4个以内(a.b中b<=4)，并且在每个第二层级下自己填充第三层级的知识点。" +
+                "数量要求：一二层级数量小于对应的教材目录，每个第二层级最多填充4个第三层级知识点(a.b.c中c<=4)。" +
                 "示例输出：1 [初识框架]\n" +
                 "1.1 [框架概述]\n" +
                 "1.1.1 [框架的优势](提高开发效率、代码规范性和软件性能)\n" +

@@ -65,18 +65,18 @@ public class Tiaochart extends AbstractFormPlugin {
 
     public KeyValueList demo() {
 
-        QFilter filter = new QFilter("lag1_data", QCP.not_equals,null);
+        QFilter filter = new QFilter("lag1_data", QCP.not_equals,0.00);
         filter.and(new QFilter("creator.id",QCP.equals, RequestContext.get().getCurrUserId())); //筛选本userid的条目
         String orderBy = "lag1_data asc";
 
         DynamicObjectCollection dataCollection;
-        //查询数据，限制返回8条
+        //查询数据，限制最多返回5条
         dataCollection = QueryServiceHelper.query(
                 "lag1_user_data",
                 "lag1_linkkp.name,lag1_data",
                 new QFilter[]{filter},
                 orderBy,
-                8
+                5
         );
 // 遍历结果获取lag1_linkkp字段值
         KeyValueList linkkpValues = new KeyValueList();
