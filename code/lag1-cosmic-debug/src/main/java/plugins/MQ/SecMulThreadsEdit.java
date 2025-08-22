@@ -40,26 +40,62 @@ public class SecMulThreadsEdit extends AbstractBasePlugIn implements Plugin {
         super.registerListener(e);
         this.addItemClickListeners("toolbarap");
     }
-    Log Logger = LogFactory.getLog(MulThreadsEdit.class);
+    Log Logger = LogFactory.getLog(SecMulThreadsEdit.class);
     @Override
     public void itemClick(ItemClickEvent evt) {
         super.itemClick(evt);
         String itemKey = evt.getItemKey();
         if ("lag1_concurrent".equals(itemKey)) {
+            // 使用线程池模拟并发 - 普通处理
+            Runnable taskTemp = new SecBizCodeThread(false);
+            LatchTest latchTest = new LatchTest();
+            try {
+                long costTime = latchTest.startTaskAllInOnce(200, taskTemp);
+                this.getView().showMessage("普通并发处理完成，耗时：" + costTime / 1000000 + "ms");
+            } catch (InterruptedException e) {
+                Logger.error("并发执行出错", e);
+                this.getView().showErrorNotification("并发执行出错：" + e.getMessage());
+            }
+        } else if ("lag1_mq_concurrent".equals(itemKey)) {
+            // 使用线程池模拟并发 - MQ处理
+            Runnable taskTemp = new SecBizCodeThread(true);
+            LatchTest latchTest = new LatchTest();
+            try {
+                long costTime = latchTest.startTaskAllInOnce(200, taskTemp);
+                this.getView().showMessage("MQ并发处理完成，耗时：" + costTime / 1000000 + "ms");
+            } catch (InterruptedException e) {
+                Logger.error("并发执行出错", e);
+                this.getView().showErrorNotification("并发执行出错：" + e.getMessage());
+            }
+        } else if ("lag1_single_thread".equals(itemKey)) {
+            // 保留原来的单线程处理方式
+            this.getView().showMessage("开始单线程处理");
+            long startTime = System.nanoTime();
+
             // 普通处理
             for (int i = 1; i < 2; i++) {
                 initNormalUserData();
             }
-        } else if ("lag1_mq_concurrent".equals(itemKey)) {
+
+            long endTime = System.nanoTime();
+            this.getView().showMessage("单线程处理完成，耗时：" + (endTime - startTime) / 1000000 + "ms");
+        } else if ("lag1_single_mq".equals(itemKey)) {
+            // 保留原来的单线程MQ处理方式
+            this.getView().showMessage("开始单线程MQ处理");
+            long startTime = System.nanoTime();
+
             // 使用MQ处理
-            this.getView().showMessage("进入循环");
             MessagePublisher mp = MQFactory.get().createSimplePublisher("lag1_learn", "erkai_queue2");
             for (int i = 1; i < 2; i++) {
                 mp.publish(i);
             }
+
+            long endTime = System.nanoTime();
+            this.getView().showMessage("单线程MQ处理完成，耗时：" + (endTime - startTime) / 1000000 + "ms");
         }
     }
-    private void initNormalUserData( ) {
+
+    private void initNormalUserData() {
         DynamicObject kp = BusinessDataServiceHelper.loadSingle(TK_KNPOINT, "id,name", new QFilter[]{new QFilter("name", QCP.equals, "普通测试用知识点")});
         DynamicObject userData = BusinessDataServiceHelper.newDynamicObject(TK_USERDATA);
         StringBuilder sb1 = new StringBuilder();
@@ -79,6 +115,5 @@ public class SecMulThreadsEdit extends AbstractBasePlugIn implements Plugin {
         userData.set("enable", 1);
 //            userData.set(TD_UDenable,"可用"); //使用状态
         SaveServiceHelper.saveOperate(TK_USERDATA,new DynamicObject[]{userData},null);
-
     }
 }

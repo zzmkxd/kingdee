@@ -16,6 +16,10 @@ import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 import kd.sdk.plugin.Plugin;
 
+import plugins.MQ.BizCodeThread;
+import plugins.MQ.LatchTest;
+
+
 import java.util.EventObject;
 
 public class MulThreadsEdit extends AbstractBasePlugIn implements Plugin {
@@ -31,6 +35,32 @@ public class MulThreadsEdit extends AbstractBasePlugIn implements Plugin {
         super.itemClick(evt);
         String itemKey = evt.getItemKey();
         if ("lag1_concurrent".equals(itemKey)) {
+            // 使用线程池模拟并发 - 普通处理
+            Runnable taskTemp = new BizCodeThread(false);
+            LatchTest latchTest = new LatchTest();
+            try {
+                long costTime = latchTest.startTaskAllInOnce(200, taskTemp);
+                this.getView().showMessage("普通并发处理完成，耗时：" + costTime / 1000000 + "ms");
+            } catch (InterruptedException e) {
+                Logger.error("并发执行出错", e);
+                this.getView().showErrorNotification("并发执行出错：" + e.getMessage());
+            }
+        } else if ("lag1_mq_concurrent".equals(itemKey)) {
+            // 使用线程池模拟并发 - MQ处理
+            Runnable taskTemp = new BizCodeThread(true);
+            LatchTest latchTest = new LatchTest();
+            try {
+                long costTime = latchTest.startTaskAllInOnce(200, taskTemp);
+                this.getView().showMessage("MQ并发处理完成，耗时：" + costTime / 1000000 + "ms");
+            } catch (InterruptedException e) {
+                Logger.error("并发执行出错", e);
+                this.getView().showErrorNotification("并发执行出错：" + e.getMessage());
+            }
+        } else if ("lag1_single_thread".equals(itemKey)) {
+            // 保留原来的单线程处理方式
+            this.getView().showMessage("开始单线程处理");
+            long startTime = System.nanoTime();
+
             // 普通处理
             for (int i = 1; i < 20000; i++) {
                 DynamicObject obj = BusinessDataServiceHelper.newDynamicObject("lag1_homework_correct");
@@ -44,13 +74,22 @@ public class MulThreadsEdit extends AbstractBasePlugIn implements Plugin {
                 obj.set("lag1_textfield1", i%11);
                 SaveServiceHelper.saveOperate("lag1_homework_correct", new DynamicObject[]{obj}, null);
             }
-        } else if ("lag1_mq_concurrent".equals(itemKey)) {
+
+            long endTime = System.nanoTime();
+            this.getView().showMessage("单线程处理完成，耗时：" + (endTime - startTime) / 1000000 + "ms");
+        } else if ("lag1_single_mq".equals(itemKey)) {
+            // 保留原来的单线程MQ处理方式
+            this.getView().showMessage("开始单线程MQ处理");
+            long startTime = System.nanoTime();
+
             // 使用MQ处理
-            this.getView().showMessage("进入循环");
             MessagePublisher mp = MQFactory.get().createSimplePublisher("lag1_learn", "erkai_queue");
             for (int i = 1; i < 20000; i++) {
                 mp.publish(i);
             }
+
+            long endTime = System.nanoTime();
+            this.getView().showMessage("单线程MQ处理完成，耗时：" + (endTime - startTime) / 1000000 + "ms");
         }
     }
 }
