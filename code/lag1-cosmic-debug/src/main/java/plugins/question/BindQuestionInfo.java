@@ -4,13 +4,16 @@ import dm.jdbc.util.StringUtil;
 import javafx.scene.control.RadioButton;
 import kd.bos.bill.BillShowParameter;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.entity.BadgeInfo;
 import kd.bos.ext.form.control.CountDown;
 import kd.bos.ext.form.control.events.CountDownEvent;
 import kd.bos.ext.form.control.events.CountDownListener;
+import kd.bos.form.ClientProperties;
 import kd.bos.form.FormShowParameter;
 import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
+import kd.bos.form.events.BeforeClosedEvent;
 import kd.bos.form.events.PreOpenFormEventArgs;
 import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.list.ListShowParameter;
@@ -40,10 +43,6 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
     private final String SUBMIT_BTN = "lag1_buttonap2";
     private final String CUR_NO = "lag1_currentquestionindex";
 
-//    private final String ANS_ONE = "lag1_ans1";
-//    private final String ANS_TWO = "lag1_ans2";
-//    private final String ANS_THREE = "lag1_ans3";
-//    private final String ANS_FOUR = "lag1_ans4";
     private final String ANS_TXT="lag1_textareafield";  //答案多行文本
     private String prolist_id = ""; //组卷表单id
     private String testorhw = "";
@@ -68,6 +67,47 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
      * 定义缓存对象
      */
     private DistributeSessionlessCache cache;
+
+    //座位标识
+//    private final String YES_BTN = "lag1_picyes";
+//    private final String NO_BTN = "lag1_picno";
+//    private final String FLEX = "lag1_flex";
+
+    private final String CHOICE_BTN="lag1_choicebtn";
+    private final String COLOR_RED="#ff5257";
+    private final String COLOR_GREEN="#77c404";
+
+    @Override
+    public void afterCreateNewData(EventObject e) {
+        //打开时判断是否答题
+        super.afterCreateNewData(e);
+        //检查是否已经加载过数据
+        if(questionObjects.isEmpty() || pronoList.isEmpty() || testorhw==""){
+//            loadQuestionData();
+            chooseLoadQuestionData();
+        }
+        for(int i=0;i<pronoList.size();i++){
+            updateButtonColor(i);
+//            String questionId = pronoList.get(i);
+//            boolean hasAnswer = cache.contains(questionId);
+//            String btnStr = CHOICE_BTN+(i+1);
+//            Button button = this.getControl(btnStr);
+//            if(button!=null){
+//                Map<String,Object> style = new HashMap<>();
+//                if(hasAnswer){
+//                   style.put(ClientProperties.BackColor,COLOR_GREEN);
+//                }else{
+//                    style.put(ClientProperties.BackColor,COLOR_RED);
+//                }
+//                this.getView().updateControlMetadata(button.getKey(),style);
+//            }
+        }
+
+        for(int i=pronoList.size();i<4;i++){
+            String btnStr = CHOICE_BTN+(i+1);
+            this.getView().setVisible(false,btnStr);
+        }
+    }
 
     private void chooseLoadQuestionData(){
         //获取自定义参数isWordCloud
@@ -258,6 +298,34 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         // 将答案存储到缓存中
         cache.put(questionId, ans);
         this.getModel().setValue(ANS_TXT,"");   //清空
+
+        //更新按钮颜色
+        updateButtonColor(curNo);
+    }
+
+    private void updateButtonColor(int curNo) {
+        String questionId = pronoList.get(curNo);
+        boolean hasAnswer = cache.contains(questionId);
+        String ans="";
+        if(cache.contains(questionId)){
+            ans=cache.get(questionId);
+//            this.getView().showMessage("ans"+ans);
+        }
+        String btnStr = CHOICE_BTN+(curNo+1);
+        Button button = this.getControl(btnStr);
+        if(button!=null){
+            Map<String,Object> style = new HashMap<>();
+            if(hasAnswer && ans.equals("未作答")){
+                style.put(ClientProperties.BackColor,COLOR_RED);
+            }
+            else if(hasAnswer && ans!="" && !ans.isEmpty()){
+                style.put(ClientProperties.BackColor,COLOR_GREEN);
+            }else{
+                style.put(ClientProperties.BackColor,COLOR_RED);
+            }
+            this.getView().updateControlMetadata(button.getKey(),style);
+        }
+
     }
 
     @Override
@@ -277,6 +345,14 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         countDown = this.getView().getControl("lag1_countdownap");
         if (countDown != null) {
             countDown.addCountDownListener(this); // 直接传递当前实例
+        }
+
+        //注册题号按钮
+        for(int i=1;i<=4;i++){
+//            this.addClickListeners(YES_BTN+i);
+//            this.addClickListeners(NO_BTN+i);
+            Button btn = this.getView().getControl(CHOICE_BTN+i);
+            btn.addClickListener(this);
         }
     }
 
@@ -306,9 +382,31 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
             //清理缓存
             for(int curNo=0;curNo<pronoList.size();curNo++){
                 String questionId = pronoList.get(curNo);
-                cache.remove(questionId);
+                if(cache.contains(questionId)){
+                    cache.remove(questionId);
+                }
             }
             sendParameter();
+        }else if(StringUtils.equals((CHOICE_BTN+1),source.getKey())){
+            //第一题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,0);
+        }else if(StringUtils.equals((CHOICE_BTN+2),source.getKey())){
+            //第2题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,1);
+        }else if(StringUtils.equals((CHOICE_BTN+3),source.getKey())){
+            //第3题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,2);
+        }else if(StringUtils.equals((CHOICE_BTN+4),source.getKey())){
+            //第一题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,3);
         }
     }
 
@@ -374,6 +472,17 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         bindHasAnswerData();
     }
 
+    private void onClickJump(EventObject e,int curNo){
+        getCurNo();
+        //超出范围
+        if(curNo<0) curNo=0;
+        else if(curNo>questionObjects.size()-1) curNo = questionObjects.size()-1;
+
+        this.getModel().setValue(CUR_NO,curNo);
+        bindCurrentQuestionData();
+        bindHasAnswerData();
+    }
+
     /**
      * 获取题目数据
      * @param e
@@ -398,6 +507,18 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
             startTimer();
         }
     }
+
+//    @Override
+//    public void beforeClosed(BeforeClosedEvent e) {
+//        super.beforeClosed(e);
+//        //清理缓存
+//        for(int curNo=0;curNo<pronoList.size();curNo++){
+//            String questionId = pronoList.get(curNo);
+//            if(cache.contains(questionId)){
+//                cache.remove(questionId);
+//            }
+//        }
+//    }
 
     /**
      * 绑定当前作答数据到作答区域
@@ -449,6 +570,7 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
      * 绑定当前题目数据到表单
      */
     private void bindCurrentQuestionData() {
+        getCurNo(); //解决第一道题目绑定的问题
         if (questionObjects.isEmpty() || currentQuestionIndex < 0 || currentQuestionIndex >= questionObjects.size()) {
             return;
         }
@@ -743,7 +865,9 @@ public class BindQuestionInfo extends AbstractFormPlugin implements Plugin,Count
         //清理缓存
         for(int curNo=0;curNo<pronoList.size();curNo++){
             String questionId = pronoList.get(curNo);
-            cache.remove(questionId);
+            if(cache.contains(questionId)){
+                cache.remove(questionId);
+            }
         }
         //调用submit方法提交考试
 //        countDownEnded();
