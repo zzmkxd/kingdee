@@ -12,6 +12,7 @@ import kd.sdk.plugin.Plugin;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 基础资料插件
@@ -23,11 +24,11 @@ public class DirectoryGeneration extends AbstractBasePlugIn implements Plugin {
         JSONObject jsonResultObject = new JSONObject();
         for (int i = 1; i <= 12; i++) {
             String str1 = this.getModel().getValue("lag1_chapter" + i).toString();
-            if(str1 != null){
+            if(!Objects.equals(str1, "")){
                 jsonResultObject.put("第" + i +"章", str1);
                 for(int j=1;j<=5;j++){
                     String str2 = this.getModel().getValue("lag1_chapter" + i+"p"+j).toString();
-                    if(str2 != null){
+                    if(!Objects.equals(str2, "")){
                         jsonResultObject.put("第" + i+"_"+j +"章", str2);
                     }
                 }
