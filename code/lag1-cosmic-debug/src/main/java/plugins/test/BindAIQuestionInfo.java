@@ -3,6 +3,7 @@ package plugins.test;
 import com.alibaba.fastjson.JSONObject;
 import kd.bos.bill.BillShowParameter;
 import kd.bos.dataentity.entity.DynamicObject;
+import kd.bos.form.ClientProperties;
 import kd.bos.form.ShowType;
 import kd.bos.form.control.Button;
 import kd.bos.form.control.Control;
@@ -12,9 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.json.*;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.EventObject;
-import java.util.List;
+import java.util.*;
+
 import kd.bos.cache.CacheFactory;
 import kd.bos.cache.DistributeSessionlessCache;
 
@@ -56,6 +56,10 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
     private DistributeSessionlessCache cache;
 
     private final String CANCEL_BTN = "btncancel";
+    //题号按钮和展示答题状态
+    private final String CHOICE_BTN="lag1_choicebtn";
+    private final String COLOR_RED="#ff5257";
+    private final String COLOR_GREEN="#77c404";
 
     @Override
     public void initialize() {
@@ -76,6 +80,13 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         submitBTN.addClickListener(this);
         Button cancelBTN = this.getView().getControl(CANCEL_BTN);
         cancelBTN.addClickListener(this);
+        //注册题号按钮
+        for(int i=1;i<=4;i++){
+//            this.addClickListeners(YES_BTN+i);
+//            this.addClickListeners(NO_BTN+i);
+            Button btn = this.getView().getControl(CHOICE_BTN+i);
+            btn.addClickListener(this);
+        }
     }
 
     @Override
@@ -104,8 +115,78 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
             //清理缓存
             clearCache();
 //            this.getView().showMessage("取消");
+        }else if(StringUtils.equals((CHOICE_BTN+1),source.getKey())){
+            //第一题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,0);
+        }else if(StringUtils.equals((CHOICE_BTN+2),source.getKey())){
+            //第2题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,1);
+        }else if(StringUtils.equals((CHOICE_BTN+3),source.getKey())){
+            //第3题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,2);
+        }else if(StringUtils.equals((CHOICE_BTN+4),source.getKey())){
+            //第一题
+            getCurNo();
+            saveAns(currentQuestionIndex);
+            onClickJump(evt,3);
         }
     }
+
+    /**
+     * 初始化答题状态按钮
+     * @param e
+     */
+    @Override
+    public void afterCreateNewData(EventObject e) {
+        //打开时判断是否答题
+        super.afterCreateNewData(e);
+        //检查是否已经加载过数据
+        reloadQ();
+        for(int i=0;i<questionJsonList.size();i++){
+            updateButtonColor(i);
+        }
+
+        for(int i=questionJsonList.size();i<4;i++){
+            String btnStr = CHOICE_BTN+(i+1);
+            this.getView().setVisible(false,btnStr);
+        }
+    }
+
+    /**
+     * 更新按钮函数
+     * @param curNo
+     */
+    private void updateButtonColor(int curNo) {
+        String questionId = String.valueOf(curNo);
+        boolean hasAnswer = cache.contains(questionId);
+        String ans="";
+        if(cache.contains(questionId)){
+            ans=cache.get(questionId);
+//            this.getView().showMessage("ans"+ans);
+        }
+        String btnStr = CHOICE_BTN+(curNo+1);
+        Button button = this.getControl(btnStr);
+        if(button!=null){
+            Map<String,Object> style = new HashMap<>();
+            if(hasAnswer && ans.equals("未作答")){
+                style.put(ClientProperties.BackColor,COLOR_RED);
+            }
+            else if(hasAnswer && ans!="" && !ans.isEmpty()){
+                style.put(ClientProperties.BackColor,COLOR_GREEN);
+            }else{
+                style.put(ClientProperties.BackColor,COLOR_RED);
+            }
+            this.getView().updateControlMetadata(button.getKey(),style);
+        }
+
+    }
+
     private void sendParameter() {
 //        this.getView().showMessage("ans"+userAnswers);
         BillShowParameter showParameter = new BillShowParameter();
@@ -176,6 +257,9 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         cache.put(questionId,ans);
 //        this.getModel().setValue(ansSavePlace,ans);
         this.getModel().setValue(PROSTUANS,"");   //清空
+
+        //更新按钮颜色
+        updateButtonColor(curNo);
     }
 
     /**
@@ -191,6 +275,22 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
             currentQuestionIndex=Math.min(currentQuestionIndex+1,questionJsonList.size()-1);
             this.getModel().setValue(PRONO,currentQuestionIndex);
         }
+        bindCurrentQuestionData();
+        bindHasAnswerData();
+    }
+
+    /**
+     * 题号跳转的函数
+     * @param e
+     * @param curNo
+     */
+    private void onClickJump(EventObject e,int curNo){
+        getCurNo();
+        //超出范围
+        if(curNo<0) curNo=0;
+        else if(curNo>questionJsonList.size()-1) curNo = questionJsonList.size()-1;
+
+        this.getModel().setValue(PRONO,curNo);
         bindCurrentQuestionData();
         bindHasAnswerData();
     }
