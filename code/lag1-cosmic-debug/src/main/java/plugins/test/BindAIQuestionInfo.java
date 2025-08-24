@@ -126,7 +126,11 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
     private void loadAnswerData() {
         for(int i=0;i<questionJsonList.size();i++){
             String questionId = String.valueOf(i);
-            String ans = cache.get(questionId);
+            String ans="";
+            if(cache.contains(questionId)){
+                ans=cache.get(questionId);
+            }
+//            String ans = cache.get(questionId);
             userAnswers.add(ans);
 //            if (i==0){
 //                String ans = (String) this.getModel().getValue(ANS_ONE);
@@ -273,7 +277,10 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         // 绑定作答(可选)
             String stuAns="";
             String questionId = String.valueOf(currentQuestionIndex);   //当前题目ID
-            stuAns = cache.get(questionId);
+            if(cache.contains(questionId)){
+                stuAns = cache.get(questionId);
+            }
+
 //            if(currentQuestionIndex==0){
 //                stuAns= (String) this.getModel().getValue(ANS_ONE);
 //            }else if(currentQuestionIndex==1){
@@ -293,7 +300,7 @@ public class BindAIQuestionInfo extends AbstractFormPlugin implements Plugin {
         // 清除缓存
         for (int i = 0; i < questionJsonList.size(); i++) {
             String questionId = String.valueOf(i);
-            cache.remove(questionId);
+            if(cache.contains(questionId)) cache.remove(questionId);
         }
     }
 }
