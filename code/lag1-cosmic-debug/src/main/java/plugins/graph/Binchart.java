@@ -121,18 +121,18 @@ public class Binchart extends AbstractFormPlugin implements RateListener {
             // 根据区间进行分类累加
             if (value.compareTo(BigDecimal.ZERO) >= 0 &&
                     value.compareTo(new BigDecimal("4")) <= 0) {
-                lowSum = lowSum.add(value);
+                lowSum = lowSum.add(BigDecimal.valueOf(1));
             }
             else if (value.compareTo(new BigDecimal("4")) > 0 &&
                     value.compareTo(new BigDecimal("7")) <= 0) {
-                midSum = midSum.add(value);
+                midSum = midSum.add(BigDecimal.valueOf(1));
             }
             else if (value.compareTo(new BigDecimal("7")) > 0 &&
                     value.compareTo(new BigDecimal("10")) <= 0) {
-                highSum = highSum.add(value);
+                highSum = highSum.add(BigDecimal.valueOf(1));
             }
             else {
-                invalidSum = invalidSum.add(value);
+                invalidSum = invalidSum.add(BigDecimal.valueOf(1));
             }
         }
 
