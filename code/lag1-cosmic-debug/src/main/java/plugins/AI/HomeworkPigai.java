@@ -207,10 +207,10 @@ public class HomeworkPigai extends AbstractBasePlugIn implements Plugin {
 
     public void updateData(DynamicObject record,String score){
         if (record != null) {
-            int num = record.get("lag1_ans_num") != null ? record.getInt("lag1_ans_num") : 0;
-            record.set("lag1_ans_num", num + 1);
+            int num = record.getInt("lag1_ans_num") + 1;
+            record.set("lag1_ans_num", num);
             // 使用DynamicObject内置安全方法
-            int sum_score = record.getInt("lag1_sum_score") + Integer.parseInt( score);
+            int sum_score = record.getInt("lag1_sum_score") + Integer.parseInt(score);
             record.set("lag1_sum_score", sum_score);
             if(num != 0 )record.set("lag1_data", sum_score / num);
             SaveServiceHelper.update(record);
