@@ -39,7 +39,7 @@ public class QuestionRecommender {
 
     // 停用词表
     // 停用词表（从文件加载）
-    static final Set<String> STOP_WORDS = loadStopWords("data/stopwords_baidu.txt");
+    static final Set<String> STOP_WORDS = loadStopWords("E:\\stopwords_baidu.txt");
 
     private static Set<String> loadStopWords(String path) {
         Set<String> stopwords = new HashSet<>();
@@ -60,7 +60,7 @@ public class QuestionRecommender {
 
     public static void main(String[] args) throws Exception {
         String csvPath = "E:\\lag1_protest.csv";
-        String word2vecPath = "data/45000-small.txt";
+        String word2vecPath = "E:\\45000-small.txt";
 
         // 加载词向量
         loadWord2Vec(word2vecPath);

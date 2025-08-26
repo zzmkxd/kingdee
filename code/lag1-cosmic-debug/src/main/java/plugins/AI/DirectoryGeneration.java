@@ -6,12 +6,9 @@ import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
-import kd.bos.servicehelper.DispatchServiceHelper;
 import kd.sdk.plugin.Plugin;
 
 import java.util.EventObject;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,22 +31,6 @@ public class DirectoryGeneration extends AbstractBasePlugIn implements Plugin {
                 }
             }
         }
-//----下面是正常提取教材代码----
-// 调用GPT开发平台微服务
-//        Map<String, String> variableMap = new HashMap<>();
-//        variableMap.put("courseinfo", jsonResultObject.toJSONString());
-//      Object[] params = new Object[]{
-//              //GPT提示编码
-//              getPromptFid("prompt-250708D5B99E7D"),
-//              "开始分析这些知识点",
-//              variableMap
-//      };
-//      Map<String, Object> result = DispatchServiceHelper.invokeBizService("ai", "gai", "GaiPromptService", "syncCall", params);
-//      JSONObject jsonObjectResult2 = new JSONObject(result);
-//      JSONObject jsonObjectData2 = jsonObjectResult2.getJSONObject("data");//微服务的输出，即代填入单据体的知识点JSON及正常微服务输出的各个键值对
-//      this.getView().showMessage(jsonObjectData2.getString("llmValue"));
-//      String llmValue2 = jsonObjectData2.getString("llmValue");
-//----优化----
         String llmValue2 = generateMarkdownMindMap(jsonResultObject);
     }
     // 获取GPT提示的Fid

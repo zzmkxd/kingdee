@@ -42,7 +42,7 @@ public class CloudUserData extends AbstractFormPlugin implements Plugin {
     public void afterBindData(EventObject e) {
         super.afterBindData(e);
         //创建过滤器
-        QFilter filter = new QFilter("lag1_data", QCP.not_equals,null);
+        QFilter filter = new QFilter("lag1_ans_num", QCP.not_equals,0);
         filter.and(new QFilter("creator.id",QCP.equals, RequestContext.get().getCurrUserId())); //筛选本userid的条目
         String orderBy = "lag1_data asc";
 

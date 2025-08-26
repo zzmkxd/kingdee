@@ -120,8 +120,8 @@ public class SimilarRecommend extends AbstractBasePlugIn implements Plugin {
     }
 
     public void recommend(String targetId,List<String> excludeIds) throws Exception {
-        String csvPath = "data/lag1_protest.csv";
-        String word2vecPath = "data/45000-small.txt";
+        String csvPath = "E:\\lag1_protest.csv";
+        String word2vecPath = "E:\\45000-small.txt";
         // 加载词向量
         loadWord2Vec(word2vecPath);
         // 读取题目
